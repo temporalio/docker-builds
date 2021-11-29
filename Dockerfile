@@ -7,10 +7,6 @@ FROM ${BASE_BUILDER_IMAGE} AS admin-tools-builder
 
 WORKDIR /home/builder
 
-# install dependencies
-COPY . .
-RUN make
-
 # cache Temporal packages as a docker layer
 COPY ./temporal/go.mod ./temporal/go.sum ./temporal/
 RUN (cd ./temporal && go mod download)
@@ -20,7 +16,8 @@ COPY ./tctl/go.mod ./tctl/go.sum ./tctl/
 RUN (cd ./tctl && go mod download)
 
 # build
-RUN (cd ./temporal && make bins)
+COPY . .
+RUN (cd ./temporal && make temporal-cassandra-tool temporal-sql-tool)
 RUN (cd ./tctl && make build)
 
 ##### Temporal admin tools #####
