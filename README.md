@@ -1,4 +1,4 @@
-[![Docker](https://github.com/temporalio/admin-tools/actions/workflows/docker.yml/badge.svg)](https://github.com/temporalio/ui-server/actions/workflows/test.yml)
+[![Docker](https://github.com/temporalio/admin-tools/actions/workflows/docker.yml/badge.svg)](https://github.com/temporalio/admin-tools/actions/workflows/docker.yml)
 
 # Admin Tools
 
