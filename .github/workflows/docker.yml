@@ -1,4 +1,4 @@
-name: Publish Docker image temporalio/admin-tools
+name: Publish to Docker Hub
 
 on:
   push:
