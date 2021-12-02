@@ -1,0 +1,6 @@
+[submodule "temporal"]
+	path = temporal
+	url = https://github.com/temporalio/temporal
+[submodule "tctl"]
+	path = tctl
+	url = https://github.com/temporalio/tctl
