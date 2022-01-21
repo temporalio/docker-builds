@@ -1,6 +1,6 @@
 [![Docker](https://github.com/temporalio/admin-tools/actions/workflows/docker.yml/badge.svg)](https://github.com/temporalio/admin-tools/actions/workflows/docker.yml)
 
-# Temporal service and Admin Tools docker images
+# Docker images build and publish
 
 A set of pipelines that build:
 
