@@ -1,11 +1,9 @@
 [![Docker](https://github.com/temporalio/admin-tools/actions/workflows/docker.yml/badge.svg)](https://github.com/temporalio/admin-tools/actions/workflows/docker.yml)
 
-# Admin Tools
+# Temporal service and Admin Tools docker images
 
-Docker image with a set of tools to operate Temporal:
+A set of pipelines that build:
 
-* tctl
-* temporal-sql-tool
-* temporal-cassandra-tool
-
-[Docker Hub](https://hub.docker.com/repository/docker/temporalio/admin-tools)
+- https://hub.docker.com/repository/docker/temporaliotest/auto-setup
+- https://hub.docker.com/repository/docker/temporaliotest/server
+- https://hub.docker.com/repository/docker/temporaliotest/admin-tools
