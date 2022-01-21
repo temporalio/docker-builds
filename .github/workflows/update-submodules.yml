@@ -1,0 +1,35 @@
+name: "Update Submodules"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  sync:
+    name: "Update submodules"
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+
+      - uses: actions/setup-go@v2
+        with:
+          go-version: 1.17
+
+      - name: Update Git Sumbodule
+        run: |
+          git pull --recurse-submodules
+          git submodule update --remote --recursive
+
+      - name: Commit update
+        run: |
+          git config --global user.name 'Temporal Data (cicd)'
+          git config --global user.email 'commander-data@temporal.io'
+          git remote set-url origin https://x-access-token:${{ secrets.COMMANDER_DATA_TOKEN }}@github.com/${{ github.repository }}
+          git commit -am "Update submodules" && git push || echo "No changes to commit"
