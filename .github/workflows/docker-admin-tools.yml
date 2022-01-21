@@ -1,4 +1,4 @@
-name: Publish Adming Tools image
+name: Publish Admin Tools image
 
 on:
   push:

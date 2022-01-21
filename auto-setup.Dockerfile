@@ -1,8 +1,8 @@
 ARG BASE_BUILDER_IMAGE=temporalio/base-builder:1.4.0
-ARG BASE_SERVER_IMAGE=temporalio/base-server:1.4.0
+ARG BASE_SERVER_IMAGE=temporalio/base-server:1.5.0
 ARG GOPROXY
 
-##### Temporal Admin Tools builder #####
+##### Builder #####
 FROM ${BASE_BUILDER_IMAGE} AS temporal-builder
 
 WORKDIR /home/builder
