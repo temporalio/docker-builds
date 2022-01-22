@@ -17,7 +17,7 @@ RUN (cd ./tctl && go mod download)
 
 # build
 COPY . .
-RUN (cd ./temporal && make bins)
+RUN (cd ./temporal && CGO_ENABLED=0 make temporal-server)
 RUN (cd ./tctl && make build)
 
 ##### Temporal server #####
