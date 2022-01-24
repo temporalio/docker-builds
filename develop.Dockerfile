@@ -52,7 +52,19 @@ COPY --from=temporal-builder /home/builder/temporal/temporal-cassandra-tool /usr
 COPY --from=temporal-builder /home/builder/temporal/temporal-sql-tool /usr/local/bin
 COPY temporal/docker/auto-setup.sh /etc/temporal/auto-setup.sh
 
-CMD ["autosetup"]
-
 USER temporal
 ENTRYPOINT ["/etc/temporal/entrypoint.sh"]
+
+CMD ["autosetup"]
+
+##### Development configuration for Temporal with additional set of tools #####
+FROM temporal-server as temporal-develop
+
+# apk and setup-develop.sh requires root permissions.
+USER root
+# iproute2 contains tc, which can be used for traffic shaping in resiliancy testing. 
+ONBUILD RUN apk add iproute2
+
+CMD ["autosetup", "develop"]
+
+COPY temporal/docker/setup-develop.sh /etc/temporal/setup-develop.sh
