@@ -35,24 +35,23 @@ RUN mkdir /etc/temporal/config
 RUN chown -R temporal:temporal /etc/temporal/config
 USER temporal
 
-# bins
+# binaries
 COPY --from=temporal-builder /home/builder/tctl/tctl /usr/local/bin
 COPY --from=temporal-builder /home/builder/tctl/tctl-authorization-plugin /usr/local/bin
 COPY --from=temporal-builder /home/builder/temporal/temporal-server /usr/local/bin
-
-# start up files
-COPY temporal/config/dynamicconfig /etc/temporal/config/dynamicconfig
-COPY temporal/docker/config_template.yaml /etc/temporal/config/config_template.yaml
-COPY temporal/docker/entrypoint.sh /etc/temporal/entrypoint.sh
-COPY temporal/docker/start-temporal.sh /etc/temporal/start-temporal.sh
-
-# auto-setup files
-COPY --from=temporal-builder /home/builder/temporal/schema /etc/temporal/schema
 COPY --from=temporal-builder /home/builder/temporal/temporal-cassandra-tool /usr/local/bin
 COPY --from=temporal-builder /home/builder/temporal/temporal-sql-tool /usr/local/bin
+
+# configs
+COPY temporal/config/dynamicconfig /etc/temporal/config/dynamicconfig
+COPY temporal/docker/config_template.yaml /etc/temporal/config/config_template.yaml
+COPY --from=temporal-builder /home/builder/temporal/schema /etc/temporal/schema
+
+# scripts
+COPY temporal/docker/entrypoint.sh /etc/temporal/entrypoint.sh
+COPY temporal/docker/start-temporal.sh /etc/temporal/start-temporal.sh
 COPY temporal/docker/auto-setup.sh /etc/temporal/auto-setup.sh
 
 CMD ["autosetup"]
 
-USER temporal
 ENTRYPOINT ["/etc/temporal/entrypoint.sh"]
