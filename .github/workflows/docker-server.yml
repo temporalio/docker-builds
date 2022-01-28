@@ -42,7 +42,9 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
+          file: server.Dockerfile
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          file: server.Dockerfile
+          build-args: |
+            GITHUB_SHA_SHORT=${{ $(echo $GITHUB_SHA | cut -c 1-8) }}
