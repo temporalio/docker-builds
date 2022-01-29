@@ -4,8 +4,9 @@ on:
   push:
     branches:
       - main
-    tags:
-      - "v*"
+  release:
+    types:
+      - created
 
 jobs:
   publish_to_docker_hub:
@@ -13,17 +14,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-        with: 
-          submodules: 'true'
-
-      - name: Docker meta
-        id: meta
-        uses: docker/metadata-action@v3
         with:
-          images: temporaliotest/server
-          tags: |
-            type=sha,format=short,event=branch
-            type=semver,pattern={{version}}
+          submodules: "true"
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -37,14 +29,46 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and push
-        id: docker_build
+      - name: Docker meta for Commit image
+        id: meta_commit
+        uses: docker/metadata-action@v3
+        if: github.event_name == 'push'
+        with:
+          images: temporaliotest/server
+          tags: |
+            type=sha,format=short,event=branch
+            # latest
+
+      - name: Push Commit image to DockerHub
         uses: docker/build-push-action@v2
+        if: github.event_name == 'push'
         with:
           push: true
           file: server.Dockerfile
           platforms: linux/amd64,linux/arm64
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.meta_commit.outputs.tags }}
+          labels: ${{ steps.meta_commit.outputs.labels }}
+          build-args: |
+            GITHUB_SHA_SHORT=${{ $(echo $GITHUB_SHA | cut -c 1-8) }}
+
+      - name: Docker meta for Release image
+        id: meta_release
+        uses: docker/metadata-action@v3
+        if: github.event_name == 'release'
+        with:
+          images: temporalio/server
+          tags: |
+            type=semver,pattern={{version}}
+            # latest
+
+      - name: Push Release image to DockerHub
+        uses: docker/build-push-action@v2
+        if: github.event_name == 'release'
+        with:
+          push: true
+          file: server.Dockerfile
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ steps.meta_release.outputs.tags }}
+          labels: ${{ steps.meta_release.outputs.labels }}
           build-args: |
             GITHUB_SHA_SHORT=${{ $(echo $GITHUB_SHA | cut -c 1-8) }}
