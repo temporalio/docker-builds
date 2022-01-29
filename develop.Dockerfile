@@ -5,6 +5,8 @@ ARG GOPROXY
 ##### Builder #####
 FROM ${BASE_BUILDER_IMAGE} AS temporal-builder
 
+ARG GITHUB_SHA_SHORT
+
 WORKDIR /home/builder
 
 # cache Temporal packages as a docker layer
