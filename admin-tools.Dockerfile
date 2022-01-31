@@ -17,7 +17,7 @@ RUN (cd ./tctl && go mod download)
 
 # build
 COPY . .
-RUN (cd ./temporal && make temporal-cassandra-tool temporal-sql-tool)
+RUN (cd ./temporal && CGO_ENABLED=0 make temporal-cassandra-tool temporal-sql-tool)
 RUN (cd ./tctl && make build)
 
 ##### Temporal admin tools #####
