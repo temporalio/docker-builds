@@ -37,7 +37,6 @@ jobs:
           images: temporaliotest/admin-tools
           tags: |
             type=sha,format=short,event=branch
-            # latest
 
       - name: Push Commit image to DockerHub
         uses: docker/build-push-action@v2
@@ -57,7 +56,6 @@ jobs:
           images: temporalio/admin-tools
           tags: |
             type=semver,pattern={{version}}
-            # latest
 
       - name: Push Release image to DockerHub
         uses: docker/build-push-action@v2
