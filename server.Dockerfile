@@ -47,7 +47,7 @@ COPY temporal/config/dynamicconfig /etc/temporal/config/dynamicconfig
 COPY temporal/docker/config_template.yaml /etc/temporal/config/config_template.yaml
 
 # scripts
-COPY temporal/docker/entrypoint.sh /etc/temporal/entrypoint.sh
-COPY temporal/docker/start-temporal.sh /etc/temporal/start-temporal.sh
+COPY ./docker/entrypoint.sh /etc/temporal/entrypoint.sh
+COPY ./docker/start-temporal.sh /etc/temporal/start-temporal.sh
 
 ENTRYPOINT ["/etc/temporal/entrypoint.sh"]

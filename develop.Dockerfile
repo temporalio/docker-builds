@@ -50,9 +50,9 @@ COPY temporal/docker/config_template.yaml /etc/temporal/config/config_template.y
 COPY --from=temporal-builder /home/builder/temporal/schema /etc/temporal/schema
 
 # scripts
-COPY temporal/docker/entrypoint.sh /etc/temporal/entrypoint.sh
-COPY temporal/docker/start-temporal.sh /etc/temporal/start-temporal.sh
-COPY temporal/docker/auto-setup.sh /etc/temporal/auto-setup.sh
+COPY ./docker/entrypoint.sh /etc/temporal/entrypoint.sh
+COPY ./docker/start-temporal.sh /etc/temporal/start-temporal.sh
+COPY ./docker/auto-setup.sh /etc/temporal/auto-setup.sh
 
 CMD ["autosetup"]
 
