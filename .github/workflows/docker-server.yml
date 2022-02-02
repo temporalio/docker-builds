@@ -32,7 +32,7 @@ jobs:
       - name: Prepare Docker build-args
         id: build_args
         run: |
-          echo "::set-output name=github_sha_short::$(echo $GITHUB_SHA | cut -c 1-8)"
+          echo "::set-output name=github_sha_short::$(echo $GITHUB_SHA | cut -c 1-7)"
 
       - name: Docker meta for Commit image
         id: meta_commit
@@ -54,6 +54,21 @@ jobs:
           labels: ${{ steps.meta_commit.outputs.labels }}
           build-args: |
             GITHUB_SHA_SHORT=${{ steps.build_args.outputs.github_sha_short }}
+
+      - name: Dispatch Commit image CICD
+        if: github.event_name == 'push'
+        env:
+          PAT: ${{ secrets.COMMANDER_DATA_TOKEN }}
+          PARENT_REPO: temporalio/cicd-builds
+          PARENT_BRANCH: master
+          WORKFLOW_ID: publish-stage-results.yml
+          STAGE: builds
+          COMPONENT: temporal
+          TAG: sha-${{ steps.build_args.outputs.github_sha_short }}
+          AUTHOR: ${{ github.event.pusher.name }}
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        run: |
+          curl -fL -X POST -H "Accept: application/vnd.github.v3+json" -H "Authorization: token ${{ env.PAT }}" https://api.github.com/repos/${{ env.PARENT_REPO }}/actions/workflows/${{ env.WORKFLOW_ID }}/dispatches -d '{"ref":"${{ env.PARENT_BRANCH }}", "inputs": { "stage":"${{ env.STAGE }}", "component":"${{ env.COMPONENT }}", "image_tag":"${{ env.TAG }}", "commit_author":"${{ env.AUTHOR }}", "commit_message":"${{ env.COMMIT_MESSAGE }}" }}'
 
       - name: Docker meta for Release image
         id: meta_release
