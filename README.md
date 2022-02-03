@@ -11,3 +11,12 @@ A set of pipelines that build:
 - https://hub.docker.com/repository/docker/temporaliotest/auto-setup
 - https://hub.docker.com/repository/docker/temporaliotest/server
 - https://hub.docker.com/repository/docker/temporaliotest/admin-tools
+
+## Build docker image for any commit
+
+Replace **YOUR_TAG** and **YOUR_CHECKOUT_COMMIT** to build manually:
+
+```bash
+git checkout YOUR_CHECKOUT_COMMIT
+docker build . -f auto-setup.Dockerfile -t temporalio/auto-setup:YOUR_TAG
+```
