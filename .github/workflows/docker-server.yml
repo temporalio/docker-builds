@@ -46,7 +46,7 @@ jobs:
 
       - name: Push Commit image to DockerHub
         uses: docker/build-push-action@v2
-        if: ${{ !env.ACT }} && github.event_name == 'push'
+        if: github.event_name == 'push' && !env.ACT
         with:
           push: true
           file: server.Dockerfile
@@ -57,7 +57,7 @@ jobs:
             GITHUB_SHA_SHORT=${{ steps.build_args.outputs.github_sha_short }}
 
       - name: Dispatch Commit image CICD
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' && !env.ACT
         env:
           PAT: ${{ secrets.COMMANDER_DATA_TOKEN }}
           PARENT_REPO: temporalio/cicd-builds
