@@ -32,7 +32,7 @@ jobs:
       - name: Prepare Docker build-args
         id: build_args
         run: |
-          echo "::set-output name=github_sha_short::$(echo $GITHUB_SHA | cut -c 1-7)"
+          echo "::set-output name=github_sha_short::${GITHUB_SHA:0:7}"
 
       - name: Docker meta for Commit image
         id: meta_commit
