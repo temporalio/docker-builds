@@ -6,7 +6,7 @@
 
 # Build docker image
 
-Temporal builds 3 Docker images with [every release](https://github.com/temporalio/temporal/releases): Server, Server [with Auto Setup](https://docs.temporal.io/blog/auto-setup), and Admin-Tools. Docker images are built via [Github Actions docker-builds](https://github.com/temporalio/docker-builds/actions) There are [other builds e.g. for CI](https://hub.docker.com/u/temporalio) as well.
+Temporal builds 3 Docker images with [every release](https://github.com/temporalio/temporal/releases): Server, Server [with Auto Setup](https://docs.temporal.io/blog/auto-setup), and Admin-Tools. Docker images are built via [Github Actions docker-builds](actions) There are [other builds e.g. for CI](https://hub.docker.com/u/temporalio) as well.
 
 ## Prerequisites
 
