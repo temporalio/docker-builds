@@ -7,14 +7,10 @@ on:
   pull_request:
     branches:
       - main
-  release:
-    types:
-      - created
 
 jobs:
   publish_to_docker_hub:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -73,24 +69,3 @@ jobs:
           COMMIT_MESSAGE: ${{ toJSON(github.event.head_commit.message) }}
         run: |
           curl -fL -X POST -H "Accept: application/vnd.github.v3+json" -H "Authorization: token $PAT" "https://api.github.com/repos/$PARENT_REPO/actions/workflows/$WORKFLOW_ID/dispatches" -d '{"ref":'"$PARENT_BRANCH"', "inputs": { "stage":'"$STAGE"', "component":'"$COMPONENT"', "image_tag":"'"$TAG"'", "commit_author":'"$AUTHOR"', "commit_message":'"$COMMIT_MESSAGE"' }}'
-
-      - name: Docker meta for Release image
-        id: meta_release
-        uses: docker/metadata-action@v3
-        if: github.event_name == 'release'
-        with:
-          images: temporalio/server
-          tags: |
-            type=semver,pattern={{version}}
-
-      - name: Push Release image to DockerHub
-        uses: docker/build-push-action@v2
-        if: github.event_name == 'release'
-        with:
-          push: true
-          file: server.Dockerfile
-          platforms: linux/amd64,linux/arm64
-          tags: ${{ steps.meta_release.outputs.tags }}
-          labels: ${{ steps.meta_release.outputs.labels }}
-          build-args: |
-            GITHUB_SHA_SHORT=${{ steps.build_args.outputs.github_sha_short }}
