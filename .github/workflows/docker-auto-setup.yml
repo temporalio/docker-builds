@@ -7,9 +7,6 @@ on:
   pull_request:
     branches:
       - main
-  release:
-    types:
-      - created
 
 jobs:
   publish_to_docker_hub:
@@ -55,26 +52,5 @@ jobs:
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta_commit.outputs.tags }}
           labels: ${{ steps.meta_commit.outputs.labels }}
-          build-args: |
-            GITHUB_SHA_SHORT=${{ steps.build_args.outputs.github_sha_short }}
-
-      - name: Docker meta for Release image
-        id: meta_release
-        uses: docker/metadata-action@v3
-        if: github.event_name == 'release'
-        with:
-          images: temporalio/auto-setup
-          tags: |
-            type=semver,pattern={{version}}
-
-      - name: Push Release image to DockerHub
-        uses: docker/build-push-action@v2
-        if: github.event_name == 'release'
-        with:
-          push: true
-          file: auto-setup.Dockerfile
-          platforms: linux/amd64,linux/arm64
-          tags: ${{ steps.meta_release.outputs.tags }}
-          labels: ${{ steps.meta_release.outputs.labels }}
           build-args: |
             GITHUB_SHA_SHORT=${{ steps.build_args.outputs.github_sha_short }}
