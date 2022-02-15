@@ -29,28 +29,29 @@ jobs:
           fetch-depth: 0
 
       - name: Create and switch branch
-        if: github.event.inputs.branch != 'master' # remain on 'main' branch if target branch is 'master'
         env:
           BRANCH: ${{ github.event.inputs.branch }}
         run: |
-          git switch $BRANCH || git switch -c $BRANCH
+          if [[ $BRANCH == master ]]; then BRANCH=main; fi
+          git switch "$BRANCH" || git switch -c "$BRANCH"
 
       - name: Update Submodule branch
         env:
           SUBMODULE: ${{ github.event.inputs.repo }}
           BRANCH: ${{ github.event.inputs.branch }}
         run: |
-          git config --file=.gitmodules submodule.$SUBMODULE.branch $BRANCH
+          git config --file=.gitmodules submodule.$SUBMODULE.branch "$BRANCH"
           git submodule update --init --recursive --remote
 
       - name: Commit update
         env:
           SUBMODULE: ${{ github.event.inputs.repo }}
           BRANCH: ${{ github.event.inputs.branch }}
+          TOKEN: ${{ secrets.COMMANDER_DATA_TOKEN }}
         run: |
           git config --local user.name 'Temporal Data (cicd)'
           git config --local user.email 'commander-data@temporal.io'
-          git remote set-url origin https://x-access-token:${{ secrets.COMMANDER_DATA_TOKEN }}@github.com/${{ github.repository }}
+          git remote set-url origin https://x-access-token:$TOKEN@github.com/${{ github.repository }}
           git add .
           git commit -m "Update $SUBMODULE submodule for branch $BRANCH"
-          git push --set-upstream origin $BRANCH || echo "No changes to commit"
+          git push --set-upstream origin "$BRANCH" || echo "No changes to commit"
