@@ -40,18 +40,19 @@ jobs:
           SUBMODULE: ${{ github.event.inputs.repo }}
           BRANCH: ${{ github.event.inputs.branch }}
         run: |
-          git config --file=.gitmodules submodule.$SUBMODULE.branch "$BRANCH"
+          git config --file=.gitmodules submodule."$SUBMODULE".branch "$BRANCH"
           git submodule update --init --recursive --remote
 
       - name: Commit update
         env:
+          CURRENT_REPO: ${{ github.repository }}
+          TOKEN: ${{ secrets.COMMANDER_DATA_TOKEN }}
           SUBMODULE: ${{ github.event.inputs.repo }}
           BRANCH: ${{ github.event.inputs.branch }}
-          TOKEN: ${{ secrets.COMMANDER_DATA_TOKEN }}
         run: |
           git config --local user.name 'Temporal Data (cicd)'
           git config --local user.email 'commander-data@temporal.io'
-          git remote set-url origin https://x-access-token:$TOKEN@github.com/${{ github.repository }}
+          git remote set-url origin https://x-access-token:$TOKEN@github.com/$CURRENT_REPO
           git add .
           git commit -m "Update $SUBMODULE submodule for branch $BRANCH"
           git push --set-upstream origin "$BRANCH" || echo "No changes to commit"
