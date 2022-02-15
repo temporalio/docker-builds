@@ -1,7 +1,14 @@
-name: "Update Submodules"
+name: "Update Submodule"
 
 on:
   workflow_dispatch:
+    inputs:
+      repo:
+        description: "Submodule to update"
+        required: true
+      branch:
+        description: "Branch of the submodule to update"
+        required: true
 
 jobs:
   sync:
@@ -17,21 +24,33 @@ jobs:
         uses: actions/checkout@v2
         with:
           submodules: true
-          persist-credentials: false
+          persist-credentials: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
 
-      - uses: actions/setup-go@v2
-        with:
-          go-version: 1.17
-
-      - name: Update Git Sumbodule
+      - name: Create and switch branch
+        if: github.event.inputs.branch != 'master' # remain on 'main' branch if target branch is 'master'
+        env:
+          BRANCH: ${{ github.event.inputs.branch }}
         run: |
-          git pull --recurse-submodules
-          git submodule update --remote --recursive
+          git switch $BRANCH || git switch -c $BRANCH
+
+      - name: Update Submodule branch
+        env:
+          SUBMODULE: ${{ github.event.inputs.repo }}
+          BRANCH: ${{ github.event.inputs.branch }}
+        run: |
+          git config --file=.gitmodules submodule.$SUBMODULE.branch $BRANCH
+          git submodule update --init --recursive --remote
 
       - name: Commit update
+        env:
+          SUBMODULE: ${{ github.event.inputs.repo }}
+          BRANCH: ${{ github.event.inputs.branch }}
         run: |
           git config --local user.name 'Temporal Data (cicd)'
           git config --local user.email 'commander-data@temporal.io'
           git remote set-url origin https://x-access-token:${{ secrets.COMMANDER_DATA_TOKEN }}@github.com/${{ github.repository }}
           git add .
-          git commit -m "Update submodules" && git push || echo "No changes to commit"
+          git commit -m "Update $SUBMODULE submodule for branch $BRANCH"
+          git push --set-upstream origin $BRANCH || echo "No changes to commit"
