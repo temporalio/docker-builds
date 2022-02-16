@@ -28,17 +28,26 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
+      - name: Calc target branches
+        id: target_branches
+        env:
+          LOCAL_BRANCH: ${{ github.event.inputs.branch }}
+          SUBMODULE_BRANCH: ${{ github.event.inputs.branch }}
+        run: |
+          if [[ $LOCAL_BRANCH == master ]]; then LOCAL_BRANCH=main; fi
+          echo "::set-output name=local_branch::$LOCAL_BRANCH"
+          echo "::set-output name=submodule_branch::$SUBMODULE_BRANCH"
+
       - name: Create and switch branch
         env:
-          BRANCH: ${{ github.event.inputs.branch }}
+          BRANCH: ${{ steps.target_branches.outputs.local_branch }}
         run: |
-          if [[ $BRANCH == master ]]; then BRANCH=main; fi
           git switch "$BRANCH" || git switch -c "$BRANCH"
 
       - name: Update Submodule branch
         env:
           SUBMODULE: ${{ github.event.inputs.repo }}
-          BRANCH: ${{ github.event.inputs.branch }}
+          BRANCH: ${{ steps.target_branches.outputs.submodule_branch }}
         run: |
           git config --file=.gitmodules submodule."$SUBMODULE".branch "$BRANCH"
           git submodule update --init --recursive --remote
@@ -48,11 +57,11 @@ jobs:
           CURRENT_REPO: ${{ github.repository }}
           TOKEN: ${{ secrets.COMMANDER_DATA_TOKEN }}
           SUBMODULE: ${{ github.event.inputs.repo }}
-          BRANCH: ${{ github.event.inputs.branch }}
+          BRANCH: ${{ steps.target_branches.outputs.local_branch }}
         run: |
           git config --local user.name 'Temporal Data (cicd)'
           git config --local user.email 'commander-data@temporal.io'
           git remote set-url origin "https://x-access-token:$TOKEN@github.com/$CURRENT_REPO"
           git add .
           git commit -m "Update $SUBMODULE submodule for branch $BRANCH"
-          git push origin "$BRANCH" || echo "No changes to commit"
+          git push origin "$BRANCH"
