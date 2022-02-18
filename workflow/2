@@ -1,0 +1,1 @@
+git switch "$BRANCH" || git switch -c "$BRANCH"

@@ -1,0 +1,7 @@
+if [[ "$SUBMODULE" != "temporal" && "$SUBMODULE" != "tctl" ]]
+then 
+  echo "unknown submodule $SUBMODULE"
+  exit 1
+fi
+git config --file=.gitmodules submodule."$SUBMODULE".branch "$BRANCH"
+git submodule update --init --recursive --remote "$SUBMODULE"

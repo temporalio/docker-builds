@@ -1,0 +1,3 @@
+if [[ $LOCAL_BRANCH == master ]]; then LOCAL_BRANCH=main; fi
+echo "::set-output name=local_branch::$LOCAL_BRANCH"
+echo "::set-output name=submodule_branch::$SUBMODULE_BRANCH"
