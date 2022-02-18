@@ -1,6 +1,0 @@
-git config --local user.name 'Temporal Data (cicd)'
-git config --local user.email 'commander-data@temporal.io'
-git remote set-url origin "https://x-access-token:$TOKEN@github.com/$CURRENT_REPO"
-git add .
-git commit -m "Update $SUBMODULE submodule for branch $BRANCH"
-git push origin "$BRANCH"
