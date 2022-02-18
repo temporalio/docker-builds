@@ -25,7 +25,7 @@ jobs:
         with:
           submodules: true
           persist-credentials: true
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.COMMANDER_DATA_TOKEN }}
           fetch-depth: 0
 
       - name: Calc target branches
@@ -49,8 +49,13 @@ jobs:
           SUBMODULE: ${{ github.event.inputs.repo }}
           BRANCH: ${{ steps.target_branches.outputs.submodule_branch }}
         run: |
+          if [[ "$SUBMODULE" != "temporal" && "$SUBMODULE" != "tctl" ]]
+          then 
+            echo "unknown submodule $SUBMODULE"
+            exit 1
+          fi
           git config --file=.gitmodules submodule."$SUBMODULE".branch "$BRANCH"
-          git submodule update --init --recursive --remote
+          git submodule update --init --recursive --remote "$SUBMODULE"
 
       - name: Commit update
         env:
