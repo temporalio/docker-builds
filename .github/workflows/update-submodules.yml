@@ -49,8 +49,7 @@ jobs:
           SUBMODULE: ${{ github.event.inputs.repo }}
           BRANCH: ${{ steps.target_branches.outputs.submodule_branch }}
         run: |
-          if [[ "$SUBMODULE" != "temporal" && "$SUBMODULE" != "tctl" ]]
-          then 
+          if ! git config --file=.gitmodules --get submodule."$SUBMODULE".url >/dev/null; then
             echo "unknown submodule $SUBMODULE"
             exit 1
           fi
