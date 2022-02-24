@@ -63,6 +63,7 @@ jobs:
 ### BUILD & PUSH ADMIN TOOLS IMAGE ###
 
       - name: Metatags for the Admin Tools image
+        if: steps.build_args.outputs.push == 'true'
         id: meta_admin_tools
         uses: docker/metadata-action@v3
         with:
@@ -71,6 +72,7 @@ jobs:
             type=sha,format=short,event=branch
 
       - name: Build-Push Admin Tools
+        if: steps.build_args.outputs.push == 'true'
         uses: docker/build-push-action@v2
         with:
           push: ${{ steps.build_args.outputs.push }}
@@ -82,7 +84,7 @@ jobs:
             SERVER_IMAGE=temporaliotest/server:${{ steps.build_args.outputs.image_tag }}
 
       - name: Dispatch CICD
-        if: 'false' # ${{ steps.build_args.outputs.push }}
+        if: steps.build_args.outputs.push == 'true'
         env:
           PAT: ${{ secrets.COMMANDER_DATA_TOKEN }}
           PARENT_REPO: temporalio/cicd-builds
@@ -99,6 +101,7 @@ jobs:
 ### BUILD & PUSH AUTO SETUP IMAGE ###
 
       - name: Metatags for the Auto Setup image
+        if: steps.build_args.outputs.push == 'true'
         id: meta_auto_setup
         uses: docker/metadata-action@v3
         with:
@@ -107,6 +110,7 @@ jobs:
             type=sha,format=short,event=branch
 
       - name: Build-Push Auto Setup
+        if: steps.build_args.outputs.push == 'true'
         uses: docker/build-push-action@v2
         with:
           push: ${{ steps.build_args.outputs.push }}
