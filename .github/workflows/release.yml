@@ -1,0 +1,52 @@
+name: Release Images
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit:
+        description: "Commit sha"
+        required: true
+      tag:
+        description: "The tag for the new images"
+        required: true
+
+jobs:
+  retag-and-release:
+    name: "Re-tag and release images"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Set up skopeo
+        run: |
+          skopeo() {
+            # Needed for older docker versions
+            # See: https://github.com/containers/skopeo/issues/1501 and https://github.com/moby/moby/issues/42680
+            local seccomp="--security-opt seccomp=unconfined"
+
+            docker run --rm -i $seccomp quay.io/skopeo/stable "$@"
+          }
+          skopeo login -u ${{ secrets.DOCKER_USERNAME }} --password ${{ secrets.DOCKER_PASSWORD }} docker.io
+
+      - name: Calc image tag from commit sha
+        id: calc_args
+        env: 
+          COMMIT: ${{ github.event.inputs.commit }}
+        run: |
+          echo "::set-output name=image_tag::sha-${COMMIT:0:7}"
+
+      - name: Copy images
+        env:
+          IMAGES: server auto-setup admin-tools
+          SRC_REPO: temporaliotest
+          DST_REPO: temporalio
+          SRC_TAG: ${{ steps.calc_args.outputs.image_tag }}
+          DST_TAG: ${{ github.event.inputs.tag }}
+        run: |
+          for image in ${IMAGES//,/ }; do
+            src="docker://${SRC_REPO}/${image}:${SRC_TAG}"
+            dst="docker://${DST_REPO}/${image}:${TAG}"
+            skopeo copy --all "$src" "$dst"
+          done
