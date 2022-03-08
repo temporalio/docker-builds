@@ -5,3 +5,4 @@
 [submodule "tctl"]
 	path = tctl
 	url = https://github.com/temporalio/tctl
+	branch = main
