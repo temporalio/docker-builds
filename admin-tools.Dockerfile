@@ -1,5 +1,6 @@
 ARG BASE_BUILDER_IMAGE=temporalio/base-builder:1.6.0
 ARG BASE_ADMIN_TOOLS_IMAGE=temporalio/base-admin-tools:1.3.0
+ARG SERVER_IMAGE
 ARG GOPROXY
 
 ##### Temporal Admin Tools builder #####
@@ -11,24 +12,25 @@ WORKDIR /home/builder
 COPY ./temporal/go.mod ./temporal/go.sum ./temporal/
 RUN (cd ./temporal && go mod download)
 
-# cache tctl packages as a docker layer
-COPY ./tctl/go.mod ./tctl/go.sum ./tctl/
-RUN (cd ./tctl && go mod download)
-
 # build
 COPY . .
 RUN (cd ./temporal && CGO_ENABLED=0 make temporal-cassandra-tool temporal-sql-tool)
-RUN (cd ./tctl && make build)
+
+
+##### Server #####
+FROM ${SERVER_IMAGE} as server
+
 
 ##### Temporal admin tools #####
 FROM ${BASE_ADMIN_TOOLS_IMAGE} as temporal-admin-tools
+
 WORKDIR /etc/temporal
 
-COPY --from=admin-tools-builder /home/builder/temporal/schema /etc/temporal/schema
+COPY --from=server /usr/local/bin/tctl /usr/local/bin
+COPY --from=server /usr/local/bin/tctl-authorization-plugin /usr/local/bin
 COPY --from=admin-tools-builder /home/builder/temporal/temporal-cassandra-tool /usr/local/bin
 COPY --from=admin-tools-builder /home/builder/temporal/temporal-sql-tool /usr/local/bin
-COPY --from=admin-tools-builder /home/builder/tctl/tctl /usr/local/bin
-COPY --from=admin-tools-builder /home/builder/tctl/tctl-authorization-plugin /usr/local/bin
+COPY --from=admin-tools-builder /home/builder/temporal/schema /etc/temporal/schema
 
 # Keep the container running.
 ENTRYPOINT ["tail", "-f", "/dev/null"]
