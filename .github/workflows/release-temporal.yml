@@ -1,4 +1,4 @@
-name: Release Images
+name: Release Temporal Images
 
 on:
   workflow_dispatch:
@@ -19,33 +19,29 @@ jobs:
         shell: bash
 
     steps:
-      - name: Set up skopeo
-        env:
-          USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-        run: |
-          skopeo() {
-            docker run --rm -i quay.io/skopeo/stable "$@"
-          }
-          skopeo login -u "$USERNAME" --password "$PASSWORD" docker.io
-
       - name: Calc image tag from commit sha
         id: calc_args
-        env: 
+        env:
           COMMIT: ${{ github.event.inputs.commit }}
         run: |
           echo "::set-output name=image_tag::sha-${COMMIT:0:7}"
 
       - name: Copy images
         env:
+          USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
           IMAGES: server auto-setup admin-tools
           SRC_REPO: temporaliotest
           DST_REPO: temporalio
           SRC_TAG: ${{ steps.calc_args.outputs.image_tag }}
           DST_TAG: ${{ github.event.inputs.tag }}
         run: |
+          skopeo() {
+            docker run --rm -i quay.io/skopeo/stable "$@"
+          }
+
           for image in ${IMAGES}; do
             src="docker://${SRC_REPO}/${image}:${SRC_TAG}"
             dst="docker://${DST_REPO}/${image}:${DST_TAG}"
-            skopeo copy --all "$src" "$dst"
+            skopeo copy --dest-creds="$USERNAME":"$PASSWORD" --all "$src" "$dst"
           done
