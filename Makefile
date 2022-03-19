@@ -7,6 +7,8 @@ all: install
 COLOR := "\e[1;36m%s\e[0m\n"
 
 DOCKER_IMAGE_TAG ?= latest
+# Pass "registry" to automatically push image to the docker hub.
+DOCKER_BUILDX_OUTPUT ?= image
 
 ##### Scripts ######
 install: install-submodules
@@ -20,7 +22,7 @@ install-submodules:
 update-submodules:
 	@printf $(COLOR) "Updatinging temporal and tctl submodules..."
 	git submodule update --force --remote $(PROTO_ROOT)
-	
+
 ##### Docker #####
 docker-server:
 	@printf $(COLOR) "Building docker image temporalio/server:$(DOCKER_IMAGE_TAG)..."
