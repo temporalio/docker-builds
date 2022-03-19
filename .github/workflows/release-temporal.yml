@@ -1,0 +1,47 @@
+name: Release Temporal Images
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit:
+        description: "Commit sha"
+        required: true
+      tag:
+        description: "The tag for the new images"
+        required: true
+
+jobs:
+  retag-and-release:
+    name: "Re-tag and release images"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Calc image tag from commit sha
+        id: calc_args
+        env:
+          COMMIT: ${{ github.event.inputs.commit }}
+        run: |
+          echo "::set-output name=image_tag::sha-${COMMIT:0:7}"
+
+      - name: Copy images
+        env:
+          USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          IMAGES: server auto-setup admin-tools
+          SRC_REPO: temporaliotest
+          DST_REPO: temporalio
+          SRC_TAG: ${{ steps.calc_args.outputs.image_tag }}
+          DST_TAG: ${{ github.event.inputs.tag }}
+        run: |
+          skopeo() {
+            docker run --rm -i quay.io/skopeo/stable "$@"
+          }
+
+          for image in ${IMAGES}; do
+            src="docker://${SRC_REPO}/${image}:${SRC_TAG}"
+            dst="docker://${DST_REPO}/${image}:${DST_TAG}"
+            skopeo copy --dest-creds="$USERNAME":"$PASSWORD" --all "$src" "$dst"
+          done
