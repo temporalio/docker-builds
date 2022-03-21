@@ -7,10 +7,10 @@ on:
         description: "Target base image"
         type: choice
         options:
-        - base-server
-        - base-builder
-        - base-admin-tools
-        - base-ci-builder
+          - base-server
+          - base-builder
+          - base-admin-tools
+          - base-ci-builder
         required: true
       commit:
         description: "Commit sha to build from"
@@ -18,6 +18,15 @@ on:
       tag:
         description: "New tag for the image"
         required: true
+      arch:
+        description: "Platform architecture"
+        type: choice
+        options:
+          - linux/amd64,linux/arm64
+          - linux/amd64
+          - linux/arm64
+        required: true
+        default: linux/amd64,linux/arm64
 
 jobs:
   build-push-images:
@@ -52,6 +61,6 @@ jobs:
         with:
           push: true
           file: docker/base-images/${{ github.event.inputs.target }}.Dockerfile
-          platforms: linux/amd64,linux/arm64
+          platforms: ${{ github.event.inputs.arch }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
