@@ -15,8 +15,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-        with:
-          submodules: "true"
+
+      - name: Install submodules
+        run: |
+          make install-submodules
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
