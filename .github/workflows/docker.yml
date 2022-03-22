@@ -20,7 +20,7 @@ jobs:
 
       - name: Test
         run: |
-          git version
+          git show -s --no-show-signature --format=%H:%ct
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
