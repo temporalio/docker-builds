@@ -18,9 +18,9 @@ jobs:
         with:
           submodules: "true"
 
-      - name: Install submodules
+      - name: Test
         run: |
-          make install-submodules
+          (cd ./temporal && git status)
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
