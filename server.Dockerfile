@@ -5,22 +5,21 @@ ARG GOPROXY
 ##### Builder #####
 FROM ${BASE_BUILDER_IMAGE} AS temporal-builder
 
-ARG GITHUB_SHA_SHORT
 
-#WORKDIR /home/builder
+WORKDIR /home/builder
 
 # cache Temporal packages as a docker layer
-#COPY ./temporal/go.mod ./temporal/go.sum ./temporal/
-#RUN (cd ./temporal && go mod download all)
+COPY ./temporal/go.mod ./temporal/go.sum ./temporal/
+RUN (cd ./temporal && go mod download all)
 
 # cache tctl packages as a docker layer
-#COPY ./tctl/go.mod ./tctl/go.sum ./tctl/
-#RUN (cd ./tctl && go mod download all)
+COPY ./tctl/go.mod ./tctl/go.sum ./tctl/
+RUN (cd ./tctl && go mod download all)
 
 # build
 COPY . .
-RUN (cd ./temporal && git show -s --format=%H:%ct)
-#RUN (cd ./tctl && make build)
+RUN (cd ./temporal && CGO_ENABLED=0 make temporal-server)
+RUN (cd ./tctl && make build)
 
 ##### Temporal server #####
 FROM ${BASE_SERVER_IMAGE} as temporal-server
@@ -43,8 +42,8 @@ COPY --from=temporal-builder /home/builder/tctl/tctl-authorization-plugin /usr/l
 COPY --from=temporal-builder /home/builder/temporal/temporal-server /usr/local/bin
 
 # configs
-COPY temporal/config/dynamicconfig /etc/temporal/config/dynamicconfig
-COPY temporal/docker/config_template.yaml /etc/temporal/config/config_template.yaml
+COPY ./temporal/config/dynamicconfig /etc/temporal/config/dynamicconfig
+COPY ./temporal/docker/config_template.yaml /etc/temporal/config/config_template.yaml
 
 # scripts
 COPY ./docker/entrypoint.sh /etc/temporal/entrypoint.sh
