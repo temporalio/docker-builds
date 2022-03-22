@@ -10,7 +10,7 @@ WORKDIR /home/builder
 
 # cache Temporal packages as a docker layer
 COPY ./temporal/go.mod ./temporal/go.sum ./temporal/
-RUN (cd ./temporal && go mod download)
+RUN (cd ./temporal && go mod download all)
 
 # build
 COPY . .

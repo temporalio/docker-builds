@@ -11,11 +11,11 @@ WORKDIR /home/builder
 
 # cache Temporal packages as a docker layer
 COPY ./temporal/go.mod ./temporal/go.sum ./temporal/
-RUN (cd ./temporal && go mod download)
+RUN (cd ./temporal && go mod download all)
 
 # cache tctl packages as a docker layer
 COPY ./tctl/go.mod ./tctl/go.sum ./tctl/
-RUN (cd ./tctl && go mod download)
+RUN (cd ./tctl && go mod download all)
 
 # build
 COPY . .

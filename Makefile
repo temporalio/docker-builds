@@ -10,6 +10,9 @@ DOCKER_IMAGE_TAG ?= latest
 # Pass "registry" to automatically push image to the docker hub.
 DOCKER_BUILDX_OUTPUT ?= image
 
+TEMPORAL_ROOT := temporal
+TCTL_ROOT := tctl
+
 ##### Scripts ######
 install: install-submodules
 
@@ -17,11 +20,11 @@ update: update-submodules
 
 install-submodules:
 	@printf $(COLOR) "Installing temporal and tctl submodules..."
-	git submodule update --init $(PROTO_ROOT)
+	git submodule update --init $(TEMPORAL_ROOT) $(TCTL_ROOT)
 
 update-submodules:
 	@printf $(COLOR) "Updatinging temporal and tctl submodules..."
-	git submodule update --force --remote $(PROTO_ROOT)
+	git submodule update --force --remote $(TEMPORAL_ROOT) $(TCTL_ROOT)
 
 ##### Docker #####
 docker-server:
