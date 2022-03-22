@@ -19,7 +19,7 @@ RUN (cd ./tctl && go mod download all)
 
 # build
 COPY . .
-RUN (cd ./temporal && CGO_ENABLED=0 make temporal-server)
+RUN (cd ./temporal && git show -s --no-show-signature --format=%H:%ct)
 RUN (cd ./tctl && make build)
 
 ##### Temporal server #####
