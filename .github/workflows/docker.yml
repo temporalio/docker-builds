@@ -53,13 +53,12 @@ jobs:
       - name: Build-Push Server image
         uses: docker/build-push-action@v2
         with:
+          context: .
           push: ${{ steps.build_args.outputs.push }}
           file: server.Dockerfile
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta_server.outputs.tags }}
           labels: ${{ steps.meta_server.outputs.labels }}
-          build-args: |
-            GITHUB_SHA_SHORT=${{ steps.build_args.outputs.commit_sha_short }}
 
 ### BUILD & PUSH ADMIN TOOLS IMAGE ###
 
@@ -77,6 +76,7 @@ jobs:
         if: steps.build_args.outputs.push == 'true'
         uses: docker/build-push-action@v2
         with:
+          context: .
           push: ${{ steps.build_args.outputs.push }}
           file: admin-tools.Dockerfile
           platforms: linux/amd64,linux/arm64
@@ -116,6 +116,7 @@ jobs:
         if: steps.build_args.outputs.push == 'true'
         uses: docker/build-push-action@v2
         with:
+          context: .
           push: ${{ steps.build_args.outputs.push }}
           file: auto-setup.Dockerfile
           platforms: linux/amd64,linux/arm64

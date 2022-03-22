@@ -1,21 +1,20 @@
-ARG BASE_BUILDER_IMAGE=temporalio/base-builder:1.6.0
-ARG BASE_SERVER_IMAGE=temporalio/base-server:1.6.0
+ARG BASE_BUILDER_IMAGE=temporalio/base-builder:1.7.0
+ARG BASE_SERVER_IMAGE=temporalio/base-server:1.7.0
 ARG GOPROXY
 
 ##### Builder #####
 FROM ${BASE_BUILDER_IMAGE} AS temporal-builder
 
-ARG GITHUB_SHA_SHORT
 
 WORKDIR /home/builder
 
 # cache Temporal packages as a docker layer
 COPY ./temporal/go.mod ./temporal/go.sum ./temporal/
-RUN (cd ./temporal && go mod download)
+RUN (cd ./temporal && go mod download all)
 
 # cache tctl packages as a docker layer
 COPY ./tctl/go.mod ./tctl/go.sum ./tctl/
-RUN (cd ./tctl && go mod download)
+RUN (cd ./tctl && go mod download all)
 
 # build
 COPY . .
@@ -43,8 +42,8 @@ COPY --from=temporal-builder /home/builder/tctl/tctl-authorization-plugin /usr/l
 COPY --from=temporal-builder /home/builder/temporal/temporal-server /usr/local/bin
 
 # configs
-COPY temporal/config/dynamicconfig /etc/temporal/config/dynamicconfig
-COPY temporal/docker/config_template.yaml /etc/temporal/config/config_template.yaml
+COPY ./temporal/config/dynamicconfig /etc/temporal/config/dynamicconfig
+COPY ./temporal/docker/config_template.yaml /etc/temporal/config/config_template.yaml
 
 # scripts
 COPY ./docker/entrypoint.sh /etc/temporal/entrypoint.sh

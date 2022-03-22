@@ -11,4 +11,4 @@ ONBUILD RUN apk add iproute2
 
 CMD ["autosetup", "develop"]
 
-COPY temporal/docker/setup-develop.sh /etc/temporal/setup-develop.sh
+COPY ./temporal/docker/setup-develop.sh /etc/temporal/setup-develop.sh
