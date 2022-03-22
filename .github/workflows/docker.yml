@@ -20,7 +20,7 @@ jobs:
 
       - name: Test
         run: |
-          (cd ./temporal && git status)
+          git version
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
