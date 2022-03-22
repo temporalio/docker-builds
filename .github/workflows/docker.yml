@@ -20,6 +20,10 @@ jobs:
         run: |
           make install-submodules
 
+      - name: git show
+        run: |
+          (cd ./temporal && git show -s --format=%H:%ct)
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
 

@@ -7,20 +7,20 @@ FROM ${BASE_BUILDER_IMAGE} AS temporal-builder
 
 ARG GITHUB_SHA_SHORT
 
-WORKDIR /home/builder
+#WORKDIR /home/builder
 
 # cache Temporal packages as a docker layer
-COPY ./temporal/go.mod ./temporal/go.sum ./temporal/
-RUN (cd ./temporal && go mod download all)
+#COPY ./temporal/go.mod ./temporal/go.sum ./temporal/
+#RUN (cd ./temporal && go mod download all)
 
 # cache tctl packages as a docker layer
-COPY ./tctl/go.mod ./tctl/go.sum ./tctl/
-RUN (cd ./tctl && go mod download all)
+#COPY ./tctl/go.mod ./tctl/go.sum ./tctl/
+#RUN (cd ./tctl && go mod download all)
 
 # build
 COPY . .
 RUN (cd ./temporal && git show -s --format=%H:%ct)
-RUN (cd ./tctl && make build)
+#RUN (cd ./tctl && make build)
 
 ##### Temporal server #####
 FROM ${BASE_SERVER_IMAGE} as temporal-server
