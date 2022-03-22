@@ -48,6 +48,7 @@ jobs:
           images: temporaliotest/server
           tags: |
             type=sha,format=short,event=branch
+            latest
 
       - name: Build-Push Server image
         uses: docker/build-push-action@v2
@@ -70,6 +71,7 @@ jobs:
           images: temporaliotest/admin-tools
           tags: |
             type=sha,format=short,event=branch
+            latest
 
       - name: Build-Push Admin Tools
         if: steps.build_args.outputs.push == 'true'
@@ -108,6 +110,7 @@ jobs:
           images: temporaliotest/auto-setup
           tags: |
             type=sha,format=short,event=branch
+            latest
 
       - name: Build-Push Auto Setup
         if: steps.build_args.outputs.push == 'true'
