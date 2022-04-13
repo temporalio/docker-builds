@@ -1,3 +1,9 @@
+### Publish a new base-* image
+
+The base-* images are published by a Github Action https://github.com/temporalio/docker-builds/actions/workflows/release-base-image.yml
+
+Press on `Run Workflow` and follow the inputs to publish your changes
+
 ### Build and push base docker images using `docker build`
 
 To build a new version of base docker image run:
