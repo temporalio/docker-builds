@@ -44,4 +44,7 @@ jobs:
             src="docker://${SRC_REPO}/${image}:${SRC_TAG}"
             dst="docker://${DST_REPO}/${image}:${DST_TAG}"
             skopeo copy --dest-creds="$USERNAME":"$PASSWORD" --all "$src" "$dst"
+
+            dst_latest="docker://${DST_REPO}/${image}:latest"
+            skopeo copy --dest-creds="$USERNAME":"$PASSWORD" --all "$src" "$dst_latest"
           done
