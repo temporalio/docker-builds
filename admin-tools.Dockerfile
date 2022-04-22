@@ -14,7 +14,7 @@ RUN (cd ./temporal && go mod download all)
 
 # build
 COPY . .
-RUN (cd ./temporal && CGO_ENABLED=0 make temporal-cassandra-tool temporal-sql-tool)
+RUN (cd ./temporal && make temporal-cassandra-tool temporal-sql-tool)
 
 
 ##### Server #####
