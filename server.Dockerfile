@@ -42,7 +42,7 @@ COPY --from=temporal-builder /home/builder/tctl/tctl-authorization-plugin /usr/l
 COPY --from=temporal-builder /home/builder/temporal/temporal-server /usr/local/bin
 
 # configs
-COPY ./temporal/config/dynamicconfig /etc/temporal/config/dynamicconfig
+COPY ./temporal/config/dynamicconfig/docker.yaml /etc/temporal/config/dynamicconfig/docker.yaml
 COPY ./temporal/docker/config_template.yaml /etc/temporal/config/config_template.yaml
 
 # scripts
