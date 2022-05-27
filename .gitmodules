@@ -1,7 +1,7 @@
 [submodule "temporal"]
 	path = temporal
 	url = https://github.com/temporalio/temporal
-	branch = master
+	branch = release/v1.16.x-ns-migration
 [submodule "tctl"]
 	path = tctl
 	url = https://github.com/temporalio/tctl
