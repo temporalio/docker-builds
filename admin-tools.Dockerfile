@@ -14,7 +14,7 @@ RUN (cd ./temporal && go mod download all)
 
 # build
 COPY . .
-RUN (cd ./temporal && make temporal-cassandra-tool temporal-sql-tool)
+RUN (cd ./temporal && make temporal-cassandra-tool temporal-sql-tool tdbg)
 
 
 ##### Server #####
@@ -31,6 +31,7 @@ COPY --from=server /usr/local/bin/tctl-authorization-plugin /usr/local/bin
 COPY --from=admin-tools-builder /home/builder/temporal/temporal-cassandra-tool /usr/local/bin
 COPY --from=admin-tools-builder /home/builder/temporal/temporal-sql-tool /usr/local/bin
 COPY --from=admin-tools-builder /home/builder/temporal/schema /etc/temporal/schema
+COPY --from=admin-tools-builder /home/builder/temporal/tdbg /usr/local/bin
 
 # Keep the container running.
 ENTRYPOINT ["tail", "-f", "/dev/null"]
