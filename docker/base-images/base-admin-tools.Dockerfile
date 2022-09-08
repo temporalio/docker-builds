@@ -8,8 +8,7 @@ RUN apk add --update --no-cache \
     jq \
     mysql-client \
     postgresql-client \
-    python2 \
-    && curl https://bootstrap.pypa.io/pip/2.7/get-pip.py | python \
+    py-pip \
     && pip install cqlsh
 
 # set up nsswitch.conf for Go's "netgo" implementation
