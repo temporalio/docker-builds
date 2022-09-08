@@ -1,5 +1,5 @@
-ARG BASE_BUILDER_IMAGE=temporalio/base-builder:1.8.0
-ARG BASE_ADMIN_TOOLS_IMAGE=temporalio/base-admin-tools:1.5.0
+ARG BASE_BUILDER_IMAGE=temporalio/base-builder:1.9.0
+ARG BASE_ADMIN_TOOLS_IMAGE=temporalio/base-admin-tools:1.6.0
 ARG SERVER_IMAGE
 ARG GOPROXY
 
