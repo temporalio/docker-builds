@@ -281,9 +281,9 @@ setup_es_index() {
 
 register_default_namespace() {
     echo "Registering default namespace: ${DEFAULT_NAMESPACE}."
-    if ! tctl --ns "${DEFAULT_NAMESPACE}" namespace describe; then
+    if ! tctl --namespace "${DEFAULT_NAMESPACE}" namespace describe; then
         echo "Default namespace ${DEFAULT_NAMESPACE} not found. Creating..."
-        tctl --ns "${DEFAULT_NAMESPACE}" namespace register --rd "${DEFAULT_NAMESPACE_RETENTION}" --desc "Default namespace for Temporal Server."
+        tctl --namespace "${DEFAULT_NAMESPACE}" namespace register --retention "${DEFAULT_NAMESPACE_RETENTION}" --description "Default namespace for Temporal Server."
         echo "Default namespace ${DEFAULT_NAMESPACE} registration complete."
     else
         echo "Default namespace ${DEFAULT_NAMESPACE} already registered."
@@ -294,7 +294,9 @@ add_custom_search_attributes() {
       echo "Adding Custom*Field search attributes."
       # TODO: Remove CustomStringField
 # @@@SNIPSTART add-custom-search-attributes-for-testing-command
-      tctl --auto_confirm admin cluster add-search-attributes \
+      tctl config set version 2
+      tctl search-attribute create \
+          --yes \
           --name CustomKeywordField --type Keyword \
           --name CustomStringField --type Text \
           --name CustomTextField --type Text \
