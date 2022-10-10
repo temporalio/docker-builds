@@ -13,7 +13,7 @@ on:
 jobs:
   sync:
     name: "Update submodules"
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     defaults:
       run:
