@@ -1,5 +1,5 @@
 ##### dockerize builder: built from source to support arm & x86 #####
-FROM golang:1.18-alpine3.16 AS dockerize-builder
+FROM golang:1.19-alpine3.16 AS dockerize-builder
 
 RUN apk add --update --no-cache \
     git
