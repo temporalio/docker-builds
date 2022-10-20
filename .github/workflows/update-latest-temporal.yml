@@ -1,0 +1,35 @@
+name: Update latest tag
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "The tag to use as latest"
+        required: true
+
+jobs:
+  retag-and-release:
+    name: "Update latest tag"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Copy images
+        env:
+          USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          IMAGES: server auto-setup admin-tools
+          REPO: temporalio
+          SRC_TAG: ${{ github.event.inputs.tag }}
+        run: |
+          skopeo() {
+            docker run --rm -i quay.io/skopeo/stable "$@"
+          }
+
+          for image in ${IMAGES}; do
+            src="docker://${REPO}/${image}:${SRC_TAG}"
+            dst_latest="docker://${REPO}/${image}:latest"
+            skopeo copy --dest-creds="$USERNAME":"$PASSWORD" --all "$src" "$dst_latest"
+          done
