@@ -9,6 +9,11 @@ on:
       tag:
         description: "The tag for the new images"
         required: true
+      latest:
+        type: boolean
+        description: "Also update latest tag"
+        required: true
+        default: false
 
 jobs:
   retag-and-release:
@@ -35,6 +40,7 @@ jobs:
           DST_REPO: temporalio
           SRC_TAG: ${{ steps.calc_args.outputs.image_tag }}
           DST_TAG: ${{ github.event.inputs.tag }}
+          LATEST: ${{ github.event.inputs.latest }}
         run: |
           skopeo() {
             docker run --rm -i quay.io/skopeo/stable "$@"
@@ -45,6 +51,8 @@ jobs:
             dst="docker://${DST_REPO}/${image}:${DST_TAG}"
             skopeo copy --dest-creds="$USERNAME":"$PASSWORD" --all "$src" "$dst"
 
-            dst_latest="docker://${DST_REPO}/${image}:latest"
-            skopeo copy --dest-creds="$USERNAME":"$PASSWORD" --all "$src" "$dst_latest"
+            if [[ "$LATEST" == "true" ]]; then
+              dst_latest="docker://${DST_REPO}/${image}:latest"
+              skopeo copy --dest-creds="$USERNAME":"$PASSWORD" --all "$src" "$dst_latest"
+            fi
           done
