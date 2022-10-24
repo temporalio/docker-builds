@@ -9,6 +9,7 @@ RUN apk add --update --no-cache \
     mysql-client \
     postgresql-client \
     py-pip \
+    expat \
     && pip install cqlsh
 
 # set up nsswitch.conf for Go's "netgo" implementation
