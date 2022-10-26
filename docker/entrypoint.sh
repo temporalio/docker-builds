@@ -2,7 +2,7 @@
 
 set -eu -o pipefail
 
-: "${BIND_ON_IP:=$(hostname -i)}"
+: "${BIND_ON_IP:=$(getent hosts $(hostname) | awk '{print $1;}')}"
 export BIND_ON_IP
 
 if [[ "${BIND_ON_IP}" =~ ":" ]]; then
