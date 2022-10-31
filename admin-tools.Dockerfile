@@ -24,6 +24,10 @@ FROM ${SERVER_IMAGE} as server
 ##### Temporal admin tools #####
 FROM ${BASE_ADMIN_TOOLS_IMAGE} as temporal-admin-tools
 
+# upgrade just this one for CVE-2022-40674
+RUN apk add --update --no-cache --upgrade \
+    expat
+
 WORKDIR /etc/temporal
 
 COPY --from=server /usr/local/bin/tctl /usr/local/bin
