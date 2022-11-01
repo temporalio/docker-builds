@@ -61,7 +61,7 @@ jobs:
           labels: ${{ steps.meta_server.outputs.labels }}
 
       - name: Run Trivy vulnerability scanner on Server image
-        uses: ./.github/workflows/trivy.yml
+        uses: ./.github/actions/trivy
         with:
           image-tags: ${{ steps.meta_server.outputs.tags }}
           image-name: server
@@ -92,7 +92,7 @@ jobs:
             SERVER_IMAGE=temporaliotest/server:${{ steps.build_args.outputs.image_tag }}
 
       - name: Run Trivy vulnerability scanner on Admin Tools image
-        uses: ./.github/workflows/trivy.yml
+        uses: ./.github/actions/trivy
         with:
           image-tags: ${{ steps.meta_admin_tools.outputs.tags }}
           image-name: admin_tools
@@ -139,7 +139,7 @@ jobs:
             ADMIN_TOOLS_IMAGE=temporaliotest/admin-tools:${{ steps.build_args.outputs.image_tag }}
 
       - name: Run Trivy vulnerability scanner on Auto Setup image
-        uses: ./.github/workflows/trivy.yml
+        uses: ./.github/actions/trivy
         with:
           image-tags: ${{ steps.meta_auto_setup.outputs.tags }}
           image-name: auto_setup

@@ -1,0 +1,37 @@
+name: 'Trivy Action'
+description: 'Docker Image Trivy security check combined action'
+
+inputs:
+  image-tags:
+    required: true
+    type: string
+  image-name:
+    required: true
+    type: string
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set variables
+      env:
+        TAGS: ${{ inputs.image-tags }}
+        NAME: ${{ inputs.image-name }}
+      id: vars
+      shell: bash
+      run: |
+        tag=$(echo "$TAGS" | head -1)
+        name=${NAME// /-}
+        echo "::set-output name=tag::${tag}"
+        echo "::set-output name=name::${name}"
+
+    - name: Run Trivy vulnerability scanner on ${{ inputs.image-name }} image
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: ${{ steps.vars.outputs.tag }}
+        format: 'sarif'
+        output: 'trivy-${{ steps.vars.outputs.name }}-results.sarif'
+
+    - name: Upload ${{ inputs.image-name }} image Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: 'trivy-${{ steps.vars.outputs.name }}-results.sarif'
