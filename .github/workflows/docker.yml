@@ -60,6 +60,18 @@ jobs:
           tags: ${{ steps.meta_server.outputs.tags }}
           labels: ${{ steps.meta_server.outputs.labels }}
 
+      - name: Run Trivy vulnerability scanner on Server image
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ steps.meta_server.outputs.tags }}
+          format: 'sarif'
+          output: 'trivy-server-results.sarif'
+
+      - name: Upload Server image Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-server-results.sarif'
+
 ### BUILD & PUSH ADMIN TOOLS IMAGE ###
 
       - name: Metatags for the Admin Tools image
@@ -84,6 +96,20 @@ jobs:
           labels: ${{ steps.meta_admin_tools.outputs.labels }}
           build-args: |
             SERVER_IMAGE=temporaliotest/server:${{ steps.build_args.outputs.image_tag }}
+
+      - name: Run Trivy vulnerability scanner on Admin tools image
+        if: steps.build_args.outputs.push == 'true'
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ steps.meta_admin_tools.outputs.tags }}
+          format: 'sarif'
+          output: 'trivy-admin_tools-results.sarif'
+
+      - name: Upload Admin tools image Trivy scan results to GitHub Security tab
+        if: steps.build_args.outputs.push == 'true'
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-admin_tools-results.sarif'
 
       - name: Dispatch CICD
         if: steps.build_args.outputs.push == 'true'
@@ -125,3 +151,17 @@ jobs:
           build-args: |
             SERVER_IMAGE=temporaliotest/server:${{ steps.build_args.outputs.image_tag }}
             ADMIN_TOOLS_IMAGE=temporaliotest/admin-tools:${{ steps.build_args.outputs.image_tag }}
+
+      - name: Run Trivy vulnerability scanner on Auto Setup image
+        if: steps.build_args.outputs.push == 'true'
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ steps.meta_auto_setup.outputs.tags }}
+          format: 'sarif'
+          output: 'trivy-auto_setup-results.sarif'
+
+      - name: Upload Auto Setup image Trivy scan results to GitHub Security tab
+        if: steps.build_args.outputs.push == 'true'
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-auto_setup-results.sarif'
