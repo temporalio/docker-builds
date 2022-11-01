@@ -63,7 +63,7 @@ jobs:
       - name: Run Trivy vulnerability scanner on Server image
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ${{ steps.meta_server.outputs.tags }}
+          image-ref: ${{ steps.meta_server.outputs.tags[0] }}
           format: 'sarif'
           output: 'trivy-server-results.sarif'
 
@@ -101,7 +101,7 @@ jobs:
         if: steps.build_args.outputs.push == 'true'
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ${{ steps.meta_admin_tools.outputs.tags }}
+          image-ref: ${{ steps.meta_admin_tools.outputs.tags[0] }}
           format: 'sarif'
           output: 'trivy-admin_tools-results.sarif'
 
@@ -156,7 +156,7 @@ jobs:
         if: steps.build_args.outputs.push == 'true'
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ${{ steps.meta_auto_setup.outputs.tags }}
+          image-ref: ${{ steps.meta_auto_setup.outputs.tags[0] }}
           format: 'sarif'
           output: 'trivy-auto_setup-results.sarif'
 
