@@ -29,7 +29,7 @@ jobs:
         env:
           COMMIT: ${{ github.event.inputs.commit }}
         run: |
-          echo "::set-output name=image_tag::sha-${COMMIT:0:7}"
+          echo "image_tag=sha-${COMMIT:0:7}" >> $GITHUB_OUTPUT
 
       - name: Copy images
         env:
