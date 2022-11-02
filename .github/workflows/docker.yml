@@ -60,6 +60,12 @@ jobs:
           tags: ${{ steps.meta_server.outputs.tags }}
           labels: ${{ steps.meta_server.outputs.labels }}
 
+      - name: Run Trivy vulnerability scanner on Server image
+        uses: ./.github/actions/trivy
+        with:
+          image-tags: ${{ steps.meta_server.outputs.tags }}
+          image-name: server
+
 ### BUILD & PUSH ADMIN TOOLS IMAGE ###
 
       - name: Metatags for the Admin Tools image
@@ -84,6 +90,13 @@ jobs:
           labels: ${{ steps.meta_admin_tools.outputs.labels }}
           build-args: |
             SERVER_IMAGE=temporaliotest/server:${{ steps.build_args.outputs.image_tag }}
+
+      - name: Run Trivy vulnerability scanner on Admin Tools image
+        if: steps.build_args.outputs.push == 'true'
+        uses: ./.github/actions/trivy
+        with:
+          image-tags: ${{ steps.meta_admin_tools.outputs.tags }}
+          image-name: admin-tools
 
       - name: Dispatch CICD
         if: steps.build_args.outputs.push == 'true'
@@ -125,3 +138,10 @@ jobs:
           build-args: |
             SERVER_IMAGE=temporaliotest/server:${{ steps.build_args.outputs.image_tag }}
             ADMIN_TOOLS_IMAGE=temporaliotest/admin-tools:${{ steps.build_args.outputs.image_tag }}
+
+      - name: Run Trivy vulnerability scanner on Auto Setup image
+        if: steps.build_args.outputs.push == 'true'
+        uses: ./.github/actions/trivy
+        with:
+          image-tags: ${{ steps.meta_auto_setup.outputs.tags }}
+          image-name: auto-setup
