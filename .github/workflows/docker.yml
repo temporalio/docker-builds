@@ -35,9 +35,9 @@ jobs:
         run: |
           github_sha_short=${GITHUB_SHA:0:7}
           push=${{ github.event_name == 'push' && !env.ACT }}
-          echo "::set-output name=commit_sha_short::$github_sha_short"
-          echo "::set-output name=image_tag::sha-$github_sha_short"
-          echo "::set-output name=push::$push"
+          echo "commit_sha_short=${github_sha_short}" >> $GITHUB_OUTPUT
+          echo "image_tag=sha-${github_sha_short}" >> $GITHUB_OUTPUT
+          echo "push=${push}" >> $GITHUB_OUTPUT
 
 ### BUILD & PUSH SERVER IMAGE ###
 
