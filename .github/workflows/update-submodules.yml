@@ -35,8 +35,8 @@ jobs:
           SUBMODULE_BRANCH: ${{ github.event.inputs.branch }}
         run: |
           if [[ $LOCAL_BRANCH == master ]]; then LOCAL_BRANCH=main; fi
-          echo "::set-output name=local_branch::$LOCAL_BRANCH"
-          echo "::set-output name=submodule_branch::$SUBMODULE_BRANCH"
+          echo "local_branch=${LOCAL_BRANCH}" >> $GITHUB_OUTPUT
+          echo "submodule_branch=${SUBMODULE_BRANCH}" >> $GITHUB_OUTPUT
 
       - name: Create and switch branch
         env:
