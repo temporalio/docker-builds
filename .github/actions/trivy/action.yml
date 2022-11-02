@@ -21,8 +21,8 @@ runs:
       run: |
         tag=$(echo "$TAGS" | head -1)
         name=${NAME// /-}
-        echo "::set-output name=tag::${tag}"
-        echo "::set-output name=name::${name}"
+        echo "tag=${tag}" >> $GITHUB_OUTPUT
+        echo "name=${name}" >> $GITHUB_OUTPUT
 
     - name: Run Trivy vulnerability scanner on ${{ inputs.image-name }} image
       uses: aquasecurity/trivy-action@master

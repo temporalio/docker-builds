@@ -96,7 +96,7 @@ jobs:
         uses: ./.github/actions/trivy
         with:
           image-tags: ${{ steps.meta_admin_tools.outputs.tags }}
-          image-name: admin_tools
+          image-name: admin-tools
 
       - name: Dispatch CICD
         if: steps.build_args.outputs.push == 'true'
@@ -144,4 +144,4 @@ jobs:
         uses: ./.github/actions/trivy
         with:
           image-tags: ${{ steps.meta_auto_setup.outputs.tags }}
-          image-name: auto_setup
+          image-name: auto-setup
