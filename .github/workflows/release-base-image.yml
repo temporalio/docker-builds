@@ -71,5 +71,5 @@ jobs:
           push: true
           file: docker/base-images/${{ github.event.inputs.target }}.Dockerfile
           platforms: ${{ github.event.inputs.arch }}
-          tags: ${{ steps.vars.outputs.tags }}
+          tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
