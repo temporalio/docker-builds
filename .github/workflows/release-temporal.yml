@@ -28,8 +28,13 @@ jobs:
         id: calc_args
         env:
           COMMIT: ${{ github.event.inputs.commit }}
+          TAGS: ${{ github.event.inputs.tag }}
         run: |
           echo "image_tag=sha-${COMMIT:0:7}" >> $GITHUB_OUTPUT
+          tags=$(awk -v v="$TAGS" 'BEGIN { while(v ~ /\./) {print v; gsub(/\.([^\.]+)$/, "", v)}; print v}')
+          echo "tags<<TAGS_EOF" >> $GITHUB_OUTPUT
+          echo "${tags}" >> $GITHUB_OUTPUT
+          echo "TAGS_EOF" >> $GITHUB_OUTPUT
 
       - name: Copy images
         env:
@@ -39,7 +44,7 @@ jobs:
           SRC_REPO: temporaliotest
           DST_REPO: temporalio
           SRC_TAG: ${{ steps.calc_args.outputs.image_tag }}
-          DST_TAG: ${{ github.event.inputs.tag }}
+          DST_TAGS: ${{ steps.calc_args.outputs.tags }}
           LATEST: ${{ github.event.inputs.latest }}
         run: |
           skopeo() {
@@ -48,8 +53,11 @@ jobs:
 
           for image in ${IMAGES}; do
             src="docker://${SRC_REPO}/${image}:${SRC_TAG}"
-            dst="docker://${DST_REPO}/${image}:${DST_TAG}"
-            skopeo copy --dest-creds="$USERNAME":"$PASSWORD" --all "$src" "$dst"
+
+            for tag in ${DST_TAGS}; do
+              dst="docker://${DST_REPO}/${image}:${tag}"
+              skopeo copy --dest-creds="$USERNAME":"$PASSWORD" --all "$src" "$dst"
+            done
 
             if [[ "$LATEST" == "true" ]]; then
               dst_latest="docker://${DST_REPO}/${image}:latest"
