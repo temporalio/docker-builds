@@ -14,37 +14,20 @@ jobs:
   retag-and-release:
     name: "Re-tag and release images"
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
 
     steps:
-      - name: Calc image tag from commit sha
-        id: calc_args
-        env:
-          COMMIT: ${{ github.event.inputs.commit }}
-        run: |
-          echo "image_tag=sha-${COMMIT:0:7}" >> $GITHUB_OUTPUT
-
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          go-version-file: 'src/go.mod'
       - name: Copy images
         env:
+          COMMIT: ${{ github.event.inputs.commit }}
+          TAG: ${{ github.event.inputs.tag }}
           USERNAME: ${{ secrets.DOCKER_USERNAME }}
           PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
           IMAGES: server auto-setup admin-tools
           SRC_REPO: temporaliotest
           DST_REPO: temporalio
-          SRC_TAG: ${{ steps.calc_args.outputs.image_tag }}
-          DST_TAG: ${{ github.event.inputs.tag }}
-        run: |
-          skopeo() {
-            docker run --rm -i quay.io/skopeo/stable "$@"
-          }
-
-          for image in ${IMAGES}; do
-            src="docker://${SRC_REPO}/${image}:${SRC_TAG}"
-            dst="docker://${DST_REPO}/${image}:${DST_TAG}"
-            skopeo copy --dest-creds="$USERNAME":"$PASSWORD" --all "$src" "$dst"
-
-            dst_latest="docker://${DST_REPO}/${image}:latest"
-            skopeo copy --dest-creds="$USERNAME":"$PASSWORD" --all "$src" "$dst_latest"
-          done
+          LATEST: ${{ github.event.inputs.latest }}
+        run: go run src/release_temporal/main.go
