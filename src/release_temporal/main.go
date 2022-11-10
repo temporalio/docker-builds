@@ -68,16 +68,16 @@ func copyImages() {
 
 	for _, image := range env.images {
 		src := fmt.Sprintf("docker://%s/%s:%s", env.srcRepo, image, env.srcTag)
+		destCreds := fmt.Sprintf("--dest-creds=%s:%s", env.username, env.password)
 
 		for _, tag := range env.dstTags {
 			dst := fmt.Sprintf("docker://%s/%s:%s", env.dstRepo, image, tag)
-			skopeo([]string{"copy", "--dest-creds=$USERNAME:$PASSWORD", "--all", src, dst})
+			skopeo([]string{"copy", destCreds, "--all", src, dst})
 		}
 
 		if env.setLatestTag {
 			dst_latest := fmt.Sprintf("docker://%s/%s:latest", env.dstRepo, image)
-			creds := fmt.Sprintf("--dest-creds=%s:%s", env.username, env.password)
-			skopeo([]string{"copy", creds, "--all", src, dst_latest})
+			skopeo([]string{"copy", destCreds, "--all", src, dst_latest})
 		}
 	}
 }
