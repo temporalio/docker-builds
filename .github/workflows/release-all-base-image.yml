@@ -19,7 +19,7 @@ on:
 
 jobs:
   build-push-multi-arch-images:
-    runs-on: buildjet-16vcpu-ubuntu-2204
+    runs-on: ubuntu-latest-16-cores
     strategy:
       matrix:
         arch: ["linux/amd64,linux/arm64"]
@@ -63,7 +63,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
 
   build-push-amd64-images:
-    runs-on: buildjet-16vcpu-ubuntu-2204
+    runs-on: ubuntu-latest-16-cores
     strategy:
       matrix:
         arch: [linux/amd64]
