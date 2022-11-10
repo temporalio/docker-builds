@@ -35,4 +35,4 @@ jobs:
           SRC_REPO: temporaliotest
           DST_REPO: temporalio
           LATEST: ${{ github.event.inputs.latest }}
-        run: go run src/release_temporal/main.go
+        run: go run src/release_temporal/main.go --commit "$COMMIT" --dst-tag "$TAG" --images "$IMAGES" --src-repo "$SRC_REPO" --dst-repo "$DST_REPO"
