@@ -1,0 +1,96 @@
+# This workflow builds the server docker image and exposes it as an artifact which may be used by
+# other GitHub workflow jobs. This is useful for creating docker images that you want to use to
+# test a certain commit of server without publishing them.
+
+name: Build Docker Image as Artifact
+
+on:
+  workflow_call:
+    inputs:
+      # TODO: Shouldn't be required. If not set, use existing submodule.
+      temporal-server-repo-ref:
+        type: string
+        required: true
+      temporal-server-repo-path:
+        type: string
+        default: "temporalio/temporal"
+      docker-builds-repo-ref:
+        type: string
+        default: "main"
+
+jobs:
+  build-image:
+    # TODO: use bigger runner when available. Seems like they're stuck or not enough?
+    runs-on: ubuntu-latest
+    services:
+      registry:
+        image: registry:2
+        ports:
+          - 5000:5000
+    steps:
+      - name: Checkout docker builds repository
+        uses: actions/checkout@v3
+        with:
+          # Must specify repo path, or it will use path of calling workflow
+          repository: temporalio/docker-builds
+          ref: ${{ inputs.docker-builds-repo-ref }}
+          submodules: "true"
+
+      - name: Checkout temporal server repository
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ inputs.temporal-server-repo-path }}
+          path: temporal-server-checkedout
+          ref: ${{ inputs.temporal-server-repo-ref }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        with:
+          driver-opts: network=host
+
+      - name: Build Server Image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: server.Dockerfile
+          build-args: |
+            TEMPORAL_REPO_PATH=temporal-server-checkedout
+            GOFLAGS=-buildvcs=false
+          tags: localhost:5000/temporal-server:latest
+          push: true
+
+      - name: Build Admin tools Image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: admin-tools.Dockerfile
+          build-args: |
+            TEMPORAL_REPO_PATH=temporal-server-checkedout
+            SERVER_IMAGE=localhost:5000/temporal-server:latest
+            GOFLAGS=-buildvcs=false
+          tags: localhost:5000/temporal-admin-tools:latest
+          push: true
+
+      - name: Build Autosetup Image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: auto-setup.Dockerfile
+          build-args: |
+            SERVER_IMAGE=localhost:5000/temporal-server:latest
+            ADMIN_TOOLS_IMAGE=localhost:5000/temporal-admin-tools:latest
+          tags: temporal-autosetup:latest
+          outputs: type=docker,dest=/tmp/temporal-autosetup.tar
+
+      # Upload-artifact has no good way to flatten paths, so we need to move the compose file
+      # to avoid some disgustingly long inner path inside the artifact zip.
+      - name: Copy compose file
+        run: cp ./temporal-server-checkedout/develop/docker-compose/docker-compose.yml /tmp/docker-compose.yml
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: temporal-server-docker
+          path: |
+            /tmp/temporal-autosetup.tar
+            /tmp/docker-compose.yml

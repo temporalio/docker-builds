@@ -5,15 +5,18 @@ ARG GOPROXY
 
 ##### Temporal Admin Tools builder #####
 FROM ${BASE_BUILDER_IMAGE} AS admin-tools-builder
+ARG TEMPORAL_REPO_PATH=temporal
+ARG GOFLAGS
+ENV GOFLAGS ${GOFLAGS}
 
 WORKDIR /home/builder
 
 # cache Temporal packages as a docker layer
-COPY ./temporal/go.mod ./temporal/go.sum ./temporal/
+COPY ./${TEMPORAL_REPO_PATH}/go.mod ./${TEMPORAL_REPO_PATH}/go.sum ./temporal/
 RUN (cd ./temporal && go mod download all)
 
 # build
-COPY . .
+COPY ./${TEMPORAL_REPO_PATH} ./temporal
 RUN (cd ./temporal && make temporal-cassandra-tool temporal-sql-tool tdbg)
 
 

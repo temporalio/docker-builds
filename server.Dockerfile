@@ -1,15 +1,16 @@
 ARG BASE_BUILDER_IMAGE=temporalio/base-builder:1.11.0
 ARG BASE_SERVER_IMAGE=temporalio/base-server:1.12.0
-ARG GOPROXY
 
 ##### Builder #####
 FROM ${BASE_BUILDER_IMAGE} AS temporal-builder
-
+ARG TEMPORAL_REPO_PATH=temporal
+ARG GOFLAGS
+ENV GOFLAGS ${GOFLAGS}
 
 WORKDIR /home/builder
 
 # cache Temporal packages as a docker layer
-COPY ./temporal/go.mod ./temporal/go.sum ./temporal/
+COPY ./${TEMPORAL_REPO_PATH}/go.mod ./${TEMPORAL_REPO_PATH}/go.sum ./temporal/
 RUN (cd ./temporal && go mod download all)
 
 # cache tctl packages as a docker layer
@@ -17,12 +18,14 @@ COPY ./tctl/go.mod ./tctl/go.sum ./tctl/
 RUN (cd ./tctl && go mod download all)
 
 # build
-COPY . .
+COPY ./tctl ./tctl
+COPY ./${TEMPORAL_REPO_PATH} ./temporal
 RUN (cd ./temporal && make temporal-server)
 RUN (cd ./tctl && make build)
 
 ##### Temporal server #####
 FROM ${BASE_SERVER_IMAGE} as temporal-server
+
 WORKDIR /etc/temporal
 
 ENV TEMPORAL_HOME /etc/temporal
