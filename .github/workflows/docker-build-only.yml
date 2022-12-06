@@ -37,11 +37,22 @@ jobs:
           submodules: "true"
 
       - name: Checkout temporal server repository
-        uses: actions/checkout@v3
-        with:
-          repository: ${{ inputs.temporal-server-repo-path }}
-          path: temporal-server-checkedout
-          ref: ${{ inputs.temporal-server-repo-ref }}
+        # I have no idea why all this hullabaloo with explicitly fetching the other repo's branch
+        # is necessary, you should be able to just `git submodule update --init` and have it work,
+        # but possibly something about the barebones nature of the checkout action makes that not
+        # work.
+        run: |
+          git submodule set-url temporal ${{ format('https://github.com/{0}', inputs.temporal-server-repo-path) }}
+          git submodule set-branch --branch ${{ inputs.temporal-server-repo-ref }} -- temporal
+          git submodule sync
+          cat .gitmodules
+          echo "Updating temporal submodule"
+          cd temporal
+          git remote show origin
+          git fetch --depth 1 origin ${{ inputs.temporal-server-repo-ref }}:refs/remotes/origin/${{ inputs.temporal-server-repo-ref }}
+          git checkout origin/${{ inputs.temporal-server-repo-ref }}
+          cd ..
+          git submodule status temporal
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -53,9 +64,6 @@ jobs:
         with:
           context: .
           file: server.Dockerfile
-          build-args: |
-            TEMPORAL_REPO_PATH=temporal-server-checkedout
-            GOFLAGS=-buildvcs=false
           tags: localhost:5000/temporal-server:latest
           push: true
 
@@ -65,9 +73,7 @@ jobs:
           context: .
           file: admin-tools.Dockerfile
           build-args: |
-            TEMPORAL_REPO_PATH=temporal-server-checkedout
             SERVER_IMAGE=localhost:5000/temporal-server:latest
-            GOFLAGS=-buildvcs=false
           tags: localhost:5000/temporal-admin-tools:latest
           push: true
 
@@ -85,7 +91,7 @@ jobs:
       # Upload-artifact has no good way to flatten paths, so we need to move the compose file
       # to avoid some disgustingly long inner path inside the artifact zip.
       - name: Copy compose file
-        run: cp ./temporal-server-checkedout/develop/docker-compose/docker-compose.yml /tmp/docker-compose.yml
+        run: cp ./temporal/develop/docker-compose/docker-compose.yml /tmp/docker-compose.yml
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
