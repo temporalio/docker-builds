@@ -1,0 +1,104 @@
+# This workflow builds the server docker image and exposes it as an artifact which may be used by
+# other GitHub workflow jobs. This is useful for creating docker images that you want to use to
+# test a certain commit of server without publishing them.
+
+name: Build Docker Image as Artifact
+
+on:
+  workflow_call:
+    inputs:
+      # If set, change the temporal submodule to use the repo path from `temporal-server-repo-path`
+      # and use this ref when checking it out. If it isn't set, the submodule as defined in this
+      # repo will be used when building server.
+      temporal-server-repo-ref:
+        type: string
+      temporal-server-repo-path:
+        type: string
+        default: "temporalio/temporal"
+      docker-builds-repo-ref:
+        type: string
+        default: "main"
+
+jobs:
+  build-image:
+    # TODO: use bigger runner when available. Seems like they're stuck or not enough?
+    runs-on: ubuntu-latest
+    services:
+      registry:
+        image: registry:2
+        ports:
+          - 5000:5000
+    steps:
+      - name: Checkout docker builds repository
+        uses: actions/checkout@v3
+        with:
+          # Must specify repo path, or it'll use path of calling workflow (since this is a reusable wf)
+          repository: temporalio/docker-builds
+          ref: ${{ inputs.docker-builds-repo-ref }}
+          submodules: "true"
+
+      - name: Checkout temporal server repository
+        if: inputs.temporal-server-repo-ref
+        # I have no idea why all this hullabaloo with explicitly fetching the other repo's branch
+        # is necessary, you should be able to just `git submodule update --init` and have it work,
+        # but possibly something about the barebones nature of the checkout action makes that not
+        # work.
+        run: |
+          git submodule set-url temporal ${{ format('https://github.com/{0}', inputs.temporal-server-repo-path) }}
+          git submodule set-branch --branch ${{ inputs.temporal-server-repo-ref }} -- temporal
+          git submodule sync
+          cat .gitmodules
+          echo "Updating temporal submodule"
+          cd temporal
+          git remote show origin
+          git fetch --depth 1 origin ${{ inputs.temporal-server-repo-ref }}:refs/remotes/origin/${{ inputs.temporal-server-repo-ref }}
+          git checkout origin/${{ inputs.temporal-server-repo-ref }}
+          cd ..
+          git submodule status temporal
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        with:
+          driver-opts: network=host
+
+      - name: Build Server Image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: server.Dockerfile
+          tags: localhost:5000/temporal-server:latest
+          push: true
+
+      - name: Build Admin tools Image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: admin-tools.Dockerfile
+          build-args: |
+            SERVER_IMAGE=localhost:5000/temporal-server:latest
+          tags: localhost:5000/temporal-admin-tools:latest
+          push: true
+
+      - name: Build Autosetup Image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: auto-setup.Dockerfile
+          build-args: |
+            SERVER_IMAGE=localhost:5000/temporal-server:latest
+            ADMIN_TOOLS_IMAGE=localhost:5000/temporal-admin-tools:latest
+          tags: temporal-autosetup:latest
+          outputs: type=docker,dest=/tmp/temporal-autosetup.tar
+
+      # Upload-artifact has no good way to flatten paths, so we need to move the compose file
+      # to avoid some disgustingly long inner path inside the artifact zip.
+      - name: Copy compose file
+        run: cp ./temporal/develop/docker-compose/docker-compose.yml /tmp/docker-compose.yml
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: temporal-server-docker
+          path: |
+            /tmp/temporal-autosetup.tar
+            /tmp/docker-compose.yml

@@ -13,7 +13,11 @@ COPY ./temporal/go.mod ./temporal/go.sum ./temporal/
 RUN (cd ./temporal && go mod download all)
 
 # build
-COPY . .
+COPY ./temporal ./temporal
+# Git info is needed for Go build to attach VCS information properly.
+# See the `buildvcs` Go flag: https://pkg.go.dev/cmd/go
+COPY ./.git ./.git
+COPY ./.gitmodules ./.gitmodules
 RUN (cd ./temporal && make temporal-cassandra-tool temporal-sql-tool tdbg)
 
 

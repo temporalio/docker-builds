@@ -1,10 +1,8 @@
 ARG BASE_BUILDER_IMAGE=temporalio/base-builder:1.11.0
 ARG BASE_SERVER_IMAGE=temporalio/base-server:1.12.0
-ARG GOPROXY
 
 ##### Builder #####
 FROM ${BASE_BUILDER_IMAGE} AS temporal-builder
-
 
 WORKDIR /home/builder
 
@@ -17,12 +15,18 @@ COPY ./tctl/go.mod ./tctl/go.sum ./tctl/
 RUN (cd ./tctl && go mod download all)
 
 # build
-COPY . .
+COPY ./tctl ./tctl
+COPY ./temporal ./temporal
+# Git info is needed for Go build to attach VCS information properly.
+# See the `buildvcs` Go flag: https://pkg.go.dev/cmd/go
+COPY ./.git ./.git
+COPY ./.gitmodules ./.gitmodules
 RUN (cd ./temporal && make temporal-server)
 RUN (cd ./tctl && make build)
 
 ##### Temporal server #####
 FROM ${BASE_SERVER_IMAGE} as temporal-server
+
 WORKDIR /etc/temporal
 
 ENV TEMPORAL_HOME /etc/temporal
