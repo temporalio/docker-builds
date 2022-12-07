@@ -7,10 +7,11 @@ name: Build Docker Image as Artifact
 on:
   workflow_call:
     inputs:
-      # TODO: Shouldn't be required. If not set, use existing submodule.
+      # If set, change the temporal submodule to use the repo path from `temporal-server-repo-path`
+      # and use this ref when checking it out. If it isn't set, the submodule as defined in this
+      # repo will be used when building server.
       temporal-server-repo-ref:
         type: string
-        required: true
       temporal-server-repo-path:
         type: string
         default: "temporalio/temporal"
@@ -31,12 +32,13 @@ jobs:
       - name: Checkout docker builds repository
         uses: actions/checkout@v3
         with:
-          # Must specify repo path, or it will use path of calling workflow
+          # Must specify repo path, or it'll use path of calling workflow (since this is a reusable wf)
           repository: temporalio/docker-builds
           ref: ${{ inputs.docker-builds-repo-ref }}
           submodules: "true"
 
       - name: Checkout temporal server repository
+        if: inputs.temporal-server-repo-ref
         # I have no idea why all this hullabaloo with explicitly fetching the other repo's branch
         # is necessary, you should be able to just `git submodule update --init` and have it work,
         # but possibly something about the barebones nature of the checkout action makes that not
