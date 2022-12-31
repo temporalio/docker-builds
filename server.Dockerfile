@@ -14,15 +14,21 @@ RUN (cd ./temporal && go mod download all)
 COPY ./tctl/go.mod ./tctl/go.sum ./tctl/
 RUN (cd ./tctl && go mod download all)
 
+# cache Temporal CLI packages as a docker layer
+COPY ./cli/go.mod ./cli/go.sum ./cli/
+RUN (cd ./cli && go mod download all)
+
 # build
 COPY ./tctl ./tctl
 COPY ./temporal ./temporal
+COPY ./cli ./cli
 # Git info is needed for Go build to attach VCS information properly.
 # See the `buildvcs` Go flag: https://pkg.go.dev/cmd/go
 COPY ./.git ./.git
 COPY ./.gitmodules ./.gitmodules
 RUN (cd ./temporal && make temporal-server)
 RUN (cd ./tctl && make build)
+RUN (cd ./cli && make build)
 
 ##### Temporal server #####
 FROM ${BASE_SERVER_IMAGE} as temporal-server
@@ -44,6 +50,7 @@ USER temporal
 COPY --from=temporal-builder /home/builder/tctl/tctl /usr/local/bin
 COPY --from=temporal-builder /home/builder/tctl/tctl-authorization-plugin /usr/local/bin
 COPY --from=temporal-builder /home/builder/temporal/temporal-server /usr/local/bin
+COPY --from=temporal-builder /home/builder/cli/temporal /usr/local/bin
 
 # configs
 COPY ./temporal/config/dynamicconfig/docker.yaml /etc/temporal/config/dynamicconfig/docker.yaml
