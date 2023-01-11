@@ -29,7 +29,7 @@ FROM ${BASE_SERVER_IMAGE} as temporal-server
 
 WORKDIR /etc/temporal
 
-ENV TEMPORAL_HOME /etc/temporal
+ENV TEMPORAL_HOME=/etc/temporal
 EXPOSE 6933 6934 6935 6939 7233 7234 7235 7239
 
 # TODO switch WORKDIR to /home/temporal and remove "mkdir" and "chown" calls.
