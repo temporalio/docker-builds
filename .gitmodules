@@ -6,7 +6,3 @@
 	path = tctl
 	url = https://github.com/temporalio/tctl
 	branch = main
-[submodule "cli"]
-	path = cli
-	url = https://github.com/temporalio/cli
-	branch = main
