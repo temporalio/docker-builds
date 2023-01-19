@@ -12,6 +12,10 @@ on:
 jobs:
   build-push-images:
     runs-on: ubuntu-latest-16-cores
+    # Usually, a successful job takes ~17 mins.
+    # Anything more than 30 mins is a sign that job is stuck.
+    # This is a workaround until we find the root cause.
+    timeout-minutes: 30
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
