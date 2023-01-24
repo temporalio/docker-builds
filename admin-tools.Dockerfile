@@ -37,6 +37,10 @@ FROM ${BASE_ADMIN_TOOLS_IMAGE} as temporal-admin-tools
 
 WORKDIR /etc/temporal
 
+RUN addgroup -g 1000 temporal
+RUN adduser -u 1000 -G temporal -D temporal
+USER temporal
+
 COPY --from=server /usr/local/bin/tctl /usr/local/bin
 COPY --from=server /usr/local/bin/tctl-authorization-plugin /usr/local/bin
 COPY --from=server /usr/local/bin/temporal /usr/local/bin
