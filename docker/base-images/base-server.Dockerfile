@@ -1,5 +1,5 @@
 ##### dockerize builder: built from source to support arm & x86 #####
-FROM golang:1.19-alpine3.16 AS dockerize-builder
+FROM golang:1.19-alpine3.17 AS dockerize-builder
 
 RUN apk add --update --no-cache \
     git
@@ -11,7 +11,7 @@ RUN mkdir -p /xsrc && \
     rm -rf /xsrc
 
 ##### base-server target #####
-FROM alpine:3.16 AS base-server
+FROM alpine:3.17 AS base-server
 
 RUN apk add --update --no-cache \
     ca-certificates \

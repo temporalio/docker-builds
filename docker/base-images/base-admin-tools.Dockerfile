@@ -1,4 +1,4 @@
-FROM alpine:3.16 AS base-admin-tools
+FROM alpine:3.17 AS base-admin-tools
 
 RUN apk add --update --no-cache \
     ca-certificates \
