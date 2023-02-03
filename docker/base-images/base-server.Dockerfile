@@ -20,8 +20,5 @@ RUN apk add --update --no-cache \
     curl
 
 COPY --from=dockerize-builder /usr/local/bin/dockerize /usr/local/bin/dockerize
-# set up nsswitch.conf for Go's "netgo" implementation
-# https://github.com/gliderlabs/docker-alpine/issues/367#issuecomment-424546457
-RUN test ! -e /etc/nsswitch.conf && echo 'hosts: files dns' > /etc/nsswitch.conf
 
 SHELL ["/bin/bash", "-c"]
