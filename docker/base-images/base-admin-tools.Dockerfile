@@ -12,8 +12,4 @@ RUN apk add --update --no-cache \
     expat \
     && pip install cqlsh
 
-# set up nsswitch.conf for Go's "netgo" implementation
-# https://github.com/gliderlabs/docker-alpine/issues/367#issuecomment-424546457
-RUN test ! -e /etc/nsswitch.conf && echo 'hosts: files dns' > /etc/nsswitch.conf
-
 SHELL ["/bin/bash", "-c"]
