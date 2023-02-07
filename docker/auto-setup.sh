@@ -293,9 +293,9 @@ setup_es_index() {
 
 register_default_namespace() {
     echo "Registering default namespace: ${DEFAULT_NAMESPACE}."
-    if ! tctl --ns "${DEFAULT_NAMESPACE}" namespace describe; then
+    if ! temporal operator namespace describe "${DEFAULT_NAMESPACE}"; then
         echo "Default namespace ${DEFAULT_NAMESPACE} not found. Creating..."
-        tctl --ns "${DEFAULT_NAMESPACE}" namespace register --rd "${DEFAULT_NAMESPACE_RETENTION}" --desc "Default namespace for Temporal Server."
+        temporal operator namespace create --retention "${DEFAULT_NAMESPACE_RETENTION}" --description "Default namespace for Temporal Server." "${DEFAULT_NAMESPACE}"
         echo "Default namespace ${DEFAULT_NAMESPACE} registration complete."
     else
         echo "Default namespace ${DEFAULT_NAMESPACE} already registered."
@@ -303,24 +303,30 @@ register_default_namespace() {
 }
 
 add_custom_search_attributes() {
-      echo "Adding Custom*Field search attributes."
-      # TODO: Remove CustomStringField
+    until temporal operator search-attribute list --namespace "${DEFAULT_NAMESPACE}"; do
+      echo "Waiting for namespace cache to refresh..."
+      sleep 1
+    done
+    echo "Namespace cache refreshed."
+
+    echo "Adding Custom*Field search attributes."
+    # TODO: Remove CustomStringField
 # @@@SNIPSTART add-custom-search-attributes-for-testing-command
-      tctl --auto_confirm admin cluster add-search-attributes \
-          --name CustomKeywordField --type Keyword \
-          --name CustomStringField --type Text \
-          --name CustomTextField --type Text \
-          --name CustomIntField --type Int \
-          --name CustomDatetimeField --type Datetime \
-          --name CustomDoubleField --type Double \
-          --name CustomBoolField --type Bool
+    temporal operator search-attribute create --namespace "${DEFAULT_NAMESPACE}" --yes \
+        --name CustomKeywordField --type Keyword \
+        --name CustomStringField --type Text \
+        --name CustomTextField --type Text \
+        --name CustomIntField --type Int \
+        --name CustomDatetimeField --type Datetime \
+        --name CustomDoubleField --type Double \
+        --name CustomBoolField --type Bool
 # @@@SNIPEND
 }
 
 setup_server(){
     echo "Temporal CLI address: ${TEMPORAL_CLI_ADDRESS}."
 
-    until tctl cluster health | grep -q SERVING; do
+    until temporal operator cluster health | grep -q SERVING; do
         echo "Waiting for Temporal server to start..."
         sleep 1
     done
