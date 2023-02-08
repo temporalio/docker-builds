@@ -10,6 +10,7 @@ RUN apk add --update --no-cache \
     postgresql-client \
     py-pip \
     expat \
+    tini \
     && pip install cqlsh
 
 SHELL ["/bin/bash", "-c"]
