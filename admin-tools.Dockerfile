@@ -50,4 +50,4 @@ COPY --from=admin-tools-builder /home/builder/temporal/schema /etc/temporal/sche
 COPY --from=admin-tools-builder /home/builder/temporal/tdbg /usr/local/bin
 
 # Keep the container running.
-ENTRYPOINT ["tail", "-f", "/dev/null"]
+ENTRYPOINT ["tini", "--", "sleep", "infinity"]
