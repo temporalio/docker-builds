@@ -1,5 +1,5 @@
 ##### dockerize builder: built from source to support arm & x86 #####
-FROM golang:1.19-alpine3.17 AS dockerize-builder
+FROM golang:1.20-alpine3.17 AS dockerize-builder
 
 RUN apk add --update --no-cache \
     git
@@ -17,7 +17,9 @@ RUN apk add --update --no-cache \
     ca-certificates \
     tzdata \
     bash \
-    curl
+    curl \
+    libcrypto3 \
+    libssl3
 
 COPY --from=dockerize-builder /usr/local/bin/dockerize /usr/local/bin/dockerize
 
