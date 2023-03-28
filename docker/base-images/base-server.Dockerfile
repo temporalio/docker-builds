@@ -13,6 +13,7 @@ RUN mkdir -p /xsrc && \
 ##### base-server target #####
 FROM alpine:3.17 AS base-server
 
+# todo: remove libcrypto3 and libssl3 when alpine 3.18 is released
 RUN apk add --update --no-cache \
     ca-certificates \
     tzdata \
