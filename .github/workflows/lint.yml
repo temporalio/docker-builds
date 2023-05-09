@@ -13,8 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Run ShellCheck
-        uses: ludeeus/action-shellcheck@master
+        uses: redhat-plumbers-in-action/differential-shellcheck@v4
         with:
-          scandir: ./docker
+          include-path: ./docker
