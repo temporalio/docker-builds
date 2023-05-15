@@ -1,4 +1,4 @@
-ARG BASE_BUILDER_IMAGE=builder-temp:latest
+ARG BASE_BUILDER_IMAGE=temporalio/base-builder:1.13.1
 ARG BASE_SERVER_IMAGE=temporalio/base-server:1.14.1
 
 ##### Builder #####
@@ -15,7 +15,7 @@ COPY ./tctl/go.mod ./tctl/go.sum ./tctl/
 RUN (cd ./tctl && go mod download all)
 
 # cache Temporal CLI binary
-RUN set -e; curl -sSf https://temporal.download/cli.sh | sh /dev/stdin --dir ./cli
+RUN sh -c "$(curl -sSf https://temporal.download/cli.sh)" -- --dir ./cli
 RUN mv ./cli/bin/temporal ./cli/
 
 # build
