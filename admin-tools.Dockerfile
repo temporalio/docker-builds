@@ -12,10 +12,6 @@ WORKDIR /home/builder
 COPY ./temporal/go.mod ./temporal/go.sum ./temporal/
 RUN (cd ./temporal && go mod download all)
 
-# cache Temporal CLI packages as a docker layer
-COPY ./cli/go.mod ./cli/go.sum ./cli/
-RUN (cd ./cli && go mod download all)
-
 # build
 COPY ./temporal ./temporal
 # Git info is needed for Go build to attach VCS information properly.
@@ -23,9 +19,6 @@ COPY ./temporal ./temporal
 COPY ./.git ./.git
 COPY ./.gitmodules ./.gitmodules
 RUN (cd ./temporal && make temporal-cassandra-tool temporal-sql-tool tdbg)
-
-COPY ./cli ./cli
-RUN (cd ./cli && make build)
 
 
 ##### Server #####
