@@ -45,9 +45,9 @@ jobs:
 
           TEMPORAL_SHA=$(git submodule status -- temporal | awk '{print $1}')
           echo "TEMPORAL_SHA=${TEMPORAL_SHA}" >> $GITHUB_OUTPUT
-          TCTL_SHA=$(git submodule status -- temporal | awk '{print $1}')
+          TCTL_SHA=$(git submodule status -- tctl | awk '{print $1}')
           echo "TCTL_SHA=${TCTL_SHA}" >> $GITHUB_OUTPUT
-          CLI_SHA=$(git submodule status -- temporal | awk '{print $1}')
+          CLI_SHA=$(git submodule status -- cli | awk '{print $1}')
           echo "CLI_SHA=${CLI_SHA}" >> $GITHUB_OUTPUT
 
 ### BUILD & PUSH SERVER IMAGE ###
