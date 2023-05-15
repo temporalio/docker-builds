@@ -14,6 +14,11 @@ TEMPORAL_ROOT := temporal
 TCTL_ROOT := tctl
 TEMPORAL_CLI_ROOT := cli
 
+TEMPORAL_SHA := $(shell sh -c 'git submodule status -- temporal | cut -c2-40')
+TCTL_SHA := $(shell sh -c "git submodule status -- tctl | cut -c2-40")
+CLI_SHA := $(shell sh -c "git submodule status -- cli | cut -c2-40")
+SERVER_BUILD_ARGS := --build-arg TEMPORAL_SHA=$(TEMPORAL_SHA) --build-arg TCTL_SHA=$(TCTL_SHA) --build-arg CLI_SHA=$(CLI_SHA)
+
 ##### Scripts ######
 install: install-submodules
 
@@ -30,7 +35,7 @@ update-submodules:
 ##### Docker #####
 docker-server:
 	@printf $(COLOR) "Building docker image temporalio/server:$(DOCKER_IMAGE_TAG)..."
-	docker build . -f server.Dockerfile -t temporalio/server:$(DOCKER_IMAGE_TAG)
+	docker build . -f server.Dockerfile -t temporalio/server:$(DOCKER_IMAGE_TAG) $(SERVER_BUILD_ARGS)
 
 docker-admin-tools: docker-server
 	@printf $(COLOR) "Build docker image temporalio/admin-tools:$(DOCKER_IMAGE_TAG)..."
@@ -45,7 +50,7 @@ docker-buildx-container:
 
 docker-server-x:
 	@printf $(COLOR) "Building cross-platform docker image temporalio/server:$(DOCKER_IMAGE_TAG)..."
-	docker buildx build . -f server.Dockerfile -t temporalio/server:$(DOCKER_IMAGE_TAG) --platform linux/amd64,linux/arm64 --output type=$(DOCKER_BUILDX_OUTPUT)
+	docker buildx build . -f server.Dockerfile -t temporalio/server:$(DOCKER_IMAGE_TAG) --platform linux/amd64,linux/arm64 --output type=$(DOCKER_BUILDX_OUTPUT) $(SERVER_BUILD_ARGS)
 
 docker-admin-tools-x: docker-server-x
 	@printf $(COLOR) "Build cross-platform docker image temporalio/admin-tools:$(DOCKER_IMAGE_TAG)..."
