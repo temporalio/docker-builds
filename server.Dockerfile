@@ -14,9 +14,9 @@ RUN (cd ./temporal && go mod download all)
 COPY ./tctl/go.mod ./tctl/go.sum ./tctl/
 RUN (cd ./tctl && go mod download all)
 
-# cache Temporal CLI binary
-RUN sh -c "$(curl -sSf https://temporal.download/cli.sh)" -- --dir ./cli
-RUN mv ./cli/bin/temporal ./cli/
+# install Temporal CLI
+RUN sh -c "$(curl -sSf https://temporal.download/cli.sh)" -- --dir ./cli && \
+    mv ./cli/bin/temporal ./cli/
 
 # build
 COPY ./tctl ./tctl
