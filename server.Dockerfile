@@ -32,6 +32,9 @@ RUN (cd ./cli && make build)
 
 ##### Temporal server #####
 FROM ${BASE_SERVER_IMAGE} as temporal-server
+ARG TEMPORAL_SHA=unknown
+ARG TCTL_SHA=unknown
+ARG CLI_SHA=unknown
 
 WORKDIR /etc/temporal
 
@@ -44,6 +47,11 @@ RUN adduser -u 1000 -G temporal -D temporal
 RUN mkdir /etc/temporal/config
 RUN chown -R temporal:temporal /etc/temporal/config
 USER temporal
+
+# store component versions in the environment
+ENV TEMPORAL_SHA=${TEMPORAL_SHA}
+ENV TCTL_SHA=${TCTL_SHA}
+ENV CLI_SHA=${CLI_SHA}
 
 # binaries
 COPY --from=temporal-builder /home/builder/tctl/tctl /usr/local/bin

@@ -43,6 +43,13 @@ jobs:
           echo "image_tag=sha-${github_sha_short}" >> $GITHUB_OUTPUT
           echo "push=${push}" >> $GITHUB_OUTPUT
 
+          TEMPORAL_SHA=$(git submodule status -- temporal | awk '{print $1}')
+          echo "TEMPORAL_SHA=${TEMPORAL_SHA}" >> $GITHUB_OUTPUT
+          TCTL_SHA=$(git submodule status -- tctl | awk '{print $1}')
+          echo "TCTL_SHA=${TCTL_SHA}" >> $GITHUB_OUTPUT
+          CLI_SHA=$(git submodule status -- cli | awk '{print $1}')
+          echo "CLI_SHA=${CLI_SHA}" >> $GITHUB_OUTPUT
+
 ### BUILD & PUSH SERVER IMAGE ###
 
       - name: Metatags for the Server image
@@ -60,6 +67,10 @@ jobs:
           context: .
           push: ${{ steps.build_args.outputs.push }}
           file: server.Dockerfile
+          build-args: |
+            TEMPORAL_SHA: ${{ steps.build_args.outputs.TEMPORAL_SHA }}
+            TCTL_SHA: ${{ steps.build_args.outputs.TCTL_SHA }}
+            CLI_SHA: ${{ steps.build_args.outputs.CLI_SHA }}
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta_server.outputs.tags }}
           labels: ${{ steps.meta_server.outputs.labels }}
