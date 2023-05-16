@@ -68,9 +68,9 @@ jobs:
           push: ${{ steps.build_args.outputs.push }}
           file: server.Dockerfile
           build-args: |
-            TEMPORAL_SHA: ${{ steps.build_args.outputs.TEMPORAL_SHA }}
-            TCTL_SHA: ${{ steps.build_args.outputs.TCTL_SHA }}
-            CLI_SHA: ${{ steps.build_args.outputs.CLI_SHA }}
+            TEMPORAL_SHA=${{ steps.build_args.outputs.TEMPORAL_SHA }}
+            TCTL_SHA=${{ steps.build_args.outputs.TCTL_SHA }}
+            CLI_SHA=${{ steps.build_args.outputs.CLI_SHA }}
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta_server.outputs.tags }}
           labels: ${{ steps.meta_server.outputs.labels }}
