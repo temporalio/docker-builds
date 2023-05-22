@@ -46,7 +46,7 @@ func getToken(org, repo string) string {
 	return out.Token
 }
 
-// getLatestTag returns all tags for the repository
+// getAllTags returns all tags for the repository
 func getAllTags(org, repo string) Tags {
 	tagsListURL := fmt.Sprintf("https://registry.hub.docker.com/v2/%s/%s/tags/list", org, repo)
 	req, err := http.NewRequest("GET", tagsListURL, nil)
