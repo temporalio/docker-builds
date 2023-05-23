@@ -1,8 +1,11 @@
 module docker_builds
 
-go 1.19
+go 1.20
 
-require github.com/stretchr/testify v1.8.1
+require (
+	github.com/Masterminds/semver/v3 v3.2.1
+	github.com/stretchr/testify v1.8.1
+)
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect

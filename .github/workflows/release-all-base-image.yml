@@ -6,14 +6,19 @@ on:
       commit:
         description: "Commit sha to build from"
         required: true
-      tag:
-        type: string
-        description: "New tag for the image"
-        default: test
+        default: main
+      bump:
+        type: choice
+        description: "Bump type [major, minor, patch]"
         required: true
+        default: patch
+        options:
+          - major
+          - minor
+          - patch
       latest:
         type: boolean
-        description: "Also update latest tag"
+        description: "Also update latest tags"
         required: true
         default: false
 
@@ -22,14 +27,22 @@ jobs:
     runs-on: ubuntu-latest-16-cores
     strategy:
       matrix:
-        arch: ["linux/amd64,linux/arm64"]
-        image: [base-server, base-builder, base-admin-tools]
+        arch: ["linux/amd64, linux/arm64"]
+        image: [base-server, base-builder, base-admin-tools, base-ci-builder]
+        exclude:
+          # don't build arm64 images for base-ci-builder
+          - arch: linux/arm64
+            image: base-ci-builder
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
         with:
           ref: ${{ github.event.inputs.commit }}
+
+      - uses: actions/setup-go@v3
+        with:
+          go-version-file: 'src/go.mod'
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -42,6 +55,15 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+      
+      - name: Bump version
+        id: bump
+        env:
+          REPO: ${{ matrix.image }}
+          BUMP: ${{ github.event.inputs.bump }}
+        run: |
+          tag=$(go run src/images_tags/main.go -org temporalio -repo "$REPO" bump "$BUMP")
+          echo "tag=$tag\n" >> $GITHUB_OUTPUT
 
       - name: Metatags for the image
         id: meta
@@ -49,51 +71,7 @@ jobs:
         with:
           images: temporalio/${{ matrix.image }}
           tags: |
-            type=raw,value=${{ github.event.inputs.tag }}
-            type=sha,value=${{ github.event.inputs.commit }}
-            type=raw,value=latest,enable=${{ github.event.inputs.latest }}
-
-      - name: Build and Push the image
-        uses: docker/build-push-action@v2
-        with:
-          push: true
-          file: docker/base-images/${{ matrix.image }}.Dockerfile
-          platforms: ${{ matrix.arch }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-
-  build-push-amd64-images:
-    runs-on: ubuntu-latest-16-cores
-    strategy:
-      matrix:
-        arch: [linux/amd64]
-        image: [base-ci-builder]
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-        with:
-          ref: ${{ github.event.inputs.commit }}
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-
-      - name: Login to DockerHub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Metatags for the image
-        id: meta
-        uses: docker/metadata-action@v3
-        with:
-          images: temporalio/${{ matrix.image }}
-          tags: |
-            type=raw,value=${{ github.event.inputs.tag }}
+            type=raw,value=${{ steps.bump.outputs.tag }}
             type=sha,value=${{ github.event.inputs.commit }}
             type=raw,value=latest,enable=${{ github.event.inputs.latest }}
 
