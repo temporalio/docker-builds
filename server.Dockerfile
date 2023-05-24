@@ -1,8 +1,9 @@
-ARG BASE_BUILDER_IMAGE=temporalio/base-builder:1.13.1
+ARG BASE_BUILDER_IMAGE=temporalio/base-builder:1.13.2
 ARG BASE_SERVER_IMAGE=temporalio/base-server:1.14.1
 
 ##### Builder #####
 FROM ${BASE_BUILDER_IMAGE} AS temporal-builder
+ARG TEMPORAL_CLI_VERSION=latest
 
 WORKDIR /home/builder
 
@@ -15,7 +16,7 @@ COPY ./tctl/go.mod ./tctl/go.sum ./tctl/
 RUN (cd ./tctl && go mod download all)
 
 # install Temporal CLI
-RUN sh -c "$(curl -sSf https://temporal.download/cli.sh)" -- --dir ./cli && \
+RUN sh -c "$(curl -sSf https://temporal.download/cli.sh)" -- --dir ./cli --version "$TEMPORAL_CLI_VERSION" && \
     mv ./cli/bin/temporal ./cli/
 
 # build
