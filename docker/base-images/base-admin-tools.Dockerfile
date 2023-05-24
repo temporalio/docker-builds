@@ -31,4 +31,7 @@ COPY --from=builder /opt/venv /opt/venv
 
 ENV PATH="/opt/venv/bin:$PATH"
 
+# validate installation
+RUN cqlsh --version
+
 SHELL ["/bin/bash", "-c"]
