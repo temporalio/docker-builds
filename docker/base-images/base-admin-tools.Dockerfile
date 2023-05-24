@@ -8,9 +8,14 @@ RUN apk add --update --no-cache \
     jq \
     mysql-client \
     postgresql-client \
-    py-pip \
+    py3-pip \
     expat \
     tini \
-    && pip install cqlsh
+    python3-dev \
+    musl-dev \
+    libffi-dev \
+    gcc
+
+RUN pip3 install cqlsh
 
 SHELL ["/bin/bash", "-c"]
