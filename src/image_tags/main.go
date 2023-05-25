@@ -118,15 +118,15 @@ func main() {
 	help := flag.Bool("help", false, "Show usage")
 	flag.Usage = func() {
 		fmt.Fprintf(flag.CommandLine.Output(), "Usage of %s:\n", os.Args[0])
-		fmt.Println("Options:")
+		fmt.Fprintf(flag.CommandLine.Output(), "Options:\n")
 		flag.PrintDefaults()
-		fmt.Println("Commands:")
-		fmt.Println("  all     - return all tags for a repo")
-		fmt.Println("  latest  - return only the most latest tag for a repo")
-		fmt.Println("  bump    - bump the latest tag for a repo")
-		fmt.Println("    major - bump major version")
-		fmt.Println("    minor - bump minor version")
-		fmt.Println("    patch - bump patch version")
+		fmt.Fprintf(flag.CommandLine.Output(), "Commands:\n")
+		fmt.Fprintf(flag.CommandLine.Output(), "  all     - return all tags for a repo\n")
+		fmt.Fprintf(flag.CommandLine.Output(), "  latest  - return only the most latest tag for a repo\n")
+		fmt.Fprintf(flag.CommandLine.Output(), "  bump    - bump the latest tag for a repo\n")
+		fmt.Fprintf(flag.CommandLine.Output(), "    major - bump major version\n")
+		fmt.Fprintf(flag.CommandLine.Output(), "    minor - bump minor version\n")
+		fmt.Fprintf(flag.CommandLine.Output(), "    patch - bump patch version\n")
 	}
 	flag.Parse()
 
