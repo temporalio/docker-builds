@@ -1,5 +1,5 @@
 ##### dockerize builder: built from source to support arm & x86 #####
-FROM golang:1.20-alpine3.17 AS dockerize-builder
+FROM golang:1.20-alpine3.18 AS dockerize-builder
 
 RUN apk add --update --no-cache \
     git
@@ -11,16 +11,13 @@ RUN mkdir -p /xsrc && \
     rm -rf /xsrc
 
 ##### base-server target #####
-FROM alpine:3.17 AS base-server
+FROM alpine:3.18 AS base-server
 
-# todo: remove libcrypto3 and libssl3 when alpine 3.18 is released
 RUN apk add --update --no-cache \
     ca-certificates \
     tzdata \
     bash \
-    curl \
-    libcrypto3 \
-    libssl3
+    curl
 
 COPY --from=dockerize-builder /usr/local/bin/dockerize /usr/local/bin/dockerize
 
