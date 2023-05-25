@@ -62,7 +62,7 @@ jobs:
           REPO: ${{ matrix.image }}
           BUMP: ${{ github.event.inputs.bump }}
         run: |
-          tag=$(go run src/image_tags/main.go -org temporalio -repo "$REPO" bump "$BUMP")
+          tag=$(cd src; go run image_tags/main.go -org temporalio -repo "$REPO" bump "$BUMP")
           echo "tag=$tag\n" >> $GITHUB_OUTPUT
 
       - name: Metatags for the image
