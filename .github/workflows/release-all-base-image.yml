@@ -63,7 +63,7 @@ jobs:
           BUMP: ${{ github.event.inputs.bump }}
         run: |
           tag=$(cd src; go run image_tags/main.go -org temporalio -repo "$REPO" bump "$BUMP")
-          echo "tag=$tag\n" >> $GITHUB_OUTPUT
+          echo "tag=$tag" >> $GITHUB_OUTPUT
 
       - name: Metatags for the image
         id: meta
