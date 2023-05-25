@@ -1,8 +1,9 @@
-ARG BASE_BUILDER_IMAGE=temporalio/base-builder:1.13.1
+ARG BASE_BUILDER_IMAGE=temporalio/base-builder:1.13.2
 ARG BASE_SERVER_IMAGE=temporalio/base-server:1.14.1
 
 ##### Builder #####
 FROM ${BASE_BUILDER_IMAGE} AS temporal-builder
+ARG TEMPORAL_CLI_VERSION=latest
 
 WORKDIR /home/builder
 
@@ -14,21 +15,19 @@ RUN (cd ./temporal && go mod download all)
 COPY ./tctl/go.mod ./tctl/go.sum ./tctl/
 RUN (cd ./tctl && go mod download all)
 
-# cache Temporal CLI packages as a docker layer
-COPY ./cli/go.mod ./cli/go.sum ./cli/
-RUN (cd ./cli && go mod download all)
+# install Temporal CLI
+RUN sh -c "$(curl -sSf https://temporal.download/cli.sh)" -- --dir ./cli --version "$TEMPORAL_CLI_VERSION" && \
+    mv ./cli/bin/temporal ./cli/
 
 # build
 COPY ./tctl ./tctl
 COPY ./temporal ./temporal
-COPY ./cli ./cli
 # Git info is needed for Go build to attach VCS information properly.
 # See the `buildvcs` Go flag: https://pkg.go.dev/cmd/go
 COPY ./.git ./.git
 COPY ./.gitmodules ./.gitmodules
 RUN (cd ./temporal && make temporal-server)
 RUN (cd ./tctl && make build)
-RUN (cd ./cli && make build)
 
 ##### Temporal server #####
 FROM ${BASE_SERVER_IMAGE} as temporal-server

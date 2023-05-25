@@ -12,7 +12,6 @@ DOCKER_BUILDX_OUTPUT ?= image
 
 TEMPORAL_ROOT := temporal
 TCTL_ROOT := tctl
-TEMPORAL_CLI_ROOT := cli
 
 TEMPORAL_SHA := $(shell sh -c 'git submodule status -- temporal | cut -c2-40')
 TCTL_SHA := $(shell sh -c "git submodule status -- tctl | cut -c2-40")
@@ -26,11 +25,11 @@ update: update-submodules
 
 install-submodules:
 	@printf $(COLOR) "Installing temporal and tctl submodules..."
-	git submodule update --init $(TEMPORAL_ROOT) $(TCTL_ROOT) $(TEMPORAL_CLI_ROOT)
+	git submodule update --init $(TEMPORAL_ROOT) $(TCTL_ROOT)
 
 update-submodules:
 	@printf $(COLOR) "Updatinging temporal and tctl submodules..."
-	git submodule update --force --remote $(TEMPORAL_ROOT) $(TCTL_ROOT) $(TEMPORAL_CLI_ROOT)
+	git submodule update --force --remote $(TEMPORAL_ROOT) $(TCTL_ROOT)
 
 ##### Docker #####
 docker-server:
