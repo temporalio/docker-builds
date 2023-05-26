@@ -27,11 +27,12 @@ jobs:
     runs-on: ubuntu-latest-16-cores
     strategy:
       matrix:
-        arch: ["linux/amd64, linux/arm64"]
-        image: [base-server, base-builder, base-admin-tools, base-ci-builder]
-        exclude:
-          # don't build arm64 images for base-ci-builder
-          - arch: linux/arm64
+        # note this arch represents a single matrix option, see quotes
+        arch: ["linux/amd64,linux/arm64"]
+        image: [base-server, base-builder, base-admin-tools]
+        include:
+          # build only amd64 image for base-ci-builder 
+          - arch: linux/amd64
             image: base-ci-builder
 
     steps:
