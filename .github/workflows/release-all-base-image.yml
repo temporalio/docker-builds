@@ -73,7 +73,6 @@ jobs:
           images: temporalio/${{ matrix.image }}
           tags: |
             type=raw,value=${{ steps.bump.outputs.tag }}
-            type=sha,value=${{ github.event.inputs.commit }}
             type=raw,value=latest,enable=${{ github.event.inputs.latest }}
 
       - name: Build and Push the image
