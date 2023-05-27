@@ -18,6 +18,12 @@ if [[ -z "${TEMPORAL_ADDRESS:-}" ]]; then
     fi
 fi
 
+# Support TEMPORAL_CLI_ADDRESS for backwards compatibility.
+# TEMPORAL_CLI_ADDRESS is deprecated and support for it will be removed in the future release.
+if [[ -z "${TEMPORAL_CLI_ADDRESS:-}" ]]; then
+    export TEMPORAL_CLI_ADDRESS="${TEMPORAL_ADDRESS}"
+fi
+
 dockerize -template /etc/temporal/config/config_template.yaml:/etc/temporal/config/docker.yaml
 
 # Automatically setup Temporal Server (databases, Elasticsearch, default namespace) if "autosetup" is passed as an argument.

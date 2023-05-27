@@ -50,6 +50,8 @@ set -eux -o pipefail
 
 # Server setup
 : "${TEMPORAL_ADDRESS:=}"
+# TEMPORAL_CLI_ADDRESS is deprecated and support for it will be removed in the future release.
+: "${TEMPORAL_CLI_ADDRESS:=}"
 
 : "${SKIP_DEFAULT_NAMESPACE_CREATION:=false}"
 : "${DEFAULT_NAMESPACE:=default}"
