@@ -5,16 +5,16 @@ set -eu -o pipefail
 : "${BIND_ON_IP:=$(getent hosts $(hostname) | awk '{print $1;}')}"
 export BIND_ON_IP
 
-# check TEMPORAL_CLI_ADDRESS is not empty
-if [[ -z "${TEMPORAL_CLI_ADDRESS:-}" ]]; then
-    echo "TEMPORAL_CLI_ADDRESS is not set, setting it to ${BIND_ON_IP}:7233"
+# check TEMPORAL_ADDRESS is not empty
+if [[ -z "${TEMPORAL_ADDRESS:-}" ]]; then
+    echo "TEMPORAL_ADDRESS is not set, setting it to ${BIND_ON_IP}:7233"
 
     if [[ "${BIND_ON_IP}" =~ ":" ]]; then
         # ipv6
-        export TEMPORAL_CLI_ADDRESS="[${BIND_ON_IP}]:7233"
+        export TEMPORAL_ADDRESS="[${BIND_ON_IP}]:7233"
     else
         # ipv4
-        export TEMPORAL_CLI_ADDRESS="${BIND_ON_IP}:7233"
+        export TEMPORAL_ADDRESS="${BIND_ON_IP}:7233"
     fi
 fi
 

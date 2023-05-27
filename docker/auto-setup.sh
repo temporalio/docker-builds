@@ -49,7 +49,7 @@ set -eux -o pipefail
 : "${ES_SCHEMA_SETUP_TIMEOUT_IN_SECONDS:=0}"
 
 # Server setup
-: "${TEMPORAL_CLI_ADDRESS:=}"
+: "${TEMPORAL_ADDRESS:=}"
 
 : "${SKIP_DEFAULT_NAMESPACE_CREATION:=false}"
 : "${DEFAULT_NAMESPACE:=default}"
@@ -329,7 +329,7 @@ add_custom_search_attributes() {
 }
 
 setup_server(){
-    echo "Temporal CLI address: ${TEMPORAL_CLI_ADDRESS}."
+    echo "Temporal CLI address: ${TEMPORAL_ADDRESS}."
 
     until temporal operator cluster health | grep -q SERVING; do
         echo "Waiting for Temporal server to start..."
