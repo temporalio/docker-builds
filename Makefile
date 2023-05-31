@@ -15,8 +15,7 @@ TCTL_ROOT := tctl
 
 TEMPORAL_SHA := $(shell sh -c 'git submodule status -- temporal | cut -c2-40')
 TCTL_SHA := $(shell sh -c "git submodule status -- tctl | cut -c2-40")
-CLI_SHA := $(shell sh -c "git submodule status -- cli | cut -c2-40")
-SERVER_BUILD_ARGS := --build-arg TEMPORAL_SHA=$(TEMPORAL_SHA) --build-arg TCTL_SHA=$(TCTL_SHA) --build-arg CLI_SHA=$(CLI_SHA)
+SERVER_BUILD_ARGS := --build-arg TEMPORAL_SHA=$(TEMPORAL_SHA) --build-arg TCTL_SHA=$(TCTL_SHA)
 
 ##### Scripts ######
 install: install-submodules
