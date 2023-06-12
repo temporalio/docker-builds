@@ -46,8 +46,10 @@ func getToken(org, repo string) string {
 	return out.Token
 }
 
-// getAllTags returns all tags for the repository
-func getAllTags(org, repo string) Tags {
+var getAllTags = _getAllTags
+
+// _getAllTags returns all tags for the repository
+func _getAllTags(org, repo string) Tags {
 	tagsListURL := fmt.Sprintf("https://registry.hub.docker.com/v2/%s/%s/tags/list", org, repo)
 	req, err := http.NewRequest("GET", tagsListURL, nil)
 	if err != nil {
@@ -77,14 +79,17 @@ func getAllTags(org, repo string) Tags {
 // getLatestTag returns the latest tag for a repo
 func getLatestTag(org, repo string) string {
 	tags := getAllTags(org, repo)
-	vs := make([]*semver.Version, len(tags.Tags))
-	for i, r := range tags.Tags {
+	vs := make([]*semver.Version, 0)
+	for _, r := range tags.Tags {
 		v, err := semver.NewVersion(r)
 		if err != nil {
-			log.Fatalf("Error parsing version: %s", err)
+			log.Printf("Error parsing version: %q. %s", r, err)
+			continue
 		}
 
-		vs[i] = v
+		if v != nil {
+			vs = append(vs, v)
+		}
 	}
 
 	sort.Sort(semver.Collection(vs))
@@ -96,7 +101,7 @@ func getLatestTag(org, repo string) string {
 func bumpVersion(version, bump string) string {
 	v, err := semver.NewVersion(version)
 	if err != nil {
-		log.Fatalf("Error parsing version: %s", err)
+		log.Fatalf("Error parsing version: %q. %s", version, err)
 	}
 	var newVersion semver.Version
 	switch bump {
