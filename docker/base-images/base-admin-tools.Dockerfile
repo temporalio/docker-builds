@@ -21,6 +21,7 @@ RUN apk add --update --no-cache \
     bash \
     curl \
     jq \
+    yq \
     mysql-client \
     postgresql-client \
     py3-pip \
