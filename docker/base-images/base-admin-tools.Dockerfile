@@ -11,7 +11,7 @@ RUN apk add --update --no-cache \
 
 RUN python3 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
-RUN pip3 install cqlsh
+RUN pip3 install cqlsh yq
 
 FROM ${BASE_IMAGE} AS base-admin-tools
 
