@@ -1,5 +1,5 @@
-ARG BASE_BUILDER_IMAGE=temporalio/base-builder:1.13.4
-ARG BASE_SERVER_IMAGE=temporalio/base-server:1.14.3
+ARG BASE_BUILDER_IMAGE=temporalio/base-builder:1.14.0
+ARG BASE_SERVER_IMAGE=temporalio/base-server:1.15.0
 
 ##### Builder #####
 FROM ${BASE_BUILDER_IMAGE} AS temporal-builder
