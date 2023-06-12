@@ -11,7 +11,7 @@ RUN apk add --update --no-cache \
 
 RUN python3 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
-RUN pip3 install cqlsh yq
+RUN pip3 install cqlsh
 
 FROM ${BASE_IMAGE} AS base-admin-tools
 
@@ -21,6 +21,7 @@ RUN apk add --update --no-cache \
     bash \
     curl \
     jq \
+    yq \
     mysql-client \
     postgresql-client \
     py3-pip \
