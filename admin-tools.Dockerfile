@@ -28,13 +28,6 @@ FROM ${SERVER_IMAGE} as server
 ##### Temporal admin tools #####
 FROM ${BASE_ADMIN_TOOLS_IMAGE} as temporal-admin-tools
 
-WORKDIR /etc/temporal
-
-RUN echo "source <(temporal completion bash)" > /etc/bash/temporal-completion.sh && \
-    addgroup -g 1000 temporal && \
-    adduser -u 1000 -G temporal -D temporal
-USER temporal
-
 COPY --from=server /usr/local/bin/tctl /usr/local/bin
 COPY --from=server /usr/local/bin/tctl-authorization-plugin /usr/local/bin
 COPY --from=server /usr/local/bin/temporal /usr/local/bin
@@ -42,6 +35,14 @@ COPY --from=admin-tools-builder /home/builder/temporal/temporal-cassandra-tool /
 COPY --from=admin-tools-builder /home/builder/temporal/temporal-sql-tool /usr/local/bin
 COPY --from=admin-tools-builder /home/builder/temporal/schema /etc/temporal/schema
 COPY --from=admin-tools-builder /home/builder/temporal/tdbg /usr/local/bin
+
+# Alpine has a /etc/bash/bashrc that sources all files named /etc/bash/*.sh for
+# interactive shells, so we can add completion logic in /etc/bash/temporal-completion.sh
+RUN temporal completion bash > /etc/bash/temporal-completion.sh && \
+    addgroup -g 1000 temporal && \
+    adduser -u 1000 -G temporal -D temporal
+USER temporal
+WORKDIR /etc/temporal
 
 # Keep the container running.
 ENTRYPOINT ["tini", "--", "sleep", "infinity"]
