@@ -30,8 +30,9 @@ FROM ${BASE_ADMIN_TOOLS_IMAGE} as temporal-admin-tools
 
 WORKDIR /etc/temporal
 
-RUN addgroup -g 1000 temporal
-RUN adduser -u 1000 -G temporal -D temporal
+RUN echo "source <(temporal completion bash)" > /etc/bash/temporal-completion.sh && \
+    addgroup -g 1000 temporal && \
+    adduser -u 1000 -G temporal -D temporal
 USER temporal
 
 COPY --from=server /usr/local/bin/tctl /usr/local/bin
