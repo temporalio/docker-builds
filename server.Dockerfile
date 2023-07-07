@@ -17,7 +17,7 @@ RUN (cd ./tctl && go mod download all)
 
 # install Temporal CLI
 RUN sh -c "$(curl -sSf https://temporal.download/cli.sh)" -- --dir ./cli --version "$TEMPORAL_CLI_VERSION" && \
-    mv ./cli/bin/temporal ./cli/
+    mv ./cli/bin/temporal ./cli/ && chown 0:0 ./cli/temporal
 
 # build
 COPY ./tctl ./tctl
