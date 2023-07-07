@@ -25,7 +25,7 @@ jobs:
         with:
           submodules: true
           persist-credentials: true
-          token: ${{ secrets.COMMANDER_DATA_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
       - name: Calc target branches
@@ -59,7 +59,7 @@ jobs:
       - name: Commit update
         env:
           CURRENT_REPO: ${{ github.repository }}
-          TOKEN: ${{ secrets.COMMANDER_DATA_TOKEN }}
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SUBMODULE: ${{ github.event.inputs.repo }}
           BRANCH: ${{ steps.target_branches.outputs.local_branch }}
         run: |
