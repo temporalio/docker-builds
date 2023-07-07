@@ -38,7 +38,9 @@ COPY --from=admin-tools-builder /home/builder/temporal/tdbg /usr/local/bin
 
 # Alpine has a /etc/bash/bashrc that sources all files named /etc/bash/*.sh for
 # interactive shells, so we can add completion logic in /etc/bash/temporal-completion.sh
-RUN temporal completion bash > /etc/bash/temporal-completion.sh && \
+# Completion for temporal depends on the bash-completion package.
+RUN apk add bash-completion && \
+    temporal completion bash > /etc/bash/temporal-completion.sh && \
     addgroup -g 1000 temporal && \
     adduser -u 1000 -G temporal -D temporal
 USER temporal
