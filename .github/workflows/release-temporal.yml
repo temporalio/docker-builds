@@ -14,6 +14,11 @@ on:
         description: "Also update latest tag"
         required: true
         default: false
+      major:
+        type: boolean
+        description: "Also update major tag"
+        required: true
+        default: false
 
 jobs:
   retag-and-release:
@@ -35,4 +40,5 @@ jobs:
           SRC_REPO: temporaliotest
           DST_REPO: temporalio
           LATEST: ${{ github.event.inputs.latest }}
+          MAJOR: ${{ github.event.inputs.major }}
         run: go run src/release_temporal/main.go

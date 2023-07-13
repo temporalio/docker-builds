@@ -9,18 +9,25 @@ import (
 func TestGetTags(t *testing.T) {
 	assert := assert.New(t)
 	tests := map[string]struct {
-		tag      string
-		expected []string
+		tag         string
+		updateMajor bool
+		expected    []string
 	}{
 		"Version 1": {
-			tag:      "0.12.345.6789",
-			expected: []string{"0", "0.12", "0.12.345", "0.12.345.6789"},
+			tag:         "0.12.345.6789",
+			updateMajor: true,
+			expected:    []string{"0", "0.12", "0.12.345", "0.12.345.6789"},
+		},
+		"Version 2": {
+			tag:         "1.23.456.7890",
+			updateMajor: false,
+			expected:    []string{"1.23", "1.23.456", "1.23.456.7890"},
 		},
 	}
 
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
-			assert.Equal(tt.expected, getTags(tt.tag))
+			assert.Equal(tt.expected, getTags(tt.tag, tt.updateMajor))
 		})
 	}
 }
@@ -40,7 +47,8 @@ func TestLoadEnv(t *testing.T) {
 				os.Setenv("PASSWORD", "password")
 				os.Setenv("SRC_REPO", "test-repo")
 				os.Setenv("DST_REPO", "release-repo")
-				os.Setenv("LATEST", "1")
+				os.Setenv("LATEST", "true")
+				os.Setenv("MAJOR", "true")
 			},
 			expected: &Env{
 				srcTag:       "sha-7757792",
