@@ -21,15 +21,16 @@ type Env struct {
 
 func loadEnv() *Env {
 	commit := getEnv("COMMIT")
+	updateMajor := os.Getenv("MAJOR") == "true"
 	return &Env{
 		srcTag:       fmt.Sprintf("sha-%s", commit[0:7]),
-		dstTags:      getTags(getEnv("TAG")),
+		dstTags:      getTags(getEnv("TAG"), updateMajor),
 		images:       strings.Split(getEnv("IMAGES"), " "),
 		username:     getEnv("USERNAME"),
 		password:     getEnv("PASSWORD"),
 		srcRepo:      getEnv("SRC_REPO"),
 		dstRepo:      getEnv("DST_REPO"),
-		setLatestTag: os.Getenv("LATEST") != "",
+		setLatestTag: os.Getenv("LATEST") == "true",
 	}
 }
 
@@ -52,10 +53,13 @@ func skopeo(arguments []string) {
 	}
 }
 
-func getTags(dstTag string) []string {
+func getTags(dstTag string, updateMajor bool) []string {
 	versions := strings.Split(dstTag, ".")
 	vv := versions[0]
-	tags := []string{vv}
+	var tags []string
+	if updateMajor {
+		tags = []string{vv}
+	}
 	for _, v := range versions[1:] {
 		vv += "." + v
 		tags = append(tags, vv)
