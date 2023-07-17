@@ -4,6 +4,8 @@
 
 name: Build Docker Image as Artifact
 
+permissions: read-all
+
 on:
   workflow_call:
     inputs:
