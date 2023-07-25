@@ -1,6 +1,8 @@
 name: Build Docker Images
 
-permissions: read-all
+permissions:
+  contents: read
+  security-events: write
 
 on:
   push:
