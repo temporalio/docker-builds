@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eux -o pipefail
+set -eu -o pipefail
 
 # === Auto setup defaults ===
 
@@ -100,7 +100,7 @@ wait_for_cassandra() {
     export CASSANDRA_TLS_KEY=${CASSANDRA_CERT_KEY}
     export CASSANDRA_TLS_CA=${CASSANDRA_CA}
 
-    { export CASSANDRA_PASSWORD=${CASSANDRA_PASSWORD}; } 2> /dev/null
+    export CASSANDRA_PASSWORD=${CASSANDRA_PASSWORD}
 
     until temporal-cassandra-tool --ep "${CASSANDRA_SEEDS}" validate-health; do
         echo 'Waiting for Cassandra to start up.'
@@ -153,7 +153,7 @@ setup_cassandra_schema() {
     export CASSANDRA_TLS_KEY=${CASSANDRA_CERT_KEY}
     export CASSANDRA_TLS_CA=${CASSANDRA_CA}
 
-    { export CASSANDRA_PASSWORD=${CASSANDRA_PASSWORD}; } 2> /dev/null
+    export CASSANDRA_PASSWORD=${CASSANDRA_PASSWORD}
 
     SCHEMA_DIR=${TEMPORAL_HOME}/schema/cassandra/temporal/versioned
     if [[ ${SKIP_DB_CREATE} != true ]]; then
@@ -172,7 +172,7 @@ setup_cassandra_schema() {
 
 setup_mysql_schema() {
     # TODO (alex): Remove exports
-    { export SQL_PASSWORD=${MYSQL_PWD}; } 2> /dev/null
+    export SQL_PASSWORD=${MYSQL_PWD}
 
     if [[ ${MYSQL_TX_ISOLATION_COMPAT} == true ]]; then
         MYSQL_CONNECT_ATTR=(--connect-attributes "tx_isolation=READ-COMMITTED")
@@ -203,7 +203,7 @@ setup_mysql_schema() {
 
 setup_postgres_schema() {
     # TODO (alex): Remove exports
-    { export SQL_PASSWORD=${POSTGRES_PWD}; } 2> /dev/null
+    export SQL_PASSWORD=${POSTGRES_PWD}
 
     if [[ ${DB} == "postgres12" ]]; then
       POSTGRES_VERSION_DIR=v12
