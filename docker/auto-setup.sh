@@ -36,6 +36,13 @@ set -eu -o pipefail
 : "${POSTGRES_USER:=}"
 : "${POSTGRES_PWD:=}"
 
+: "${POSTGRES_TLS_ENABLED:=false}"
+: "${POSTGRES_TLS_DISABLE_HOST_VERIFICATION:=false}"
+: "${POSTGRES_TLS_CERT_FILE:=}"
+: "${POSTGRES_TLS_KEY_FILE:=}"
+: "${POSTGRES_TLS_CA_FILE:=}"
+: "${POSTGRES_TLS_SERVER_NAME:=}"
+
 # Elasticsearch
 : "${ENABLE_ES:=false}"
 : "${ES_SCHEME:=http}"
@@ -214,17 +221,89 @@ setup_postgres_schema() {
     SCHEMA_DIR=${TEMPORAL_HOME}/schema/postgresql/${POSTGRES_VERSION_DIR}/temporal/versioned
     # Create database only if its name is different from the user name. Otherwise PostgreSQL container itself will create database.
     if [[ ${DBNAME} != "${POSTGRES_USER}" && ${SKIP_DB_CREATE} != true ]]; then
-        temporal-sql-tool --plugin postgres --ep "${POSTGRES_SEEDS}" -u "${POSTGRES_USER}" -p "${DB_PORT}" --db "${DBNAME}" create
+        temporal-sql-tool \
+            --plugin postgres \
+            --ep "${POSTGRES_SEEDS}" \
+            -u "${POSTGRES_USER}" \
+            -p "${DB_PORT}" \
+            --db "${DBNAME}" \
+            --tls="${POSTGRES_TLS_ENABLED}" \
+            --tls-disable-host-verification="${POSTGRES_TLS_DISABLE_HOST_VERIFICATION}" \
+            --tls-cert-file "${POSTGRES_TLS_CERT_FILE}" \
+            --tls-key-file "${POSTGRES_TLS_KEY_FILE}" \
+            --tls-ca-file "${POSTGRES_TLS_CA_FILE}" \
+            --tls-server-name "${POSTGRES_TLS_SERVER_NAME}" \
+            create
     fi
-    temporal-sql-tool --plugin postgres --ep "${POSTGRES_SEEDS}" -u "${POSTGRES_USER}" -p "${DB_PORT}" --db "${DBNAME}" setup-schema -v 0.0
-    temporal-sql-tool --plugin postgres --ep "${POSTGRES_SEEDS}" -u "${POSTGRES_USER}" -p "${DB_PORT}" --db "${DBNAME}" update-schema -d "${SCHEMA_DIR}"
+    temporal-sql-tool \
+        --plugin postgres \
+        --ep "${POSTGRES_SEEDS}" \
+        -u "${POSTGRES_USER}" \
+        -p "${DB_PORT}" \
+        --db "${DBNAME}" \
+        --tls="${POSTGRES_TLS_ENABLED}" \
+        --tls-disable-host-verification="${POSTGRES_TLS_DISABLE_HOST_VERIFICATION}" \
+        --tls-cert-file "${POSTGRES_TLS_CERT_FILE}" \
+        --tls-key-file "${POSTGRES_TLS_KEY_FILE}" \
+        --tls-ca-file "${POSTGRES_TLS_CA_FILE}" \
+        --tls-server-name "${POSTGRES_TLS_SERVER_NAME}" \
+        setup-schema -v 0.0
+    temporal-sql-tool \
+        --plugin postgres \
+        --ep "${POSTGRES_SEEDS}" \
+        -u "${POSTGRES_USER}" \
+        -p "${DB_PORT}" \
+        --db "${DBNAME}" \
+        --tls="${POSTGRES_TLS_ENABLED}" \
+        --tls-disable-host-verification="${POSTGRES_TLS_DISABLE_HOST_VERIFICATION}" \
+        --tls-cert-file "${POSTGRES_TLS_CERT_FILE}" \
+        --tls-key-file "${POSTGRES_TLS_KEY_FILE}" \
+        --tls-ca-file "${POSTGRES_TLS_CA_FILE}" \
+        --tls-server-name "${POSTGRES_TLS_SERVER_NAME}" \
+        update-schema -d "${SCHEMA_DIR}"
 
     VISIBILITY_SCHEMA_DIR=${TEMPORAL_HOME}/schema/postgresql/${POSTGRES_VERSION_DIR}/visibility/versioned
     if [[ ${VISIBILITY_DBNAME} != "${POSTGRES_USER}" && ${SKIP_DB_CREATE} != true ]]; then
-        temporal-sql-tool --plugin postgres --ep "${POSTGRES_SEEDS}" -u "${POSTGRES_USER}" -p "${DB_PORT}" --db "${VISIBILITY_DBNAME}" create
+        temporal-sql-tool \
+            --plugin postgres \
+            --ep "${POSTGRES_SEEDS}" \
+            -u "${POSTGRES_USER}" \
+            -p "${DB_PORT}" \
+            --db "${VISIBILITY_DBNAME}" \
+            --tls="${POSTGRES_TLS_ENABLED}" \
+            --tls-disable-host-verification="${POSTGRES_TLS_DISABLE_HOST_VERIFICATION}" \
+            --tls-cert-file "${POSTGRES_TLS_CERT_FILE}" \
+            --tls-key-file "${POSTGRES_TLS_KEY_FILE}" \
+            --tls-ca-file "${POSTGRES_TLS_CA_FILE}" \
+            --tls-server-name "${POSTGRES_TLS_SERVER_NAME}" \
+            create
     fi
-    temporal-sql-tool --plugin postgres --ep "${POSTGRES_SEEDS}" -u "${POSTGRES_USER}" -p "${DB_PORT}" --db "${VISIBILITY_DBNAME}" setup-schema -v 0.0
-    temporal-sql-tool --plugin postgres --ep "${POSTGRES_SEEDS}" -u "${POSTGRES_USER}" -p "${DB_PORT}" --db "${VISIBILITY_DBNAME}" update-schema -d "${VISIBILITY_SCHEMA_DIR}"
+    temporal-sql-tool \
+        --plugin postgres \
+        --ep "${POSTGRES_SEEDS}" \
+        -u "${POSTGRES_USER}" \
+        -p "${DB_PORT}" \
+        --db "${VISIBILITY_DBNAME}" \
+        --tls="${POSTGRES_TLS_ENABLED}" \
+        --tls-disable-host-verification="${POSTGRES_TLS_DISABLE_HOST_VERIFICATION}" \
+        --tls-cert-file "${POSTGRES_TLS_CERT_FILE}" \
+        --tls-key-file "${POSTGRES_TLS_KEY_FILE}" \
+        --tls-ca-file "${POSTGRES_TLS_CA_FILE}" \
+        --tls-server-name "${POSTGRES_TLS_SERVER_NAME}" \
+        setup-schema -v 0.0
+    temporal-sql-tool \
+        --plugin postgres \
+        --ep "${POSTGRES_SEEDS}" \
+        -u "${POSTGRES_USER}" \
+        -p "${DB_PORT}" \
+        --db "${VISIBILITY_DBNAME}" \
+        --tls="${POSTGRES_TLS_ENABLED}" \
+        --tls-disable-host-verification="${POSTGRES_TLS_DISABLE_HOST_VERIFICATION}" \
+        --tls-cert-file "${POSTGRES_TLS_CERT_FILE}" \
+        --tls-key-file "${POSTGRES_TLS_KEY_FILE}" \
+        --tls-ca-file "${POSTGRES_TLS_CA_FILE}" \
+        --tls-server-name "${POSTGRES_TLS_SERVER_NAME}" \
+        update-schema -d "${VISIBILITY_SCHEMA_DIR}"
 }
 
 setup_schema() {
