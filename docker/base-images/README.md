@@ -54,7 +54,7 @@ docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
 
 Then run base image. For example:
 ```bash
-docker run --rm -it --platform linux/arm64 temporalio/base-server:1.1.0 uname -m
+docker run --rm -it --platform linux/arm64 temporalio/base-server:latest uname -m
 ```
 
 ### Troubleshooting
