@@ -9,6 +9,10 @@ on:
     branches:
       - main
       - release/*
+  pull_request:
+    branches:
+      - main
+
 jobs:
   build-push-images:
     runs-on: ubuntu-latest-16-cores
