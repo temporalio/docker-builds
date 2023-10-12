@@ -33,5 +33,5 @@ base-server-x:
 	docker buildx build . -f base-server.Dockerfile -t temporalio/base-server:$(DOCKER_IMAGE_TAG) --platform linux/amd64,linux/arm64 --output type=$(DOCKER_BUILDX_OUTPUT)
 
 base-ci-builder-x:
-	@echo CI builder is not supported because \"shellcheck\" and \"fossa\" are not available on \"linux/arm64\".
+	@echo CI builder is not supported because \"shellcheck\" is not available on \"linux/arm64\".
 
