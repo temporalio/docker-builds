@@ -1,7 +1,7 @@
 [submodule "temporal"]
 	path = temporal
 	url = https://github.com/temporalio/temporal
-	branch = main
+	branch = release/1.23.x-rc-proto-changes
 [submodule "tctl"]
 	path = tctl
 	url = https://github.com/temporalio/tctl
