@@ -12,11 +12,6 @@ on:
   pull_request:
     branches:
       - main
-  workflow_dispatch:
-    inputs:
-      commit:
-        description: "Commit sha"
-        required: true
 
 jobs:
   build-push-images:
@@ -30,7 +25,6 @@ jobs:
         uses: actions/checkout@v2
         with:
           submodules: "true"
-          ref: ${{ github.event.inputs.commit }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -54,13 +48,11 @@ jobs:
       - name: Prepare build args
         id: build_args
         run: |
-          github_sha_short=${{ github.event_name == 'workflow_dispatch' ? github.event.inputs.commit : GITHUB_SHA:0:7 }}
-          push=${{ (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && !env.ACT }}
-          update_latest=${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+          github_sha_short=${GITHUB_SHA:0:7}
+          push=${{ github.event_name == 'push' && !env.ACT }}
           echo "commit_sha_short=${github_sha_short}" >> $GITHUB_OUTPUT
           echo "image_tag=sha-${github_sha_short}" >> $GITHUB_OUTPUT
           echo "push=${push}" >> $GITHUB_OUTPUT
-          echo "update_latest=${update_latest}" >> $GITHUB_OUTPUT
 
           TEMPORAL_SHA=$(git submodule status -- temporal | awk '{print $1}')
           echo "TEMPORAL_SHA=${TEMPORAL_SHA}" >> $GITHUB_OUTPUT
@@ -76,7 +68,7 @@ jobs:
           images: temporaliotest/server
           tags: |
             type=sha,format=short,event=branch
-            type=raw,value=latest,enable=${{ steps.build_args.outputs.update_latest == 'true' }}
+            latest
 
       - name: Build-Push Server image
         uses: docker/build-push-action@v2
@@ -107,7 +99,7 @@ jobs:
           images: temporaliotest/admin-tools
           tags: |
             type=sha,format=short,event=branch
-            type=raw,value=latest,enable=${{ steps.build_args.outputs.update_latest == 'true' }}
+            latest
 
       - name: Build-Push Admin Tools
         if: steps.build_args.outputs.push == 'true'
@@ -154,7 +146,7 @@ jobs:
           images: temporaliotest/auto-setup
           tags: |
             type=sha,format=short,event=branch
-            type=raw,value=latest,enable=${{ steps.build_args.outputs.update_latest == 'true' }}
+            latest
 
       - name: Build-Push Auto Setup
         if: steps.build_args.outputs.push == 'true'
