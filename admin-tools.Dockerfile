@@ -9,7 +9,7 @@ WORKDIR /home/builder
 
 # cache Temporal packages as a docker layer
 COPY ./temporal/go.mod ./temporal/go.sum ./temporal/
-RUN (cd ./temporal && go mod download all)
+RUN --mount=type=cache,target=/root/.cache/go-build (cd ./temporal && go mod download all)
 
 # build
 COPY ./temporal ./temporal
@@ -17,7 +17,7 @@ COPY ./temporal ./temporal
 # See the `buildvcs` Go flag: https://pkg.go.dev/cmd/go
 COPY ./.git ./.git
 COPY ./.gitmodules ./.gitmodules
-RUN (cd ./temporal && make temporal-cassandra-tool temporal-sql-tool tdbg)
+RUN --mount=type=cache,target=/root/.cache/go-build (cd ./temporal && make temporal-cassandra-tool temporal-sql-tool tdbg)
 
 
 ##### Server #####

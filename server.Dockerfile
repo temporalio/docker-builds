@@ -9,11 +9,11 @@ WORKDIR /home/builder
 
 # cache Temporal packages as a docker layer
 COPY ./temporal/go.mod ./temporal/go.sum ./temporal/
-RUN (cd ./temporal && go mod download all)
+RUN --mount=type=cache,target=/root/.cache/go-build (cd ./temporal && go mod download all)
 
 # cache tctl packages as a docker layer
 COPY ./tctl/go.mod ./tctl/go.sum ./tctl/
-RUN (cd ./tctl && go mod download all)
+RUN --mount=type=cache,target=/root/.cache/go-build (cd ./tctl && go mod download all)
 
 # install Temporal CLI
 RUN sh -c "$(curl -sSf https://temporal.download/cli.sh)" -- --dir ./cli --version "$TEMPORAL_CLI_VERSION" && \
@@ -26,8 +26,8 @@ COPY ./temporal ./temporal
 # See the `buildvcs` Go flag: https://pkg.go.dev/cmd/go
 COPY ./.git ./.git
 COPY ./.gitmodules ./.gitmodules
-RUN (cd ./temporal && make temporal-server)
-RUN (cd ./tctl && make build)
+RUN --mount=type=cache,target=/root/.cache/go-build (cd ./temporal && make temporal-server)
+RUN --mount=type=cache,target=/root/.cache/go-build (cd ./tctl && make build)
 
 ##### Temporal server #####
 FROM ${BASE_SERVER_IMAGE} as temporal-server
