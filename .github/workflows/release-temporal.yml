@@ -29,9 +29,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-go@v3
+      - uses: actions/setup-go@v4
         with:
-          go-version-file: 'src/go.mod'
+          go-version-file: "src/go.mod"
       - name: Copy images
         env:
           COMMIT: ${{ github.event.inputs.commit }}
