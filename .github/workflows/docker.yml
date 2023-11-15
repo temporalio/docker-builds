@@ -65,13 +65,13 @@ jobs:
           set: |
             server.platform=linux/amd64
             server.cache-from=type=local,src=/tmp/.buildx-cache/server
-            server.cache-from=type=local,src=/tmp/.buildx-cache-new/server
+            server.cache-to=type=local,dest=/tmp/.buildx-cache-new/server
             admin-tools.platform=linux/amd64
             admin-tools.cache-from=type=local,src=/tmp/.buildx-cache/admin-tools
-            admin-tools.cache-from=type=local,src=/tmp/.buildx-cache-new/admin-tools
+            admin-tools.cache-to=type=local,dest=/tmp/.buildx-cache-new/admin-tools
             auto-setup.platform=linux/amd64
             auto-setup.cache-from=type=local,src=/tmp/.buildx-cache/auto-setup
-            auto-setup.cache-from=type=local,src=/tmp/.buildx-cache-new/auto-setup
+            auto-setup.cache-to=type=local,dest=/tmp/.buildx-cache-new/auto-setup
 
       - name: Bake and push multiarch images
         if: ${{ github.event_name == 'push' && !env.ACT }}
