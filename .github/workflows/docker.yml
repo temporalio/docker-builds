@@ -39,10 +39,10 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Prepare Go Build Cache for Docker
-        uses: actions/cache@v3
+      - name: Restore Cached Docker Layers
+        uses: actions/cache/restore@v3
         with:
-          path: go-build-cache
+          path: /tmp/.buildx-cache
           key: ${{ runner.os }}-go-build-cache-${{ hashFiles('**/go.sum') }}
 
       - name: Inject go-build-cache into docker
@@ -67,16 +67,30 @@ jobs:
         with:
           load: true
           set: "*.platform=linux/amd64"
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
       - name: Bake and push multiarch images
         if: ${{ github.event_name == 'push' && !env.ACT }}
         uses: docker/bake-action@v4
         with:
           push: true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+
+      # This prevents the cache from growing in size indefinitely
+      - name: Move Docker Layers Cache
+        if: always()
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+      - name: Save Docker Layers Cache
+        uses: actions/cache/save@v3
+        if: always()
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-go-build-cache-${{ hashFiles('**/go.sum') }}
 
       # TODO: can we loop this somehow?
       - name: Run Trivy vulnerability scanner on Server image
