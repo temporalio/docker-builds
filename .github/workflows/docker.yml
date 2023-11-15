@@ -54,6 +54,7 @@ jobs:
         with:
           pull: true
           push: ${{ github.event_name == 'push' && !env.ACT }}
+          load: true
 
       # TODO: can we loop this somehow?
       - name: Run Trivy vulnerability scanner on Server image
