@@ -22,7 +22,7 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           submodules: "true"
 
@@ -48,6 +48,8 @@ jobs:
           echo "TEMPORAL_SHA=${TEMPORAL_SHA}" >> $GITHUB_ENV
           TCTL_SHA=$(git submodule status -- tctl | awk '{print $1}')
           echo "TCTL_SHA=${TCTL_SHA}" >> $GITHUB_ENV
+          TAG_LATEST=${{(github.event_name == 'push' && github.ref == 'refs/heads/main') && 'true' || 'false'}}
+          echo "TAG_LATEST=${TAG_LATEST}" >> $GITHUB_ENV
 
       # You can't use `load` when building a multiarch image, so we build and load the
       # native image and build multiarch images later
