@@ -45,6 +45,8 @@ jobs:
         with:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-cache-go-build-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-cache-go-build-
 
       - name: Prepare build args
         id: build_args
