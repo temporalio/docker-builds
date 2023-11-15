@@ -49,19 +49,23 @@ jobs:
           TCTL_SHA=$(git submodule status -- tctl | awk '{print $1}')
           echo "TCTL_SHA=${TCTL_SHA}" >> $GITHUB_ENV
 
-      - name: Bake images
+      # You can't use `load` when building a multiarch image, so we build and load the
+      # native image and build multiarch images later
+      - name: Bake native images for security scanning
         uses: docker/bake-action@v4
         with:
-          pull: true
           load: true
+          set: "*.platform=linux/amd64"
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
-      # This is stupid, but you cannot specify both load and push together
-      # and we need load for trivy to work...
-      - name: Push images
+      - name: Bake and push multiarch images
         if: ${{ github.event_name == 'push' && !env.ACT }}
         uses: docker/bake-action@v4
         with:
           push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       # TODO: can we loop this somehow?
       - name: Run Trivy vulnerability scanner on Server image
