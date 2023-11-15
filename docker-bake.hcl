@@ -15,6 +15,10 @@ variable "TCTL_SHA" {
   default = null
 }
 
+variable "TAG_LATEST" {
+  default = false
+}
+
 group "default" {
   targets = [
     "server",
@@ -25,7 +29,10 @@ group "default" {
 
 target "server" {
   dockerfile = "server.Dockerfile"
-  tags = ["temporaliotest/server:${IMAGE_TAG}", "temporaliotest/server:latest"]
+  tags = [
+    "temporaliotest/server:${IMAGE_TAG}",
+    TAG_LATEST ? "temporaliotest/server:latest" : ""
+  ]
   platforms = platforms
   args = {
     TEMPORAL_SHA = "${TEMPORAL_SHA}"
@@ -42,7 +49,10 @@ target "server" {
 
 target "admin-tools" {
   dockerfile = "admin-tools.Dockerfile"
-  tags = ["temporaliotest/admin-tools:${IMAGE_TAG}", "temporaliotest/admin-tools:latest"]
+  tags = [
+    "temporaliotest/admin-tools:${IMAGE_TAG}",
+    TAG_LATEST ? "temporaliotest/admin-tools:latest" : ""
+  ]
   platforms = platforms
   contexts = {
     server = "target:server"
@@ -58,7 +68,10 @@ target "admin-tools" {
 
 target "auto-setup" {
   dockerfile = "auto-setup.Dockerfile"
-  tags = ["temporaliotest/auto-setup:${IMAGE_TAG}", "temporaliotest/auto-setup:latest"]
+  tags = [
+    "temporaliotest/auto-setup:${IMAGE_TAG}",
+    TAG_LATEST ? "temporaliotest/auto-setup:latest" : ""
+  ]
   platforms = platforms
   contexts = {
     server = "target:server"
