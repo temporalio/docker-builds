@@ -6,16 +6,14 @@ all: install
 ##### Variables ######
 COLOR := "\e[1;36m%s\e[0m\n"
 
-DOCKER_IMAGE_TAG ?= latest
-# Pass "registry" to automatically push image to the docker hub.
-DOCKER_BUILDX_OUTPUT ?= image
-
 TEMPORAL_ROOT := temporal
 TCTL_ROOT := tctl
 
+IMAGE_TAG=$(shell git rev-parse --short HEAD)
 TEMPORAL_SHA := $(shell sh -c 'git submodule status -- temporal | cut -c2-40')
 TCTL_SHA := $(shell sh -c "git submodule status -- tctl | cut -c2-40")
-SERVER_BUILD_ARGS := --build-arg TEMPORAL_SHA=$(TEMPORAL_SHA) --build-arg TCTL_SHA=$(TCTL_SHA)
+
+BAKE := IMAGE_TAG=$(IMAGE_TAG) TEMPORAL_SHA=$(TEMPORAL_SHA) TCTL_SHA=$(TCTL_SHA) docker buildx bake
 
 ##### Scripts ######
 install: install-submodules
@@ -31,29 +29,37 @@ update-submodules:
 	git submodule update --force --remote $(TEMPORAL_ROOT) $(TCTL_ROOT)
 
 ##### Docker #####
+
+build:
+	$(BAKE)
+
+verify-ci:
+	act push -j build-push-images
+
+# We hard-code linux/amd64 here as the docker machine for mac doesn't support cross-platform builds (but it does when running verify-ci)
 docker-server:
-	@printf $(COLOR) "Building docker image temporalio/server:$(DOCKER_IMAGE_TAG)..."
-	docker build . -f server.Dockerfile -t temporalio/server:$(DOCKER_IMAGE_TAG) $(SERVER_BUILD_ARGS)
+	@printf $(COLOR) "Building docker image temporalio/server:$(IMAGE_TAG)..."
+	$(BAKE) server --set "*.platform=linux/amd64"
 
-docker-admin-tools: docker-server
-	@printf $(COLOR) "Build docker image temporalio/admin-tools:$(DOCKER_IMAGE_TAG)..."
-	docker build . -f admin-tools.Dockerfile -t temporalio/admin-tools:$(DOCKER_IMAGE_TAG) --build-arg SERVER_IMAGE=temporalio/server:$(DOCKER_IMAGE_TAG)
+docker-admin-tools:
+	@printf $(COLOR) "Build docker image temporalio/admin-tools:$(IMAGE_TAG)..."
+	$(BAKE) admin-tools --set "*.platform=linux/amd64"
 
-docker-auto-setup: docker-admin-tools
-	@printf $(COLOR) "Build docker image temporalio/auto-setup:$(DOCKER_IMAGE_TAG)..."
-	docker build . -f auto-setup.Dockerfile -t temporalio/auto-setup:$(DOCKER_IMAGE_TAG) --build-arg SERVER_IMAGE=temporalio/server:$(DOCKER_IMAGE_TAG) --build-arg ADMIN_TOOLS_IMAGE=temporalio/admin-tools:$(DOCKER_IMAGE_TAG)
+docker-auto-setup:
+	@printf $(COLOR) "Build docker image temporalio/auto-setup:$(IMAGE_TAG)..."
+	$(BAKE) auto-setup --set "*.platform=linux/amd64"
 
 docker-buildx-container:
 	docker buildx create --name builder-x --driver docker-container --use
 
 docker-server-x:
-	@printf $(COLOR) "Building cross-platform docker image temporalio/server:$(DOCKER_IMAGE_TAG)..."
-	docker buildx build . -f server.Dockerfile -t temporalio/server:$(DOCKER_IMAGE_TAG) --platform linux/amd64,linux/arm64 --output type=$(DOCKER_BUILDX_OUTPUT) $(SERVER_BUILD_ARGS)
+	@printf $(COLOR) "Building cross-platform docker image temporalio/server:$(IMAGE_TAG)..."
+	$(BAKE) server
 
-docker-admin-tools-x: docker-server-x
-	@printf $(COLOR) "Build cross-platform docker image temporalio/admin-tools:$(DOCKER_IMAGE_TAG)..."
-	docker buildx build . -f admin-tools.Dockerfile -t temporalio/admin-tools:$(DOCKER_IMAGE_TAG) --platform linux/amd64,linux/arm64 --output type=$(DOCKER_BUILDX_OUTPUT) --build-arg SERVER_IMAGE=temporalio/server:$(DOCKER_IMAGE_TAG)
+docker-admin-tools-x:
+	@printf $(COLOR) "Build cross-platform docker image temporalio/admin-tools:$(IMAGE_TAG)..."
+	$(BAKE) admin-tools
 
-docker-auto-setup-x: docker-admin-tools-x
+docker-auto-setup-x:
 	@printf $(COLOR) "Build cross-platform docker image temporalio/auto-setup:$(DOCKER_IMAGE_TAG)..."
-	docker buildx build . -f auto-setup.Dockerfile -t temporalio/auto-setup:$(DOCKER_IMAGE_TAG) --platform linux/amd64,linux/arm64 --output type=$(DOCKER_BUILDX_OUTPUT) --build-arg SERVER_IMAGE=temporalio/server:$(DOCKER_IMAGE_TAG) --build-arg ADMIN_TOOLS_IMAGE=temporalio/admin-tools:$(DOCKER_IMAGE_TAG)
+	$(BAKE) auto-setup
