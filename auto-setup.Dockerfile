@@ -1,12 +1,10 @@
-ARG SERVER_IMAGE
-ARG ADMIN_TOOLS_IMAGE
 ARG GOPROXY
 
 ##### Admin Tools #####
-FROM ${ADMIN_TOOLS_IMAGE} as admin-tools
+FROM admin-tools
 
 ##### Temporal server with Auto-Setup #####
-FROM ${SERVER_IMAGE} as server
+FROM server
 WORKDIR /etc/temporal
 
 # binaries

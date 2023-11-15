@@ -15,7 +15,7 @@ on:
 
 jobs:
   build-push-images:
-    runs-on: ubuntu-latest-16-cores
+    runs-on: ubuntu-latest #-16-cores
     # Usually, a successful job takes ~17 mins.
     # Anything more than 30 mins is a sign that job is stuck.
     # This is a workaround until we find the root cause.
@@ -41,108 +41,39 @@ jobs:
       - name: Prepare build args
         id: build_args
         run: |
-          github_sha_short=${GITHUB_SHA:0:7}
-          push=${{ github.event_name == 'push' && !env.ACT }}
-          echo "commit_sha_short=${github_sha_short}" >> $GITHUB_OUTPUT
-          echo "image_tag=sha-${github_sha_short}" >> $GITHUB_OUTPUT
           echo "push=${push}" >> $GITHUB_OUTPUT
 
+          github_sha_short=${GITHUB_SHA:0:7}
+          echo "IMAGE_TAG=sha-${github_sha_short}" >> $GITHUB_ENV
+          push=${{ github.event_name == 'push' && !env.ACT }}
           TEMPORAL_SHA=$(git submodule status -- temporal | awk '{print $1}')
-          echo "TEMPORAL_SHA=${TEMPORAL_SHA}" >> $GITHUB_OUTPUT
+          echo "TEMPORAL_SHA=${TEMPORAL_SHA}" >> $GITHUB_ENV
           TCTL_SHA=$(git submodule status -- tctl | awk '{print $1}')
-          echo "TCTL_SHA=${TCTL_SHA}" >> $GITHUB_OUTPUT
+          echo "TCTL_SHA=${TCTL_SHA}" >> $GITHUB_ENV
 
-      ### BUILD & PUSH SERVER IMAGE ###
-
-      - name: Metatags for the Server image
-        id: meta_server
-        uses: docker/metadata-action@v3
+      - name: Bake images
+        uses: docker/bake-action@v4
         with:
-          images: temporaliotest/server
-          tags: |
-            type=sha,format=short,event=branch
-            latest
+          pull: true
+          push: ${{ steps.build_args.outputs.push == 'true' }}
 
-      - name: Build-Push Server image
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          push: ${{ steps.build_args.outputs.push }}
-          file: server.Dockerfile
-          build-args: |
-            TEMPORAL_SHA=${{ steps.build_args.outputs.TEMPORAL_SHA }}
-            TCTL_SHA=${{ steps.build_args.outputs.TCTL_SHA }}
-          platforms: linux/amd64,linux/arm64
-          tags: ${{ steps.meta_server.outputs.tags }}
-          labels: ${{ steps.meta_server.outputs.labels }}
-
+      # TODO: can we loop this somehow?
       - name: Run Trivy vulnerability scanner on Server image
         uses: ./.github/actions/trivy
         with:
-          image-tags: ${{ steps.meta_server.outputs.tags }}
+          image-tags: temporaliotest/server:${{ env.IMAGE_TAG }}
           image-name: server
-
-      ### BUILD & PUSH ADMIN TOOLS IMAGE ###
-
-      - name: Metatags for the Admin Tools image
-        if: steps.build_args.outputs.push == 'true'
-        id: meta_admin_tools
-        uses: docker/metadata-action@v3
-        with:
-          images: temporaliotest/admin-tools
-          tags: |
-            type=sha,format=short,event=branch
-            latest
-
-      - name: Build-Push Admin Tools
-        if: steps.build_args.outputs.push == 'true'
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          push: ${{ steps.build_args.outputs.push }}
-          file: admin-tools.Dockerfile
-          platforms: linux/amd64,linux/arm64
-          tags: ${{ steps.meta_admin_tools.outputs.tags }}
-          labels: ${{ steps.meta_admin_tools.outputs.labels }}
-          build-args: |
-            SERVER_IMAGE=temporaliotest/server:${{ steps.build_args.outputs.image_tag }}
 
       - name: Run Trivy vulnerability scanner on Admin Tools image
         if: steps.build_args.outputs.push == 'true'
         uses: ./.github/actions/trivy
         with:
-          image-tags: ${{ steps.meta_admin_tools.outputs.tags }}
+          image-tags: temporaliotest/admin-tools:${{ env.IMAGE_TAG }}
           image-name: admin-tools
-
-      ### BUILD & PUSH AUTO SETUP IMAGE ###
-
-      - name: Metatags for the Auto Setup image
-        if: steps.build_args.outputs.push == 'true'
-        id: meta_auto_setup
-        uses: docker/metadata-action@v3
-        with:
-          images: temporaliotest/auto-setup
-          tags: |
-            type=sha,format=short,event=branch
-            latest
-
-      - name: Build-Push Auto Setup
-        if: steps.build_args.outputs.push == 'true'
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          push: ${{ steps.build_args.outputs.push }}
-          file: auto-setup.Dockerfile
-          platforms: linux/amd64,linux/arm64
-          tags: ${{ steps.meta_auto_setup.outputs.tags }}
-          labels: ${{ steps.meta_auto_setup.outputs.labels }}
-          build-args: |
-            SERVER_IMAGE=temporaliotest/server:${{ steps.build_args.outputs.image_tag }}
-            ADMIN_TOOLS_IMAGE=temporaliotest/admin-tools:${{ steps.build_args.outputs.image_tag }}
 
       - name: Run Trivy vulnerability scanner on Auto Setup image
         if: steps.build_args.outputs.push == 'true'
         uses: ./.github/actions/trivy
         with:
-          image-tags: ${{ steps.meta_auto_setup.outputs.tags }}
+          image-tags: temporaliotest/auto-setup:${{ env.IMAGE_TAG }}
           image-name: auto-setup
