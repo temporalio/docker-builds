@@ -85,8 +85,8 @@ jobs:
       - name: Move Docker Layers Cache
         if: always()
         run: |
-          rm -rf /tmp/.buildx-cache || true
-          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+          test -d /tmp/.buildx-cache && rm -rf /tmp/.buildx-cache
+          test -d /tmp/.buildx-cache-new && mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
       - name: Save Docker Layers Cache
         uses: actions/cache/save@v3
