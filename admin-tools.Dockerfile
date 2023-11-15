@@ -21,7 +21,8 @@ RUN --mount=type=cache,target=/root/.cache/go-build (cd ./temporal && make tempo
 
 
 ##### Server #####
-FROM server
+# This is injected as a context via the bakefile so we don't take it as an ARG
+FROM temporaliotest/server as server
 
 ##### Temporal admin tools #####
 FROM ${BASE_ADMIN_TOOLS_IMAGE} as temporal-admin-tools
