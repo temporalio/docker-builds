@@ -1,10 +1,12 @@
 ARG GOPROXY
 
 ##### Admin Tools #####
-FROM admin-tools
+# This is injected as a context via the bakefile so we don't take it as an ARG
+FROM temporaliotest/admin-tools as admin-tools
 
 ##### Temporal server with Auto-Setup #####
-FROM server
+# This is injected as a context via the bakefile so we don't take it as an ARG
+FROM temporaliotest/server as server
 WORKDIR /etc/temporal
 
 # binaries

@@ -27,10 +27,10 @@ jobs:
           submodules: "true"
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
+        uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v3
 
       - name: Login to DockerHub
         if: ${{ !env.ACT }}
@@ -38,6 +38,15 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Restore Cached Docker Layers
+        id: restore-cache
+        uses: actions/cache/restore@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-cache-go-build-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-cache-go-build-
 
       - name: Prepare build args
         id: build_args
@@ -55,17 +64,38 @@ jobs:
         uses: docker/bake-action@v4
         with:
           load: true
-          set: "*.platform=linux/amd64"
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          set: |
+            server.platform=linux/amd64
+            server.cache-from=type=local,src=/tmp/.buildx-cache/server
+            server.cache-to=type=local,dest=/tmp/.buildx-cache-new/server
+            admin-tools.platform=linux/amd64
+            admin-tools.cache-from=type=local,src=/tmp/.buildx-cache/admin-tools
+            admin-tools.cache-to=type=local,dest=/tmp/.buildx-cache-new/admin-tools
+            auto-setup.platform=linux/amd64
+            auto-setup.cache-from=type=local,src=/tmp/.buildx-cache/auto-setup
+            auto-setup.cache-to=type=local,dest=/tmp/.buildx-cache-new/auto-setup
 
       - name: Bake and push multiarch images
         if: ${{ github.event_name == 'push' && !env.ACT }}
         uses: docker/bake-action@v4
         with:
           push: true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+
+      # This prevents the cache from growing in size indefinitely
+      - name: Move Docker Layers Cache
+        if: always()
+        run: |
+          test -d /tmp/.buildx-cache && rm -rf /tmp/.buildx-cache
+          test -d /tmp/.buildx-cache-new && mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+      - name: Save Docker Layers Cache
+        uses: actions/cache/save@v3
+        if: always()
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ steps.restore-cache.outputs.cache-primary-key }}
 
       # TODO: can we loop this somehow?
       - name: Run Trivy vulnerability scanner on Server image
@@ -75,14 +105,14 @@ jobs:
           image-name: server
 
       - name: Run Trivy vulnerability scanner on Admin Tools image
-        if: steps.build_args.outputs.push == 'true'
+        if: ${{ github.event_name == 'push' && !env.ACT }}
         uses: ./.github/actions/trivy
         with:
           image-tags: temporaliotest/admin-tools:${{ env.IMAGE_TAG }}
           image-name: admin-tools
 
       - name: Run Trivy vulnerability scanner on Auto Setup image
-        if: steps.build_args.outputs.push == 'true'
+        if: ${{ github.event_name == 'push' && !env.ACT }}
         uses: ./.github/actions/trivy
         with:
           image-tags: temporaliotest/auto-setup:${{ env.IMAGE_TAG }}
