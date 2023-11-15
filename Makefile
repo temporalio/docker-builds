@@ -34,7 +34,7 @@ build:
 	$(BAKE)
 
 verify-ci:
-	act push -j build-push-images
+	@act push -j build-push-images -P ubuntu-latest-16-cores=catthehacker/ubuntu:act-latest
 
 # We hard-code linux/amd64 here as the docker machine for mac doesn't support cross-platform builds (but it does when running verify-ci)
 docker-server:
