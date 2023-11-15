@@ -1,6 +1,5 @@
 ARG BASE_BUILDER_IMAGE=temporalio/base-builder:1.14.4
 ARG BASE_ADMIN_TOOLS_IMAGE=temporalio/base-admin-tools:1.12.3
-ARG SERVER_IMAGE
 ARG GOPROXY
 
 ##### Temporal Admin Tools builder #####
@@ -22,8 +21,7 @@ RUN (cd ./temporal && make temporal-cassandra-tool temporal-sql-tool tdbg)
 
 
 ##### Server #####
-FROM ${SERVER_IMAGE} as server
-
+FROM server
 
 ##### Temporal admin tools #####
 FROM ${BASE_ADMIN_TOOLS_IMAGE} as temporal-admin-tools
