@@ -60,6 +60,19 @@ jobs:
           TAG_LATEST=${{(github.event_name == 'push' && github.ref == 'refs/heads/main') && 'true' || 'false'}}
           echo "TAG_LATEST=${TAG_LATEST}" >> $GITHUB_ENV
 
+          # Cache params are a bit of a pain
+          cachefor () {
+              echo "$1.cache-from=type=local,src=/tmp/.buildx-cache/$1"
+              echo "$1.cache-to=type=local,dest=/tmp/.buildx-cache-new/$1"
+          }
+
+          echo 'cache_params<<EOF' >> $GITHUB_OUTPUT
+          for img in server admin-tools auto-setup; do
+            cachefor $img >> $GITHUB_OUTPUT
+          done
+          echo 'EOF' >> $GITHUB_OUTPUT
+          cat $GITHUB_OUTPUT
+
       # You can't use `load` when building a multiarch image, so we build and load the
       # native image and build multiarch images later
       - name: Bake native images for security scanning
@@ -68,22 +81,17 @@ jobs:
           load: true
           set: |
             server.platform=linux/amd64
-            server.cache-from=type=local,src=/tmp/.buildx-cache/server
-            server.cache-to=type=local,dest=/tmp/.buildx-cache-new/server
             admin-tools.platform=linux/amd64
-            admin-tools.cache-from=type=local,src=/tmp/.buildx-cache/admin-tools
-            admin-tools.cache-to=type=local,dest=/tmp/.buildx-cache-new/admin-tools
             auto-setup.platform=linux/amd64
-            auto-setup.cache-from=type=local,src=/tmp/.buildx-cache/auto-setup
-            auto-setup.cache-to=type=local,dest=/tmp/.buildx-cache-new/auto-setup
+            ${{ steps.build_args.outputs.cache_params }}
 
       - name: Bake and push multiarch images
         if: ${{ github.event_name == 'push' && !env.ACT }}
         uses: docker/bake-action@v4
         with:
           push: true
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+          set: |
+            ${{ steps.build_args.outputs.cache_params }}
 
       # This prevents the cache from growing in size indefinitely
       - name: Move Docker Layers Cache
