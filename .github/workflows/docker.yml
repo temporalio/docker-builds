@@ -44,7 +44,7 @@ jobs:
         uses: actions/cache/restore@v3
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-cache-go-${{ hashFiles('**/go.sum') }}
+          key: ${{ runner.os }}-cache-go-build-${{ hashFiles('**/go.sum') }}
 
       - name: Prepare build args
         id: build_args
