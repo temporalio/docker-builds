@@ -45,11 +45,6 @@ jobs:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-go-build-cache-${{ hashFiles('**/go.sum') }}
 
-      - name: Inject go-build-cache into docker
-        uses: reproducible-containers/buildkit-cache-dance@v2.1.2
-        with:
-          cache-source: go-build-cache
-
       - name: Prepare build args
         id: build_args
         run: |
