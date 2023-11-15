@@ -29,8 +29,6 @@ group "default" {
 
 target "server" {
   dockerfile = "server.Dockerfile"
-  # When building locally always tag latest. These will be overridden in CI to only
-  # conditionally tag the latest branch
   tags = [
     "temporaliotest/server:${IMAGE_TAG}",
     TAG_LATEST ? "temporaliotest/server:latest" : ""
