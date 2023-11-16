@@ -45,15 +45,6 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Restore Cached Docker Layers
-        id: restore-cache
-        uses: actions/cache/restore@v3
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-cache-go-build-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-cache-go-build-
-
       - name: Prepare build args
         id: build_args
         run: |
@@ -67,6 +58,7 @@ jobs:
           echo "TAG_LATEST=${TAG_LATEST}" >> $GITHUB_ENV
 
           # Cache params are a bit of a pain
+          echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
           cachefor () {
               echo "$1.cache-from=type=local,src=/tmp/.buildx-cache/$1"
               echo "$1.cache-to=type=local,dest=/tmp/.buildx-cache-new/$1"
@@ -78,6 +70,16 @@ jobs:
           done
           echo 'EOF' >> $GITHUB_OUTPUT
           cat $GITHUB_OUTPUT
+
+      - name: Restore Cached Docker Layers
+        id: restore-cache
+        uses: actions/cache/restore@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-cache-go-build-${{ hashFiles('**/go.sum') }}-${{steps.build_args.outputs.branch}}
+          restore-keys: |
+            ${{ runner.os }}-cache-go-build-${{ hashFiles('**/go.sum') }}-
+            ${{ runner.os }}-cache-go-build-
 
       # You can't use `load` when building a multiarch image, so we build and load the
       # native image and build multiarch images later
