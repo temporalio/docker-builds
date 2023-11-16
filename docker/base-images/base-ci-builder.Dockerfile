@@ -5,4 +5,5 @@ RUN apk add --update --no-cache \
     git \
     protobuf \
     build-base \
+    sed \
     shellcheck
