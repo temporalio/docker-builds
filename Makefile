@@ -33,8 +33,12 @@ update-submodules:
 build:
 	$(BAKE)
 
-verify-ci:
-	@act push -j build-push-images -P ubuntu-latest-16-cores=catthehacker/ubuntu:act-latest
+simulate-push:
+	@act push -s GITHUB_TOKEN="$(shell gh auth token)" -j build-push-images -P ubuntu-latest-16-cores=catthehacker/ubuntu:act-latest
+
+COMMIT =?
+simulate-dispatch:
+	@act workflow-dispatch -s GITHUB_TOKEN="$(shell gh auth token)" -j build-push-images -P ubuntu-latest-16-cores=catthehacker/ubuntu:act-latest --input commit=$(COMMIT)
 
 # We hard-code linux/amd64 here as the docker machine for mac doesn't support cross-platform builds (but it does when running verify-ci)
 docker-server:
