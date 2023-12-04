@@ -37,7 +37,7 @@ jobs:
           COMMIT: ${{ github.event.inputs.commit }}
           TAG: ${{ github.event.inputs.tag }}
           USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          PASSWORD: ${{ secrets.DOCKER_PAT }}
           IMAGES: server auto-setup admin-tools
           SRC_REPO: temporaliotest
           DST_REPO: temporalio

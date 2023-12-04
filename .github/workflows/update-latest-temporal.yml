@@ -21,7 +21,7 @@ jobs:
       - name: Copy images
         env:
           USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          PASSWORD: ${{ secrets.DOCKER_PAT }}
           IMAGES: server auto-setup admin-tools
           REPO: temporalio
           SRC_TAG: ${{ github.event.inputs.tag }}
