@@ -171,6 +171,35 @@ jobs:
           image-tags: ${{ steps.meta_auto_setup.outputs.tags }}
           image-name: auto-setup
 
+      - name: Start temporal cluster
+        run: docker-compose -f docker/ci-compose.yml up -d
+
+      - name: Ensure images work
+        run: |
+          is_ready() {
+            docker compose -f docker/ci-compose.yml exec admin-tools temporal operator cluster health | grep -q SERVING
+          }
+
+          tries=0
+          while (( tries < 30 )) && !is_ready; do
+            sleep 1
+            ((tries += 1))
+          done
+          is_ready
+
+      - name: Stop temporal cluster
+        if: always()
+        run: |
+          docker-compose -f docker/ci-compose.yml down
+          docker-compose logs > docker-compose.log
+
+      - name: Upload compose logs
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: docker-compose-logs
+          path: docker-compose.log
+
       # This prevents the cache from growing in size indefinitely
       - name: Move Docker Layers Cache
         if: always()
