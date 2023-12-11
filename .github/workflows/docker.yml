@@ -81,25 +81,95 @@ jobs:
             ${{ runner.os }}-cache-go-build-${{ hashFiles('**/go.sum') }}-
             ${{ runner.os }}-cache-go-build-
 
-      # You can't use `load` when building a multiarch image, so we build and load the
-      # native image and build multiarch images later
-      - name: Bake native images for security scanning
-        uses: docker/bake-action@v4
+      ### BUILD & PUSH SERVER IMAGE ###
+      - name: Metatags for the Server image
+        id: meta_server
+        uses: docker/metadata-action@v3
         with:
-          load: true
-          set: |
-            server.platform=linux/amd64
-            admin-tools.platform=linux/amd64
-            auto-setup.platform=linux/amd64
-            ${{ steps.build_args.outputs.cache_params }}
+          images: temporaliotest/server
+          tags: |
+            type=sha,format=short,event=branch
+            latest
 
-      - name: Bake and push multiarch images
-        if: ${{ github.event_name == 'push' && !env.ACT }}
-        uses: docker/bake-action@v4
+      - name: Build-Push Server image
+        uses: docker/build-push-action@v2
         with:
-          push: true
-          set: |
-            ${{ steps.build_args.outputs.cache_params }}
+          context: .
+          push: ${{ steps.build_args.outputs.push }}
+          file: server.Dockerfile
+          build-args: |
+            TEMPORAL_SHA=${{ steps.build_args.outputs.TEMPORAL_SHA }}
+            TCTL_SHA=${{ steps.build_args.outputs.TCTL_SHA }}
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ steps.meta_server.outputs.tags }}
+          labels: ${{ steps.meta_server.outputs.labels }}
+
+      - name: Run Trivy vulnerability scanner on Server image
+        uses: ./.github/actions/trivy
+        with:
+          image-tags: ${{ steps.meta_server.outputs.tags }}
+          image-name: server
+
+     ### BUILD & PUSH ADMIN TOOLS IMAGE ###
+      - name: Metatags for the Admin Tools image
+        if: steps.build_args.outputs.push == 'true'
+        id: meta_admin_tools
+        uses: docker/metadata-action@v3
+        with:
+          images: temporaliotest/admin-tools
+          tags: |
+            type=sha,format=short,event=branch
+            latest
+
+      - name: Build-Push Admin Tools
+        if: steps.build_args.outputs.push == 'true'
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: ${{ steps.build_args.outputs.push }}
+          file: admin-tools.Dockerfile
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ steps.meta_admin_tools.outputs.tags }}
+          labels: ${{ steps.meta_admin_tools.outputs.labels }}
+          build-args: |
+            SERVER_IMAGE=temporaliotest/server:${{ steps.build_args.outputs.image_tag }}
+
+      - name: Run Trivy vulnerability scanner on Admin Tools image
+        if: ${{ github.event_name == 'push' && !env.ACT }}
+        uses: ./.github/actions/trivy
+        with:
+          image-tags: ${{ steps.meta_admin_tools.outputs.tags }}
+          image-name: admin-tools
+
+      ### BUILD & PUSH AUTO SETUP IMAGE ###
+      - name: Metatags for the Auto Setup image
+        if: steps.build_args.outputs.push == 'true'
+        id: meta_auto_setup
+        uses: docker/metadata-action@v3
+        with:
+          images: temporaliotest/auto-setup
+          tags: |
+            type=sha,format=short,event=branch
+            latest
+      - name: Build-Push Auto Setup
+        if: steps.build_args.outputs.push == 'true'
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: ${{ steps.build_args.outputs.push }}
+          file: auto-setup.Dockerfile
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ steps.meta_auto_setup.outputs.tags }}
+          labels: ${{ steps.meta_auto_setup.outputs.labels }}
+          build-args: |
+            SERVER_IMAGE=temporaliotest/server:${{ steps.build_args.outputs.image_tag }}
+            ADMIN_TOOLS_IMAGE=temporaliotest/admin-tools:${{ steps.build_args.outputs.image_tag }}
+      - name: Run Trivy vulnerability scanner on Auto Setup image
+        if: ${{ github.event_name == 'push' && !env.ACT }}
+        uses: ./.github/actions/trivy
+        with:
+          image-tags: ${{ steps.meta_auto_setup.outputs.tags }}
+          image-name: auto-setup
 
       # This prevents the cache from growing in size indefinitely
       - name: Move Docker Layers Cache
@@ -114,24 +184,3 @@ jobs:
         with:
           path: /tmp/.buildx-cache
           key: ${{ steps.restore-cache.outputs.cache-primary-key }}
-
-      # TODO: can we loop this somehow?
-      - name: Run Trivy vulnerability scanner on Server image
-        uses: ./.github/actions/trivy
-        with:
-          image-tags: temporaliotest/server:${{ env.IMAGE_TAG }}
-          image-name: server
-
-      - name: Run Trivy vulnerability scanner on Admin Tools image
-        if: ${{ github.event_name == 'push' && !env.ACT }}
-        uses: ./.github/actions/trivy
-        with:
-          image-tags: temporaliotest/admin-tools:${{ env.IMAGE_TAG }}
-          image-name: admin-tools
-
-      - name: Run Trivy vulnerability scanner on Auto Setup image
-        if: ${{ github.event_name == 'push' && !env.ACT }}
-        uses: ./.github/actions/trivy
-        with:
-          image-tags: temporaliotest/auto-setup:${{ env.IMAGE_TAG }}
-          image-name: auto-setup

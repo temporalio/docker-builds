@@ -1,5 +1,6 @@
 ARG BASE_BUILDER_IMAGE=temporalio/base-builder:1.14.4
 ARG BASE_ADMIN_TOOLS_IMAGE=temporalio/base-admin-tools:1.12.3
+ARG SERVER_IMAGE
 ARG GOPROXY
 
 ##### Temporal Admin Tools builder #####
@@ -21,8 +22,7 @@ RUN --mount=type=cache,target=/root/.cache/go-build (cd ./temporal && make tempo
 
 
 ##### Server #####
-# This is injected as a context via the bakefile so we don't take it as an ARG
-FROM temporaliotest/server as server
+FROM ${SERVER_IMAGE} as server
 
 ##### Temporal admin tools #####
 FROM ${BASE_ADMIN_TOOLS_IMAGE} as temporal-admin-tools

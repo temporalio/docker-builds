@@ -1,12 +1,13 @@
+ARG SERVER_IMAGE
+ARG ADMIN_TOOLS_IMAGE
 ARG GOPROXY
 
 ##### Admin Tools #####
-# This is injected as a context via the bakefile so we don't take it as an ARG
-FROM temporaliotest/admin-tools as admin-tools
+FROM ${ADMIN_TOOLS_IMAGE} as admin-tools
 
 ##### Temporal server with Auto-Setup #####
 # This is injected as a context via the bakefile so we don't take it as an ARG
-FROM temporaliotest/server as server
+FROM ${SERVER_IMAGE} as server
 WORKDIR /etc/temporal
 
 # binaries
@@ -21,6 +22,5 @@ COPY ./docker/entrypoint.sh /etc/temporal/entrypoint.sh
 COPY ./docker/start-temporal.sh /etc/temporal/start-temporal.sh
 COPY ./docker/auto-setup.sh /etc/temporal/auto-setup.sh
 
-CMD ["autosetup"]
-
 ENTRYPOINT ["/etc/temporal/entrypoint.sh"]
+CMD ["autosetup"]
