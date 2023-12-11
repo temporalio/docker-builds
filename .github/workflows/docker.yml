@@ -50,6 +50,10 @@ jobs:
         run: |
           github_sha_short=${GITHUB_SHA:0:7}
           echo "IMAGE_TAG=sha-${github_sha_short}" >> $GITHUB_ENV
+
+          # This version is used for the docker compose cluster
+          echo "TEMPORAL_VERSION=${github_sha_short}" >> $GITHUB_ENV
+
           TEMPORAL_SHA=$(git submodule status -- temporal | awk '{print $1}')
           echo "TEMPORAL_SHA=${TEMPORAL_SHA}" >> $GITHUB_ENV
           TCTL_SHA=$(git submodule status -- tctl | awk '{print $1}')
@@ -92,7 +96,7 @@ jobs:
             latest
 
       - name: Build-Push Server image
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v5
         with:
           context: .
           push: ${{ steps.build_args.outputs.push }}
@@ -123,7 +127,7 @@ jobs:
 
       - name: Build-Push Admin Tools
         if: steps.build_args.outputs.push == 'true'
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v5
         with:
           context: .
           push: ${{ steps.build_args.outputs.push }}
@@ -153,7 +157,7 @@ jobs:
             latest
       - name: Build-Push Auto Setup
         if: steps.build_args.outputs.push == 'true'
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v5
         with:
           context: .
           push: ${{ steps.build_args.outputs.push }}
