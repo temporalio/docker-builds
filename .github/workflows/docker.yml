@@ -117,7 +117,6 @@ jobs:
 
      ### BUILD & PUSH ADMIN TOOLS IMAGE ###
       - name: Metatags for the Admin Tools image
-        if: steps.build_args.outputs.push == 'true'
         id: meta_admin_tools
         uses: docker/metadata-action@v5
         with:
@@ -127,7 +126,6 @@ jobs:
             latest
 
       - name: Build-Push Admin Tools
-        if: steps.build_args.outputs.push == 'true'
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -148,7 +146,6 @@ jobs:
 
       ### BUILD & PUSH AUTO SETUP IMAGE ###
       - name: Metatags for the Auto Setup image
-        if: steps.build_args.outputs.push == 'true'
         id: meta_auto_setup
         uses: docker/metadata-action@v5
         with:
@@ -158,7 +155,6 @@ jobs:
             latest
 
       - name: Build-Push Auto Setup
-        if: steps.build_args.outputs.push == 'true'
         uses: docker/build-push-action@v5
         with:
           context: .
