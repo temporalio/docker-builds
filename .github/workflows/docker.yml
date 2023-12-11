@@ -88,7 +88,7 @@ jobs:
       ### BUILD & PUSH SERVER IMAGE ###
       - name: Metatags for the Server image
         id: meta_server
-        uses: docker/metadata-action@v3
+        uses: docker/metadata-action@v5
         with:
           images: temporaliotest/server
           tags: |
@@ -99,7 +99,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          push: ${{ steps.build_args.outputs.push }}
+          push: ${{ github.event_name == 'push' && !env.ACT }}
           file: server.Dockerfile
           build-args: |
             TEMPORAL_SHA=${{ steps.build_args.outputs.TEMPORAL_SHA }}
@@ -118,7 +118,7 @@ jobs:
       - name: Metatags for the Admin Tools image
         if: steps.build_args.outputs.push == 'true'
         id: meta_admin_tools
-        uses: docker/metadata-action@v3
+        uses: docker/metadata-action@v5
         with:
           images: temporaliotest/admin-tools
           tags: |
@@ -130,7 +130,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          push: ${{ steps.build_args.outputs.push }}
+          push: ${{ github.event_name == 'push' && !env.ACT }}
           file: admin-tools.Dockerfile
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta_admin_tools.outputs.tags }}
@@ -149,18 +149,19 @@ jobs:
       - name: Metatags for the Auto Setup image
         if: steps.build_args.outputs.push == 'true'
         id: meta_auto_setup
-        uses: docker/metadata-action@v3
+        uses: docker/metadata-action@v5
         with:
           images: temporaliotest/auto-setup
           tags: |
             type=sha,format=short,event=branch
             latest
+
       - name: Build-Push Auto Setup
         if: steps.build_args.outputs.push == 'true'
         uses: docker/build-push-action@v5
         with:
           context: .
-          push: ${{ steps.build_args.outputs.push }}
+          push: ${{ github.event_name == 'push' && !env.ACT }}
           file: auto-setup.Dockerfile
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta_auto_setup.outputs.tags }}
