@@ -50,6 +50,7 @@ jobs:
         run: |
           github_sha_short=${GITHUB_SHA:0:7}
           echo "IMAGE_TAG=sha-${github_sha_short}" >> $GITHUB_ENV
+          push=${{ github.event_name == 'push' && !env.ACT }}
 
           # This version is used for the docker compose cluster
           echo "TEMPORAL_VERSION=${github_sha_short}" >> $GITHUB_ENV
@@ -99,7 +100,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          push: ${{ github.event_name == 'push' && !env.ACT }}
+          push: ${{steps.build_args.outputs.push == 'true'}}
           file: server.Dockerfile
           build-args: |
             TEMPORAL_SHA=${{ steps.build_args.outputs.TEMPORAL_SHA }}
@@ -130,7 +131,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          push: ${{ github.event_name == 'push' && !env.ACT }}
+          push: ${{steps.build_args.outputs.push == 'true'}}
           file: admin-tools.Dockerfile
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta_admin_tools.outputs.tags }}
@@ -139,7 +140,7 @@ jobs:
             SERVER_IMAGE=temporaliotest/server:${{ steps.build_args.outputs.image_tag }}
 
       - name: Run Trivy vulnerability scanner on Admin Tools image
-        if: ${{ github.event_name == 'push' && !env.ACT }}
+        if: steps.build_args.outputs.push == 'true'
         uses: ./.github/actions/trivy
         with:
           image-tags: ${{ steps.meta_admin_tools.outputs.tags }}
@@ -161,7 +162,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          push: ${{ github.event_name == 'push' && !env.ACT }}
+          push: ${{steps.build_args.outputs.push == 'true'}}
           file: auto-setup.Dockerfile
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta_auto_setup.outputs.tags }}
@@ -170,19 +171,19 @@ jobs:
             SERVER_IMAGE=temporaliotest/server:${{ steps.build_args.outputs.image_tag }}
             ADMIN_TOOLS_IMAGE=temporaliotest/admin-tools:${{ steps.build_args.outputs.image_tag }}
       - name: Run Trivy vulnerability scanner on Auto Setup image
-        if: ${{ github.event_name == 'push' && !env.ACT }}
+        if: steps.build_args.outputs.push == 'true'
         uses: ./.github/actions/trivy
         with:
           image-tags: ${{ steps.meta_auto_setup.outputs.tags }}
           image-name: auto-setup
 
       - name: Start temporal cluster
-        run: docker-compose -f docker/ci-compose.yml up -d
+        run: docker-compose up -d
 
       - name: Ensure images work
         run: |
           is_ready() {
-            docker compose -f docker/ci-compose.yml exec admin-tools temporal operator cluster health | grep -q SERVING
+            docker compose exec admin-tools temporal operator cluster health | grep -q SERVING
           }
 
           tries=0
@@ -195,8 +196,8 @@ jobs:
       - name: Stop temporal cluster
         if: always()
         run: |
-          docker-compose -f docker/ci-compose.yml down
-          docker-compose logs > docker-compose.log
+          docker compose down
+          docker compose logs > docker-compose.log
 
       - name: Upload compose logs
         if: always()
