@@ -180,6 +180,7 @@ jobs:
       # This prevents the cache from growing in size indefinitely
       - name: Move Docker Layers Cache
         if: always()
+        continue-on-error: true
         run: |
           test -d /tmp/.buildx-cache && rm -rf /tmp/.buildx-cache
           test -d /tmp/.buildx-cache-new && mv /tmp/.buildx-cache-new /tmp/.buildx-cache
@@ -187,6 +188,7 @@ jobs:
       - name: Save Docker Layers Cache
         uses: actions/cache/save@v3
         if: always()
+        continue-on-error: true
         with:
           path: /tmp/.buildx-cache
           key: ${{ steps.restore-cache.outputs.cache-primary-key }}
