@@ -64,4 +64,29 @@ COPY ./temporal/docker/config_template.yaml /etc/temporal/config/config_template
 COPY ./docker/entrypoint.sh /etc/temporal/entrypoint.sh
 COPY ./docker/start-temporal.sh /etc/temporal/start-temporal.sh
 
+### Server release image ###
+FROM temporal-server as server
 ENTRYPOINT ["/etc/temporal/entrypoint.sh"]
+
+### Server auto-setup image ###
+##### Admin Tools #####
+# This is injected as a context via the bakefile so we don't take it as an ARG
+FROM temporaliotest/admin-tools as admin-tools
+FROM temporal-server as auto-setup
+
+WORKDIR /etc/temporal
+
+# binaries
+COPY --from=admin-tools /usr/local/bin/temporal-cassandra-tool /usr/local/bin
+COPY --from=admin-tools /usr/local/bin/temporal-sql-tool /usr/local/bin
+
+# configs
+COPY --from=admin-tools /etc/temporal/schema /etc/temporal/schema
+
+# scripts
+COPY ./docker/entrypoint.sh /etc/temporal/entrypoint.sh
+COPY ./docker/start-temporal.sh /etc/temporal/start-temporal.sh
+COPY ./docker/auto-setup.sh /etc/temporal/auto-setup.sh
+
+ENTRYPOINT ["/etc/temporal/entrypoint.sh"]
+CMD ["autosetup"]

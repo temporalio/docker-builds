@@ -29,6 +29,7 @@ group "default" {
 
 target "server" {
   dockerfile = "server.Dockerfile"
+  target = "server"
   tags = [
     "temporaliotest/server:${IMAGE_TAG}",
     TAG_LATEST ? "temporaliotest/server:latest" : ""
@@ -67,7 +68,8 @@ target "admin-tools" {
 }
 
 target "auto-setup" {
-  dockerfile = "auto-setup.Dockerfile"
+  dockerfile = "server.Dockerfile"
+  target = "auto-setup"
   tags = [
     "temporaliotest/auto-setup:${IMAGE_TAG}",
     TAG_LATEST ? "temporaliotest/auto-setup:latest" : ""
