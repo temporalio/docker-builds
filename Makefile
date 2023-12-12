@@ -67,3 +67,6 @@ docker-admin-tools-x:
 docker-auto-setup-x:
 	@printf $(COLOR) "Build cross-platform docker image temporalio/auto-setup:$(DOCKER_IMAGE_TAG)..."
 	$(BAKE) auto-setup
+
+test:
+	IMAGE_TAG=$(IMAGE_TAG) test.sh

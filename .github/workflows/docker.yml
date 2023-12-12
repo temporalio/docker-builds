@@ -137,7 +137,7 @@ jobs:
           image-name: auto-setup
 
       - name: Ensure images work
-        run: test.sh
+        run: make IMAGE_TAG=${{env.IMAGE_TAG}} test
 
       - name: Upload compose logs
         if: always()
