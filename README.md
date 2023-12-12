@@ -15,5 +15,5 @@ Replace **YOUR_TAG** and **YOUR_CHECKOUT_COMMIT** to build manually:
 
 ```bash
 git checkout YOUR_CHECKOUT_COMMIT
-docker build . -f auto-setup.Dockerfile -t temporalio/auto-setup:YOUR_TAG
+make IMAGE_TAG=YOUR_TAG image-to-build
 ```

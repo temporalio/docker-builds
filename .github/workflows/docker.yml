@@ -118,7 +118,6 @@ jobs:
      ### BUILD & PUSH ADMIN TOOLS IMAGE ###
       - name: Metatags for the Admin Tools image
         id: meta_admin_tools
-        if: steps.build_args.outputs.push == 'true'
         uses: docker/metadata-action@v5
         with:
           images: temporaliotest/admin-tools
@@ -128,7 +127,6 @@ jobs:
 
       - name: Build-Push Admin Tools
         uses: docker/build-push-action@v5
-        if: steps.build_args.outputs.push == 'true'
         with:
           context: .
           push: ${{steps.build_args.outputs.push == 'true'}}
@@ -150,7 +148,6 @@ jobs:
       - name: Metatags for the Auto Setup image
         id: meta_auto_setup
         uses: docker/metadata-action@v5
-        if: steps.build_args.outputs.push == 'true'
         with:
           images: temporaliotest/auto-setup
           tags: |
@@ -159,7 +156,6 @@ jobs:
 
       - name: Build-Push Auto Setup
         uses: docker/build-push-action@v5
-        if: steps.build_args.outputs.push == 'true'
         with:
           context: .
           push: ${{steps.build_args.outputs.push == 'true'}}
@@ -176,6 +172,25 @@ jobs:
         with:
           image-tags: ${{ steps.meta_auto_setup.outputs.tags }}
           image-name: auto-setup
+
+      - name: Start temporal cluster
+        run: docker-compose up -d
+
+      - name: Ensure images work
+        run: test.sh
+
+      - name: Stop temporal cluster
+        if: always()
+        run: |
+          docker compose down
+          docker compose logs > docker-compose.log
+
+      - name: Upload compose logs
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: docker-compose-logs
+          path: docker-compose.log
 
       # This prevents the cache from growing in size indefinitely
       - name: Move Docker Layers Cache
