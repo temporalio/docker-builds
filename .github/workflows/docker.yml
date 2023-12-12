@@ -50,7 +50,6 @@ jobs:
         run: |
           github_sha_short=${GITHUB_SHA:0:7}
           echo "IMAGE_TAG=sha-${github_sha_short}" >> $GITHUB_ENV
-          echo "TEMPORAL_VERSION=${IMAGE_TAG}" >> $GITHUB_ENV
           TEMPORAL_SHA=$(git submodule status -- temporal | awk '{print $1}')
           echo "TEMPORAL_SHA=${TEMPORAL_SHA}" >> $GITHUB_ENV
           TCTL_SHA=$(git submodule status -- tctl | awk '{print $1}')
@@ -137,19 +136,12 @@ jobs:
           image-tags: temporaliotest/auto-setup:${{ env.IMAGE_TAG }}
           image-name: auto-setup
 
-      - name: Start temporal cluster
-        run: docker-compose up -d
-
       - name: Ensure images work
         run: test.sh
 
-      - name: Stop temporal cluster
-        if: always()
-        run: |
-          docker compose down
-          docker compose logs > docker-compose.log
       - name: Upload compose logs
         if: always()
+        continue-on-error: true
         uses: actions/upload-artifact@v3
         with:
           name: docker-compose-logs

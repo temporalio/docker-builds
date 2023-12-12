@@ -12,7 +12,7 @@ cleanup() {
 
 trap cleanup EXIT
 
-TEMPORAL_VERSION="${TEMPORAL_VERSION:-latest}"
+IMAGE_TAG="${IMAGE_TAG:-latest}"
 
 docker compose up -d >/dev/null 2>&1
 

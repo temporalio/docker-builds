@@ -12,7 +12,8 @@ IMAGE_TAG ?= sha-$(shell git rev-parse --short HEAD)
 TEMPORAL_SHA := $(shell sh -c 'git submodule status -- temporal | cut -c2-40')
 TCTL_SHA := $(shell sh -c "git submodule status -- tctl | cut -c2-40")
 
-BAKE := IMAGE_TAG=$(IMAGE_TAG) TEMPORAL_SHA=$(TEMPORAL_SHA) TCTL_SHA=$(TCTL_SHA) docker buildx bake
+DOCKER ?= docker buildx
+BAKE := IMAGE_TAG=$(IMAGE_TAG) TEMPORAL_SHA=$(TEMPORAL_SHA) TCTL_SHA=$(TCTL_SHA) $(DOCKER) bake
 
 ##### Scripts ######
 install: install-submodules
