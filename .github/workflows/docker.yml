@@ -50,6 +50,7 @@ jobs:
         run: |
           github_sha_short=${GITHUB_SHA:0:7}
           echo "IMAGE_TAG=sha-${github_sha_short}" >> $GITHUB_ENV
+          echo "TEMPORAL_VERSION=${IMAGE_TAG}" >> $GITHUB_ENV
           TEMPORAL_SHA=$(git submodule status -- temporal | awk '{print $1}')
           echo "TEMPORAL_SHA=${TEMPORAL_SHA}" >> $GITHUB_ENV
           TCTL_SHA=$(git submodule status -- tctl | awk '{print $1}')

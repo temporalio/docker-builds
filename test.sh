@@ -2,6 +2,8 @@
 
 set -u
 
+# shellcheck disable=SC2317
+# https://github.com/koalaman/shellcheck/issues/2542
 cleanup() {
     echo "Cleaning up..."
     docker compose logs > docker-compose.log
