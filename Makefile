@@ -69,4 +69,4 @@ docker-auto-setup-x:
 	$(BAKE) auto-setup
 
 test:
-	IMAGE_TAG=$(IMAGE_TAG) test.sh
+	IMAGE_TAG=$(IMAGE_TAG) ./test.sh
