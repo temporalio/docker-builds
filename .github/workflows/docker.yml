@@ -135,3 +135,14 @@ jobs:
         with:
           image-tags: temporaliotest/auto-setup:${{ env.IMAGE_TAG }}
           image-name: auto-setup
+
+      - name: Ensure images work
+        run: make IMAGE_TAG=${{env.IMAGE_TAG}} test
+
+      - name: Upload compose logs
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@v3
+        with:
+          name: docker-compose-logs
+          path: docker-compose.log

@@ -8,12 +8,12 @@ COLOR := "\e[1;36m%s\e[0m\n"
 
 TEMPORAL_ROOT := temporal
 TCTL_ROOT := tctl
-
-IMAGE_TAG=$(shell git rev-parse --short HEAD)
+IMAGE_TAG ?= sha-$(shell git rev-parse --short HEAD)
 TEMPORAL_SHA := $(shell sh -c 'git submodule status -- temporal | cut -c2-40')
 TCTL_SHA := $(shell sh -c "git submodule status -- tctl | cut -c2-40")
 
-BAKE := IMAGE_TAG=$(IMAGE_TAG) TEMPORAL_SHA=$(TEMPORAL_SHA) TCTL_SHA=$(TCTL_SHA) docker buildx bake
+DOCKER ?= docker buildx
+BAKE := IMAGE_TAG=$(IMAGE_TAG) TEMPORAL_SHA=$(TEMPORAL_SHA) TCTL_SHA=$(TCTL_SHA) $(DOCKER) bake
 
 ##### Scripts ######
 install: install-submodules
@@ -67,3 +67,6 @@ docker-admin-tools-x:
 docker-auto-setup-x:
 	@printf $(COLOR) "Build cross-platform docker image temporalio/auto-setup:$(DOCKER_IMAGE_TAG)..."
 	$(BAKE) auto-setup
+
+test:
+	IMAGE_TAG=$(IMAGE_TAG) ./test.sh
