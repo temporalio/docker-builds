@@ -18,9 +18,6 @@ TCTL_SHA := $(shell sh -c "git submodule status -- tctl | cut -c2-40")
 SERVER_BUILD_ARGS := --build-arg
 PLATFORM ?=
 
-DOCKER ?= docker
-BUILDFLAGS ?=
-
 ##### Scripts ######
 install: install-submodules
 
@@ -45,15 +42,15 @@ simulate-dispatch:
 # We hard-code linux/amd64 here as the docker machine for mac doesn't support cross-platform builds (but it does when running verify-ci)
 docker-server:
 	@printf $(COLOR) "Building docker image temporalio/server:$(IMAGE_TAG)..."
-	$(DOCKER) build . $(BUILDFLAGS) -f server.Dockerfile -t $(REPO)/server:$(IMAGE_TAG) $(PLATFORM) --build-arg TEMPORAL_SHA=$(TEMPORAL_SHA) --build-arg TCTL_SHA=$(TCTL_SHA)
+	docker build . -f server.Dockerfile -t $(REPO)/server:$(IMAGE_TAG) $(PLATFORM) --build-arg TEMPORAL_SHA=$(TEMPORAL_SHA) --build-arg TCTL_SHA=$(TCTL_SHA)
 
 docker-admin-tools: docker-server
 	@printf $(COLOR) "Build docker image temporalio/admin-tools:$(IMAGE_TAG)..."
-	$(DOCKER) build . $(BUILDFLAGS) -f admin-tools.Dockerfile -t $(REPO)/admin-tools:$(IMAGE_TAG) $(PLATFORM) --build-arg SERVER_IMAGE=$(REPO)/server:$(IMAGE_TAG)
+	docker build . -f admin-tools.Dockerfile -t $(REPO)/admin-tools:$(IMAGE_TAG) $(PLATFORM) --build-arg SERVER_IMAGE=$(REPO)/server:$(IMAGE_TAG)
 
 docker-auto-setup: docker-admin-tools
 	@printf $(COLOR) "Build docker image temporalio/auto-setup:$(IMAGE_TAG)..."
-	$(DOCKER) build . $(BUILDFLAGS) -f auto-setup.Dockerfile -t $(REPO)/auto-setup:$(IMAGE_TAG) $(PLATFORM) --build-arg SERVER_IMAGE=$(REPO)/server:$(IMAGE_TAG) --build-arg ADMIN_TOOLS_IMAGE=$(REPO)/admin-tools:$(IMAGE_TAG)
+	docker build . -f auto-setup.Dockerfile -t $(REPO)/auto-setup:$(IMAGE_TAG) $(PLATFORM) --build-arg SERVER_IMAGE=$(REPO)/server:$(IMAGE_TAG) --build-arg ADMIN_TOOLS_IMAGE=$(REPO)/admin-tools:$(IMAGE_TAG)
 
 docker-buildx-container:
 	docker buildx create --name builder-x --driver docker-container --use
