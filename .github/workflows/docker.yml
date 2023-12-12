@@ -135,3 +135,21 @@ jobs:
         with:
           image-tags: temporaliotest/auto-setup:${{ env.IMAGE_TAG }}
           image-name: auto-setup
+
+      - name: Start temporal cluster
+        run: docker-compose up -d
+
+      - name: Ensure images work
+        run: test.sh
+
+      - name: Stop temporal cluster
+        if: always()
+        run: |
+          docker compose down
+          docker compose logs > docker-compose.log
+      - name: Upload compose logs
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: docker-compose-logs
+          path: docker-compose.log

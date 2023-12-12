@@ -8,8 +8,7 @@ COLOR := "\e[1;36m%s\e[0m\n"
 
 TEMPORAL_ROOT := temporal
 TCTL_ROOT := tctl
-
-IMAGE_TAG=$(shell git rev-parse --short HEAD)
+IMAGE_TAG ?= sha-$(shell git rev-parse --short HEAD)
 TEMPORAL_SHA := $(shell sh -c 'git submodule status -- temporal | cut -c2-40')
 TCTL_SHA := $(shell sh -c "git submodule status -- tctl | cut -c2-40")
 
