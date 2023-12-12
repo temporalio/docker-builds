@@ -5,14 +5,14 @@ set -u
 cleanup() {
     echo "Cleaning up..."
     docker compose logs > docker-compose.log
-    docker compose down
+    docker compose down >/dev/null 2>&1
 }
 
 trap cleanup EXIT
 
 TEMPORAL_VERSION="${TEMPORAL_VERSION:-latest}"
 
-docker compose up -d
+docker compose up -d >/dev/null 2>&1
 
 is_ready() {
     docker compose exec temporal-admin-tools temporal operator cluster health 2>/dev/null | grep -q SERVING
@@ -27,7 +27,7 @@ is_ready 2>&1
 RES=$?
 if [ "$RES" != "0" ]; then
     docker compose exec temporal-admin-tools temporal operator cluster health
-    docker compose logs temporal -tail 10
+    docker compose logs temporal --tail 5
 else
     echo "OK"
 fi
