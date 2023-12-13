@@ -56,30 +56,19 @@ jobs:
           echo "TCTL_SHA=${TCTL_SHA}" >> $GITHUB_ENV
           TAG_LATEST=${{(github.event_name == 'push' && github.ref == 'refs/heads/main') && 'true' || 'false'}}
           echo "TAG_LATEST=${TAG_LATEST}" >> $GITHUB_ENV
-
-          # Cache params are a bit of a pain
           echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
-          cachefor () {
-              echo "$1.cache-from=type=local,src=/tmp/.buildx-cache/$1"
-              echo "$1.cache-to=type=local,dest=/tmp/.buildx-cache-new/$1"
-          }
-
-          echo 'cache_params<<EOF' >> $GITHUB_OUTPUT
-          for img in server admin-tools auto-setup; do
-            cachefor $img >> $GITHUB_OUTPUT
-          done
-          echo 'EOF' >> $GITHUB_OUTPUT
           cat $GITHUB_OUTPUT
 
-      - name: Restore Cached Docker Layers
-        id: restore-cache
-        uses: actions/cache/restore@v3
+      - name: Prepare Go Build Cache for Docker
+        uses: actions/cache@v3
         with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-cache-go-build-${{ hashFiles('**/go.sum') }}-${{steps.build_args.outputs.branch}}
-          restore-keys: |
-            ${{ runner.os }}-cache-go-build-${{ hashFiles('**/go.sum') }}-
-            ${{ runner.os }}-cache-go-build-
+          path: go-build-cache
+          key: ${{ runner.os }}-go-build-cache-${{ hashFiles('**/go.sum') }}
+
+      - name: Inject go-build-cache into docker
+        uses: reproducible-containers/buildkit-cache-dance@v2.1.3
+        with:
+          cache-source: go-build-cache
 
       # You can't use `load` when building a multiarch image, so we build and load the
       # native image and build multiarch images later
@@ -88,32 +77,15 @@ jobs:
         with:
           load: true
           set: |
-            server.platform=linux/amd64
-            admin-tools.platform=linux/amd64
-            auto-setup.platform=linux/amd64
-            ${{ steps.build_args.outputs.cache_params }}
+            server.platform=linux/arm64
+            admin-tools.platform=linux/arm64
+            auto-setup.platform=linux/arm64
 
       - name: Bake and push multiarch images
         if: ${{ github.event_name == 'push' && !env.ACT }}
         uses: docker/bake-action@v4
         with:
           push: true
-          set: |
-            ${{ steps.build_args.outputs.cache_params }}
-
-      # This prevents the cache from growing in size indefinitely
-      - name: Move Docker Layers Cache
-        if: always()
-        run: |
-          test -d /tmp/.buildx-cache && rm -rf /tmp/.buildx-cache
-          test -d /tmp/.buildx-cache-new && mv /tmp/.buildx-cache-new /tmp/.buildx-cache
-
-      - name: Save Docker Layers Cache
-        uses: actions/cache/save@v3
-        if: always()
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ steps.restore-cache.outputs.cache-primary-key }}
 
       # TODO: can we loop this somehow?
       - name: Run Trivy vulnerability scanner on Server image

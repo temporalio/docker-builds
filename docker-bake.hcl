@@ -3,6 +3,10 @@ variable "platforms" {
   default = ["linux/amd64", "linux/arm64"]
 }
 
+variable "IMAGE_REPO" {
+  default = "temporaliotest"
+}
+
 variable "IMAGE_TAG" {
   default = null
 }
@@ -31,8 +35,8 @@ target "server" {
   dockerfile = "server.Dockerfile"
   target = "server"
   tags = [
-    "temporaliotest/server:${IMAGE_TAG}",
-    TAG_LATEST ? "temporaliotest/server:latest" : ""
+    "${IMAGE_REPO}/server:${IMAGE_TAG}",
+    TAG_LATEST ? "${IMAGE_REPO}/server:latest" : ""
   ]
   platforms = platforms
   args = {
@@ -51,8 +55,8 @@ target "server" {
 target "admin-tools" {
   dockerfile = "admin-tools.Dockerfile"
   tags = [
-    "temporaliotest/admin-tools:${IMAGE_TAG}",
-    TAG_LATEST ? "temporaliotest/admin-tools:latest" : ""
+    "${IMAGE_REPO}/admin-tools:${IMAGE_TAG}",
+    TAG_LATEST ? "${IMAGE_REPO}/admin-tools:latest" : ""
   ]
   platforms = platforms
   contexts = {
@@ -71,8 +75,8 @@ target "auto-setup" {
   dockerfile = "server.Dockerfile"
   target = "auto-setup"
   tags = [
-    "temporaliotest/auto-setup:${IMAGE_TAG}",
-    TAG_LATEST ? "temporaliotest/auto-setup:latest" : ""
+    "${IMAGE_REPO}/auto-setup:${IMAGE_TAG}",
+    TAG_LATEST ? "${IMAGE_REPO}/auto-setup:latest" : ""
   ]
   platforms = platforms
   contexts = {
