@@ -20,6 +20,23 @@ on:
       docker-builds-repo-ref:
         type: string
         default: "main"
+  workflow_dispatch:
+    inputs:
+      commit:
+        description: "Commit sha"
+        required: true
+      temporal-server-repo-ref:
+        description: "Repo ref"
+        default: "main"
+        type: string
+      temporal-server-repo-path:
+        description: "owner/reponame of the server repo to build"
+        type: string
+        default: "temporalio/temporal"
+      docker-builds-repo-ref:
+        description: "The ref of the docker-builds repo to use"
+        type: string
+        default: "main"
 
 jobs:
   build-image:
