@@ -93,7 +93,8 @@ jobs:
 
       - name: Configure image variables
         run: |
-          echo "IMAGE_TAG=sha-${github_sha_short}" >> $GITHUB_ENV
+          server_sha_short=${GITHUB_SHA:0:7}
+          echo "IMAGE_TAG=sha-$(git submodule status -- temporal | cut -c2-8)" >> $GITHUB_ENV
           echo "IMAGE_REPO=temporalio" >> $GITHUB_ENV
 
 
@@ -101,11 +102,17 @@ jobs:
         uses: docker/bake-action@v4
         with:
           push: false
+          load: true
           set: |
             server.platform=linux/amd64
             admin-tools.platform=linux/amd64
             auto-setup.platform=linux/amd64
-            auto-setup.output=type=docker,dest=/tmp/temporal-autosetup.tar
+
+      - name: Ensure images work
+        run: make IMAGE_TAG=${{env.IMAGE_TAG}} test
+
+      - name: Save autosetup image
+        run: docker save --output="/tmp/temporal-autosetup.tar" ${{env.IMAGE_REPO}}/auto-setup:${{env.IMAGE_TAG}}
 
       # Upload-artifact has no good way to flatten paths, so we need to move the compose file
       # to avoid some disgustingly long inner path inside the artifact zip.
