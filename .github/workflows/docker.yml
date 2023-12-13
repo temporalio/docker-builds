@@ -77,9 +77,9 @@ jobs:
         with:
           load: true
           set: |
-            server.platform=linux/amd64
-            admin-tools.platform=linux/amd64
-            auto-setup.platform=linux/amd64
+            server.platform=linux/arm64
+            admin-tools.platform=linux/arm64
+            auto-setup.platform=linux/arm64
 
       - name: Bake and push multiarch images
         if: ${{ github.event_name == 'push' && !env.ACT }}
