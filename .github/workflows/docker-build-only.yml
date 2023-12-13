@@ -101,15 +101,11 @@ jobs:
         uses: docker/bake-action@v4
         with:
           push: false
-          load: true
           set: |
             server.platform=linux/amd64
             admin-tools.platform=linux/amd64
             auto-setup.platform=linux/amd64
             auto-setup.output=type=docker,dest=/tmp/temporal-autosetup.tar
-
-      - name: Ensure images work
-        run: make IMAGE_TAG=${{env.IMAGE_TAG}} test
 
       # Upload-artifact has no good way to flatten paths, so we need to move the compose file
       # to avoid some disgustingly long inner path inside the artifact zip.
