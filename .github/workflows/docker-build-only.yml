@@ -70,38 +70,18 @@ jobs:
           key: ${{ runner.os }}-go-build-cache-${{ hashFiles('**/go.sum') }}
 
       - name: Inject go-build-cache into docker
-        uses: reproducible-containers/buildkit-cache-dance@v2.1.2
+        uses: reproducible-containers/buildkit-cache-dance@v2.1.3
         with:
           cache-source: go-build-cache
 
-      - name: Build Server Image
-        uses: docker/build-push-action@v5
+      - name: Bake native images for security scanning
+        uses: docker/bake-action@v4
         with:
-          context: .
-          file: server.Dockerfile
-          tags: localhost:5000/temporal-server:latest
-          push: true
-
-      - name: Build Admin tools Image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: admin-tools.Dockerfile
-          build-args: |
-            SERVER_IMAGE=localhost:5000/temporal-server:latest
-          tags: localhost:5000/temporal-admin-tools:latest
-          push: true
-
-      - name: Build Autosetup Image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: auto-setup.Dockerfile
-          build-args: |
-            SERVER_IMAGE=localhost:5000/temporal-server:latest
-            ADMIN_TOOLS_IMAGE=localhost:5000/temporal-admin-tools:latest
-          tags: temporal-autosetup:latest
-          outputs: type=docker,dest=/tmp/temporal-autosetup.tar
+          set: |
+            server.platform=linux/amd64
+            admin-tools.platform=linux/amd64
+            auto-setup.platform=linux/amd64
+            auto-setup.output=type=docker,dest=/tmp/temporal-autosetup.tar
 
       # Upload-artifact has no good way to flatten paths, so we need to move the compose file
       # to avoid some disgustingly long inner path inside the artifact zip.
