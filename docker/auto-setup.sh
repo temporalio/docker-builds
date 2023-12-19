@@ -168,13 +168,6 @@ setup_cassandra_schema() {
     fi
     temporal-cassandra-tool --ep "${CASSANDRA_SEEDS}" -k "${KEYSPACE}" setup-schema -v 0.0
     temporal-cassandra-tool --ep "${CASSANDRA_SEEDS}" -k "${KEYSPACE}" update-schema -d "${SCHEMA_DIR}"
-
-    VISIBILITY_SCHEMA_DIR=${TEMPORAL_HOME}/schema/cassandra/visibility/versioned
-    if [[ ${SKIP_DB_CREATE} != true ]]; then
-        temporal-cassandra-tool --ep "${CASSANDRA_SEEDS}" create -k "${VISIBILITY_KEYSPACE}" --rf "${CASSANDRA_REPLICATION_FACTOR}"
-    fi
-    temporal-cassandra-tool --ep "${CASSANDRA_SEEDS}" -k "${VISIBILITY_KEYSPACE}" setup-schema -v 0.0
-    temporal-cassandra-tool --ep "${CASSANDRA_SEEDS}" -k "${VISIBILITY_KEYSPACE}" update-schema -d "${VISIBILITY_SCHEMA_DIR}"
 }
 
 setup_mysql_schema() {
@@ -195,17 +188,17 @@ setup_mysql_schema() {
 
     SCHEMA_DIR=${TEMPORAL_HOME}/schema/mysql/${MYSQL_VERSION_DIR}/temporal/versioned
     if [[ ${SKIP_DB_CREATE} != true ]]; then
-        temporal-sql-tool --ep "${MYSQL_SEEDS}" -u "${MYSQL_USER}" -p "${DB_PORT}" "${MYSQL_CONNECT_ATTR[@]}" --db "${DBNAME}" create
+        temporal-sql-tool --plugin "${DB}" --ep "${MYSQL_SEEDS}" -u "${MYSQL_USER}" -p "${DB_PORT}" "${MYSQL_CONNECT_ATTR[@]}" --db "${DBNAME}" create
     fi
-    temporal-sql-tool --ep "${MYSQL_SEEDS}" -u "${MYSQL_USER}" -p "${DB_PORT}" "${MYSQL_CONNECT_ATTR[@]}" --db "${DBNAME}" setup-schema -v 0.0
-    temporal-sql-tool --ep "${MYSQL_SEEDS}" -u "${MYSQL_USER}" -p "${DB_PORT}" "${MYSQL_CONNECT_ATTR[@]}" --db "${DBNAME}" update-schema -d "${SCHEMA_DIR}"
+    temporal-sql-tool --plugin "${DB}" --ep "${MYSQL_SEEDS}" -u "${MYSQL_USER}" -p "${DB_PORT}" "${MYSQL_CONNECT_ATTR[@]}" --db "${DBNAME}" setup-schema -v 0.0
+    temporal-sql-tool --plugin "${DB}" --ep "${MYSQL_SEEDS}" -u "${MYSQL_USER}" -p "${DB_PORT}" "${MYSQL_CONNECT_ATTR[@]}" --db "${DBNAME}" update-schema -d "${SCHEMA_DIR}"
 
     VISIBILITY_SCHEMA_DIR=${TEMPORAL_HOME}/schema/mysql/${MYSQL_VERSION_DIR}/visibility/versioned
     if [[ ${SKIP_DB_CREATE} != true ]]; then
-        temporal-sql-tool --ep "${MYSQL_SEEDS}" -u "${MYSQL_USER}" -p "${DB_PORT}" "${MYSQL_CONNECT_ATTR[@]}" --db "${VISIBILITY_DBNAME}" create
+        temporal-sql-tool --plugin "${DB}" --ep "${MYSQL_SEEDS}" -u "${MYSQL_USER}" -p "${DB_PORT}" "${MYSQL_CONNECT_ATTR[@]}" --db "${VISIBILITY_DBNAME}" create
     fi
-    temporal-sql-tool --ep "${MYSQL_SEEDS}" -u "${MYSQL_USER}" -p "${DB_PORT}" "${MYSQL_CONNECT_ATTR[@]}" --db "${VISIBILITY_DBNAME}" setup-schema -v 0.0
-    temporal-sql-tool --ep "${MYSQL_SEEDS}" -u "${MYSQL_USER}" -p "${DB_PORT}" "${MYSQL_CONNECT_ATTR[@]}" --db "${VISIBILITY_DBNAME}" update-schema -d "${VISIBILITY_SCHEMA_DIR}"
+    temporal-sql-tool --plugin "${DB}" --ep "${MYSQL_SEEDS}" -u "${MYSQL_USER}" -p "${DB_PORT}" "${MYSQL_CONNECT_ATTR[@]}" --db "${VISIBILITY_DBNAME}" setup-schema -v 0.0
+    temporal-sql-tool --plugin "${DB}" --ep "${MYSQL_SEEDS}" -u "${MYSQL_USER}" -p "${DB_PORT}" "${MYSQL_CONNECT_ATTR[@]}" --db "${VISIBILITY_DBNAME}" update-schema -d "${VISIBILITY_SCHEMA_DIR}"
 }
 
 setup_postgres_schema() {
@@ -214,15 +207,17 @@ setup_postgres_schema() {
 
     if [[ ${DB} == "postgres12" ]]; then
       POSTGRES_VERSION_DIR=v12
+      PLUGIN_NAME=postgres12
     else
       POSTGRES_VERSION_DIR=v96
+      PLUGIN_NAME=postgres
     fi
 
     SCHEMA_DIR=${TEMPORAL_HOME}/schema/postgresql/${POSTGRES_VERSION_DIR}/temporal/versioned
     # Create database only if its name is different from the user name. Otherwise PostgreSQL container itself will create database.
     if [[ ${DBNAME} != "${POSTGRES_USER}" && ${SKIP_DB_CREATE} != true ]]; then
         temporal-sql-tool \
-            --plugin postgres \
+            --plugin ${PLUGIN_NAME} \
             --ep "${POSTGRES_SEEDS}" \
             -u "${POSTGRES_USER}" \
             -p "${DB_PORT}" \
@@ -236,7 +231,7 @@ setup_postgres_schema() {
             create
     fi
     temporal-sql-tool \
-        --plugin postgres \
+        --plugin ${PLUGIN_NAME} \
         --ep "${POSTGRES_SEEDS}" \
         -u "${POSTGRES_USER}" \
         -p "${DB_PORT}" \
@@ -249,7 +244,7 @@ setup_postgres_schema() {
         --tls-server-name "${POSTGRES_TLS_SERVER_NAME}" \
         setup-schema -v 0.0
     temporal-sql-tool \
-        --plugin postgres \
+        --plugin ${PLUGIN_NAME} \
         --ep "${POSTGRES_SEEDS}" \
         -u "${POSTGRES_USER}" \
         -p "${DB_PORT}" \
@@ -265,7 +260,7 @@ setup_postgres_schema() {
     VISIBILITY_SCHEMA_DIR=${TEMPORAL_HOME}/schema/postgresql/${POSTGRES_VERSION_DIR}/visibility/versioned
     if [[ ${VISIBILITY_DBNAME} != "${POSTGRES_USER}" && ${SKIP_DB_CREATE} != true ]]; then
         temporal-sql-tool \
-            --plugin postgres \
+            --plugin ${PLUGIN_NAME} \
             --ep "${POSTGRES_SEEDS}" \
             -u "${POSTGRES_USER}" \
             -p "${DB_PORT}" \
@@ -279,7 +274,7 @@ setup_postgres_schema() {
             create
     fi
     temporal-sql-tool \
-        --plugin postgres \
+        --plugin ${PLUGIN_NAME} \
         --ep "${POSTGRES_SEEDS}" \
         -u "${POSTGRES_USER}" \
         -p "${DB_PORT}" \
@@ -292,7 +287,7 @@ setup_postgres_schema() {
         --tls-server-name "${POSTGRES_TLS_SERVER_NAME}" \
         setup-schema -v 0.0
     temporal-sql-tool \
-        --plugin postgres \
+        --plugin ${PLUGIN_NAME} \
         --ep "${POSTGRES_SEEDS}" \
         -u "${POSTGRES_USER}" \
         -p "${DB_PORT}" \
@@ -368,7 +363,7 @@ setup_es_index() {
     curl --fail --user "${ES_USER}":"${ES_PWD}" -X PUT "${SETTINGS_URL}" -H "Content-Type: application/json" --data-binary "@${SETTINGS_FILE}" --write-out "\n"
     curl --fail --user "${ES_USER}":"${ES_PWD}" -X PUT "${TEMPLATE_URL}" -H 'Content-Type: application/json' --data-binary "@${SCHEMA_FILE}" --write-out "\n"
     curl --user "${ES_USER}":"${ES_PWD}" -X PUT "${INDEX_URL}" --write-out "\n"
-    if [[ ! -z "${ES_SEC_VIS_INDEX}" ]]; then
+    if [[ -n "${ES_SEC_VIS_INDEX}" ]]; then
       SEC_INDEX_URL="${ES_SERVER}/${ES_SEC_VIS_INDEX}"
       curl --user "${ES_USER}":"${ES_PWD}" -X PUT "${SEC_INDEX_URL}" --write-out "\n"
     fi
