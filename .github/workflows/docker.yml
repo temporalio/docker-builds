@@ -46,14 +46,9 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Set SHA when dispatched
-        if: ${{ github.event_name == 'workflow_dispatch' }}
         run: |
-          echo "SHA=${{github.event.inputs.commit}}" >> $GITHUB_ENV
-
-      - name: Set SHA otherwise
-        if: ${{ github.event_name != 'workflow_dispatch' }}
-        run: |
-          echo "SHA=${GITHUB_SHA}" >> $GITHUB_ENV
+          SHA=$([ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ] && echo "${{ github.event.inputs.commit }}" || echo "${GITHUB_SHA}")
+          echo "SHA=${SHA}" >> $GITHUB_ENV
 
       - name: Prepare build args
         id: build_args
