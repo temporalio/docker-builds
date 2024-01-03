@@ -45,10 +45,15 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PAT }}
 
+      - name: Set SHA when dispatched
+        run: |
+          SHA=$([ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ] && echo "${{ github.event.inputs.commit }}" || echo "${GITHUB_SHA}")
+          echo "SHA=${SHA}" >> $GITHUB_ENV
+
       - name: Prepare build args
         id: build_args
         run: |
-          github_sha_short=${GITHUB_SHA:0:7}
+          github_sha_short=${SHA:0:7}
           echo "IMAGE_TAG=sha-${github_sha_short}" >> $GITHUB_ENV
           TEMPORAL_SHA=$(git submodule status -- temporal | awk '{print $1}')
           echo "TEMPORAL_SHA=${TEMPORAL_SHA}" >> $GITHUB_ENV
