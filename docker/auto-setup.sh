@@ -82,7 +82,7 @@ validate_db_env() {
               die "MYSQL_SEEDS env must be set if DB is ${DB}."
           fi
           ;;
-      postgresql | postgres | postgres12)
+      postgresql | postgres | postgres12 | postgres12_pgx)
           if [[ -z ${POSTGRES_SEEDS} ]]; then
               die "POSTGRES_SEEDS env must be set if DB is ${DB}."
           fi
@@ -139,7 +139,7 @@ wait_for_db() {
       mysql | mysql8)
           wait_for_mysql
           ;;
-      postgresql | postgres | postgres12)
+      postgresql | postgres | postgres12 | postgres12_pgx)
           wait_for_postgres
           ;;
       cassandra)
@@ -205,9 +205,9 @@ setup_postgres_schema() {
     # TODO (alex): Remove exports
     export SQL_PASSWORD=${POSTGRES_PWD}
 
-    if [[ ${DB} == "postgres12" ]]; then
+    if [[ ${DB} == "postgres12" || ${DB} == "postgres12_pgx" ]]; then
       POSTGRES_VERSION_DIR=v12
-      PLUGIN_NAME=postgres12
+      PLUGIN_NAME=${DB}
     else
       POSTGRES_VERSION_DIR=v96
       PLUGIN_NAME=postgres
@@ -307,7 +307,7 @@ setup_schema() {
           echo 'Setup MySQL schema.'
           setup_mysql_schema
           ;;
-      postgresql | postgres | postgres12)
+      postgresql | postgres | postgres12 | postgres12_pgx)
           echo 'Setup PostgreSQL schema.'
           setup_postgres_schema
           ;;
