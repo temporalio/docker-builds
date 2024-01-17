@@ -1,5 +1,5 @@
-ARG BASE_BUILDER_IMAGE=temporalio/base-builder:1.14.4
-ARG BASE_ADMIN_TOOLS_IMAGE=temporalio/base-admin-tools:1.12.3
+ARG BASE_BUILDER_IMAGE=temporalio/base-builder:1.14.7
+ARG BASE_ADMIN_TOOLS_IMAGE=temporalio/base-admin-tools:1.12.5
 ARG GOPROXY
 
 ##### Temporal Admin Tools builder #####
