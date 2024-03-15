@@ -24,7 +24,7 @@ COPY ./tctl ./tctl
 COPY ./temporal ./temporal
 # Git info is needed for Go build to attach VCS information properly.
 # See the `buildvcs` Go flag: https://pkg.go.dev/cmd/go
-COPY ./.git ./.git
+ADD ./.git ./.git
 COPY ./.gitmodules ./.gitmodules
 RUN --mount=type=cache,target=/root/.cache/go-build (cd ./temporal && make temporal-server)
 RUN --mount=type=cache,target=/root/.cache/go-build (cd ./tctl && make build)
