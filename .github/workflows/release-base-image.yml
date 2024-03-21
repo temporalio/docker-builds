@@ -62,6 +62,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           push: true
+          pull: true
           file: docker/base-images/${{ github.event.inputs.target }}.Dockerfile
           platforms: ${{ github.event.inputs.arch }}
           tags: ${{ steps.meta.outputs.tags }}
