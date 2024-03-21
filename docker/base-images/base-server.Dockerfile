@@ -11,7 +11,7 @@ RUN mkdir -p /xsrc && \
     rm -rf /xsrc
 
 ##### base-server target #####
-FROM alpine:3 AS base-server
+FROM alpine:3.19 AS base-server
 
 RUN apk add --update --no-cache \
     ca-certificates \
