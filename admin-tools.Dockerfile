@@ -7,34 +7,20 @@ FROM ${BASE_BUILDER_IMAGE} AS admin-tools-builder
 
 WORKDIR /home/builder
 
-# cache Temporal packages as a docker layer
-COPY ./temporal/go.mod ./temporal/go.sum ./temporal/
-RUN --mount=type=cache,target=/root/.cache/go-build (cd ./temporal && go mod download all)
-
-# build
-COPY ./temporal ./temporal
-# Git info is needed for Go build to attach VCS information properly.
-# See the `buildvcs` Go flag: https://pkg.go.dev/cmd/go
-# NOTE: `COPY ./.git ./.git` will fail in Docker as COPY isn't allowed to add git repositories
-COPY ./.gi[t] ./.git
-COPY ./.gitmodules ./.gitmodules
-RUN --mount=type=cache,target=/root/.cache/go-build (cd ./temporal && make temporal-cassandra-tool temporal-sql-tool tdbg)
-
-
-##### Server #####
+##### Admin Tools #####
 # This is injected as a context via the bakefile so we don't take it as an ARG
 FROM temporaliotest/server as server
 
 ##### Temporal admin tools #####
 FROM ${BASE_ADMIN_TOOLS_IMAGE} as temporal-admin-tools
 
-COPY --from=server /usr/local/bin/tctl /usr/local/bin
-COPY --from=server /usr/local/bin/tctl-authorization-plugin /usr/local/bin
-COPY --from=server /usr/local/bin/temporal /usr/local/bin
-COPY --from=admin-tools-builder /home/builder/temporal/temporal-cassandra-tool /usr/local/bin
-COPY --from=admin-tools-builder /home/builder/temporal/temporal-sql-tool /usr/local/bin
-COPY --from=admin-tools-builder /home/builder/temporal/schema /etc/temporal/schema
-COPY --from=admin-tools-builder /home/builder/temporal/tdbg /usr/local/bin
+COPY  ./${TARGETARCH}/tctl /usr/local/bin
+COPY  ./${TARGETARCH}/tctl-authorization-plugin /usr/local/bin
+COPY  ./${TARGETARCH}/temporal /usr/local/bin
+COPY  ./${TARGETARCH}/temporal-cassandra-tool /usr/local/bin
+COPY  ./${TARGETARCH}/temporal-sql-tool /usr/local/bin
+COPY  ./${TARGETARCH}/schema /etc/temporal/schema
+COPY  ./${TARGETARCH}/tdbg /usr/local/bin
 
 # Alpine has a /etc/bash/bashrc that sources all files named /etc/bash/*.sh for
 # interactive shells, so we can add completion logic in /etc/bash/temporal-completion.sh
