@@ -70,6 +70,7 @@ jobs:
           go-version-file: 'temporal/go.mod'
 
       - name: Compile binaries
+        shell: bash
         run: make bins
 
       - name: Get native architecture

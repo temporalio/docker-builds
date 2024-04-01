@@ -41,27 +41,26 @@ $(ARM64_BINS):
 amd64-bins: $(AMD64_BINS)
 	@printf $(COLOR) "Compiling for amd64..."
 	(cd dockerize && GOOS=linux GOARCH=arm64 go build -o ../$(AMD64_BINS)/dockerize .)
-	(cd temporal && GOOS=linux GOARCH=amd64 make bins)
+	GOOS=linux GOARCH=amd64 make -C temporal bins
 	cp temporal/{temporal-server,temporal-cassandra-tool,temporal-sql-tool,tdbg} $(AMD64_BINS)
-	(cd cli && GOOS=linux GOARCH=amd64 make build)
+	GOOS=linux GOARCH=amd64 make -C cli build
 	cp ./cli/temporal $(AMD64_BINS)/
-	(cd tctl && GOOS=linux GOARCH=amd64 make build)
+	GOOS=linux GOARCH=amd64 make -C tctl build
 	cp ./tctl/tctl $(AMD64_BINS)/
 	cp ./tctl/tctl-authorization-plugin $(AMD64_BINS)/
 
 arm64-bins: $(ARM64_BINS)
-	@printf $(COLOR) "Compiling for arm4..."
+	@printf $(COLOR) "Compiling for arm64..."
 	(cd dockerize && GOOS=linux GOARCH=arm64 go build -o ../$(ARM64_BINS)/dockerize .)
-	(cd temporal && GOOS=linux GOARCH=arm64 make bins)
+	GOOS=linux GOARCH=arm64 make -C temporal bins
 	cp temporal/{temporal-server,temporal-cassandra-tool,temporal-sql-tool,tdbg} $(ARM64_BINS)
-	(cd cli && GOOS=linux GOARCH=arm64 make build)
+	GOOS=linux GOARCH=arm64 make -C cli build
 	cp ./cli/temporal $(ARM64_BINS)/
-	(cd tctl && GOOS=linux GOARCH=arm64 make build)
+	GOOS=linux GOARCH=arm64 make -C tctl build
 	cp ./tctl/tctl $(ARM64_BINS)/
 	cp ./tctl/tctl-authorization-plugin $(ARM64_BINS)/
 
 bins: install-submodules amd64-bins arm64-bins
-	find ./build
 .NOTPARALLEL: bins
 
 build: bins
