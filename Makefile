@@ -40,7 +40,10 @@ build/%:
 	@printf $(COLOR) "Compiling for $*..."
 	(cd $(DOCKERIZE_ROOT) && GOOS=linux GOARCH=$* go build -o $(shell git rev-parse --show-toplevel)/build/$*/dockerize .)
 	GOOS=linux GOARCH=$* make -C $(TEMPORAL_ROOT) bins
-	cp $(TEMPORAL_ROOT)/{temporal-server,temporal-cassandra-tool,temporal-sql-tool,tdbg} build/$*/
+	cp $(TEMPORAL_ROOT)/temporal-server build/$*/
+	cp $(TEMPORAL_ROOT)/temporal-cassandra-tool build/$*/
+	cp $(TEMPORAL_ROOT)/temporal-sql-tool build/$*/
+	cp $(TEMPORAL_ROOT)/tdbg build/$*/
 	GOOS=linux GOARCH=$* make -C cli build
 	cp ./cli/temporal build/$*/
 	GOOS=linux GOARCH=$* make -C $(TCTL_ROOT) build
