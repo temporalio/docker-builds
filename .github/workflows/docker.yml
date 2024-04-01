@@ -90,9 +90,9 @@ jobs:
         with:
           load: true
           set: |
-            server.platform=linux/${NATIVE_ARCH}
-            admin-tools.platform=linux/${NATIVE_ARCH}
-            auto-setup.platform=linux/${NATIVE_ARCH}
+            server.platform=linux/${{ env.NATIVE_ARCH }}
+            admin-tools.platform=linux/${{ env.NATIVE_ARCH }}
+            auto-setup.platform=linux/${{ env.NATIVE_ARCH }}
 
       - name: Bake and push multiarch images
         if: ${{ github.event_name == 'push' && !env.ACT }}
