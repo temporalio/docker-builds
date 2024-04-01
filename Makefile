@@ -16,6 +16,7 @@ TCTL_SHA := $(shell sh -c "git submodule status -- tctl | cut -c2-40")
 
 DOCKER ?= docker buildx
 BAKE := IMAGE_TAG=$(IMAGE_TAG) TEMPORAL_SHA=$(TEMPORAL_SHA) TCTL_SHA=$(TCTL_SHA) $(DOCKER) bake
+NATIVE_ARCH := $(shell go env GOARCH)
 
 ##### Scripts ######
 install: install-submodules
@@ -53,9 +54,6 @@ build/%:
 bins: install-submodules amd64-bins arm64-bins
 .NOTPARALLEL: bins
 
-build: bins
-	$(BAKE)
-
 simulate-push:
 	@act push -s GITHUB_TOKEN="$(shell gh auth token)" -j build-push-images -P ubuntu-latest-16-cores=catthehacker/ubuntu:act-latest
 
@@ -63,18 +61,21 @@ COMMIT =?
 simulate-dispatch:
 	@act workflow_dispatch -s GITHUB_TOKEN="$(shell gh auth token)" -j build-push-images -P ubuntu-latest-16-cores=catthehacker/ubuntu:act-latest --input commit=$(COMMIT)
 
-# We hard-code linux/amd64 here as the docker machine for mac doesn't support cross-platform builds (but it does when running verify-ci)
-docker-server: amd64-bins
+# We hard-code the native arch here as the docker machine for mac doesn't support cross-platform builds (unless running within act)
+build: docker-server docker-admin-tools docker-auto-setup
+	$(BAKE) --set "*.platform=linux/$(NATIVE_ARCH)" --load
+
+docker-server: $(NATIVE_ARCH)-bins
 	@printf $(COLOR) "Building docker image temporalio/server:$(IMAGE_TAG)..."
-	$(BAKE) server --set "*.platform=linux/amd64"
+	$(BAKE) server --set "*.platform=linux/$(NATIVE_ARCH)"
 
-docker-admin-tools: amd64-bins
+docker-admin-tools: $(NATIVE_ARCH)-bins
 	@printf $(COLOR) "Build docker image temporalio/admin-tools:$(IMAGE_TAG)..."
-	$(BAKE) admin-tools --set "*.platform=linux/amd64"
+	$(BAKE) admin-tools --set "*.platform=linux/$(NATIVE_ARCH)"
 
-docker-auto-setup: amd64-bins
+docker-auto-setup: $(NATIVE_ARCH)-bins
 	@printf $(COLOR) "Build docker image temporalio/auto-setup:$(IMAGE_TAG)..."
-	$(BAKE) auto-setup --set "*.platform=linux/amd64"
+	$(BAKE) auto-setup --set "*.platform=linux/$(NATIVE_ARCH)"
 
 docker-buildx-container:
 	docker buildx create --name builder-x --driver docker-container --use
