@@ -1,10 +1,12 @@
-.ONESHELL:
 .PHONY:
 
 all: install
 
 ##### Variables ######
 COLOR := "\e[1;36m%s\e[0m\n"
+
+# Disable cgo by default.
+CGO_ENABLED ?= 0
 
 TEMPORAL_ROOT := temporal
 TCTL_ROOT := tctl
@@ -20,6 +22,8 @@ NATIVE_ARCH := $(shell go env GOARCH)
 
 ##### Scripts ######
 install: install-submodules
+clean:
+	rm -rf ./build
 
 update: update-submodules
 
@@ -35,21 +39,23 @@ update-submodules:
 build/%:
 	mkdir -p $(@)
 
+build/%/dockerize:
+	@printf $(COLOR) "Building dockerize with CGO_ENABLED=$(CGO_ENABLED) for linux/$*..."
+	cd $(DOCKERIZE_ROOT) && CGO_ENABLED=$(CGO_ENABLED) GOOS=linux GOARCH=$* go build -o $@ .
+
 # If you're new to Make, this is a pattern rule: https://www.gnu.org/software/make/manual/html_node/Pattern-Rules.html#Pattern-Rules
 # $* expands to the stem that matches the %, so when the target is amd64-bins $* expands to amd64
-%-bins: build/%
-	@printf $(COLOR) "Compiling for $*..."
-	(cd $(DOCKERIZE_ROOT) && GOOS=linux GOARCH=$* go build -o $(shell git rev-parse --show-toplevel)/build/$*/dockerize .)
-	GOOS=linux GOARCH=$* make -C $(TEMPORAL_ROOT) bins
-	cp $(TEMPORAL_ROOT)/temporal-server build/$*/
-	cp $(TEMPORAL_ROOT)/temporal-cassandra-tool build/$*/
-	cp $(TEMPORAL_ROOT)/temporal-sql-tool build/$*/
-	cp $(TEMPORAL_ROOT)/tdbg build/$*/
-	GOOS=linux GOARCH=$* make -C cli build
-	cp ./cli/temporal build/$*/
-	GOOS=linux GOARCH=$* make -C $(TCTL_ROOT) build
-	cp ./$(TCTL_ROOT)/tctl build/$*/
-	cp ./$(TCTL_ROOT)/tctl-authorization-plugin build/$*/
+%-bins: build/% build/%/dockerize
+	@GOOS=linux GOARCH=$* CGO_ENABLED=$(CGO_ENABLED) make -C $(TEMPORAL_ROOT) bins
+	@cp $(TEMPORAL_ROOT)/temporal-server build/$*/
+	@cp $(TEMPORAL_ROOT)/temporal-cassandra-tool build/$*/
+	@cp $(TEMPORAL_ROOT)/temporal-sql-tool build/$*/
+	@cp $(TEMPORAL_ROOT)/tdbg build/$*/
+	@GOOS=linux GOARCH=$* CGO_ENABLED=$(CGO_ENABLED) make -C $(CLI_ROOT) build
+	@cp ./$(CLI_ROOT)/temporal build/$*/
+	@GOOS=linux GOARCH=$* CGO_ENABLED=$(CGO_ENABLED) make -C $(TCTL_ROOT) build
+	@cp ./$(TCTL_ROOT)/tctl build/$*/
+	@cp ./$(TCTL_ROOT)/tctl-authorization-plugin build/$*/
 
 bins: install-submodules amd64-bins arm64-bins
 .NOTPARALLEL: bins
