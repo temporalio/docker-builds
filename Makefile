@@ -15,22 +15,55 @@ TCTL_SHA := $(shell sh -c "git submodule status -- tctl | cut -c2-40")
 DOCKER ?= docker buildx
 BAKE := IMAGE_TAG=$(IMAGE_TAG) TEMPORAL_SHA=$(TEMPORAL_SHA) TCTL_SHA=$(TCTL_SHA) $(DOCKER) bake
 
+AMD64_BINS ?= build/amd64
+ARM64_BINS ?= build/arm64
+
 ##### Scripts ######
 install: install-submodules
 
 update: update-submodules
 
 install-submodules:
-	@printf $(COLOR) "Installing temporal and tctl submodules..."
-	git submodule update --init $(TEMPORAL_ROOT) $(TCTL_ROOT)
+	@printf $(COLOR) "Installing submodules..."
+	git submodule update --init
 
 update-submodules:
-	@printf $(COLOR) "Updatinging temporal and tctl submodules..."
+	@printf $(COLOR) "Updating submodules..."
 	git submodule update --force --remote $(TEMPORAL_ROOT) $(TCTL_ROOT)
 
 ##### Docker #####
+$(AMD64_BINS):
+	mkdir -p $(@)
 
-build:
+$(ARM64_BINS):
+	mkdir -p $(@)
+
+amd64-bins: $(AMD64_BINS)
+	@printf $(COLOR) "Compiling for amd64..."
+	(cd dockerize && GOOS=linux GOARCH=arm64 go build -o ../$(AMD64_BINS)/dockerize .)
+	(cd temporal && GOOS=linux GOARCH=amd64 make bins)
+	cp temporal/{temporal-server,temporal-cassandra-tool,temporal-sql-tool,tdbg} $(AMD64_BINS)
+	(cd cli && GOOS=linux GOARCH=amd64 make build)
+	cp ./cli/temporal $(AMD64_BINS)/
+	(cd tctl && GOOS=linux GOARCH=amd64 make build)
+	cp ./tctl/tctl $(AMD64_BINS)/
+	cp ./tctl/tctl-authorization-plugin $(AMD64_BINS)/
+
+arm64-bins: $(ARM64_BINS)
+	@printf $(COLOR) "Compiling for arm4..."
+	(cd dockerize && GOOS=linux GOARCH=arm64 go build -o ../$(ARM64_BINS)/dockerize .)
+	(cd temporal && GOOS=linux GOARCH=arm64 make bins)
+	cp temporal/{temporal-server,temporal-cassandra-tool,temporal-sql-tool,tdbg} $(ARM64_BINS)
+	(cd cli && GOOS=linux GOARCH=arm64 make build)
+	cp ./cli/temporal $(ARM64_BINS)/
+	(cd tctl && GOOS=linux GOARCH=arm64 make build)
+	cp ./tctl/tctl $(ARM64_BINS)/
+	cp ./tctl/tctl-authorization-plugin $(ARM64_BINS)/
+
+bins: install-submodules amd64-bins arm64-bins
+.NOTPARALLEL: bins
+
+build: bins
 	$(BAKE)
 
 simulate-push:
