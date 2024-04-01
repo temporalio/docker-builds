@@ -42,6 +42,7 @@ build/%:
 build/%/dockerize:
 	@printf $(COLOR) "Building dockerize with CGO_ENABLED=$(CGO_ENABLED) for linux/$*..."
 	cd $(DOCKERIZE_ROOT) && CGO_ENABLED=$(CGO_ENABLED) GOOS=linux GOARCH=$* go build -o $@ .
+.NOTINTERMEDIATE: build/%/dockerize
 
 # If you're new to Make, this is a pattern rule: https://www.gnu.org/software/make/manual/html_node/Pattern-Rules.html#Pattern-Rules
 # $* expands to the stem that matches the %, so when the target is amd64-bins $* expands to amd64
