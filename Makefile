@@ -61,6 +61,7 @@ arm64-bins: $(ARM64_BINS)
 	cp ./tctl/tctl-authorization-plugin $(ARM64_BINS)/
 
 bins: install-submodules amd64-bins arm64-bins
+	find ./build
 .NOTPARALLEL: bins
 
 build: bins
