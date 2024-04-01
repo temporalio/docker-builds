@@ -75,6 +75,17 @@ jobs:
         with:
           cache-source: go-build-cache
 
+      - name: Get native architecture
+        run: |
+          case ${RUNNER_ARCH} in
+            X*)
+                echo NATIVE_ARCH=amd64 >> $GITHUB_ENV
+                ;;
+            ARM*)
+                echo NATIVE_ARCH=arm64 >> $GITHUB_ENV
+                ;;
+          esac
+
       # You can't use `load` when building a multiarch image, so we build and load the
       # native image and build multiarch images later
       - name: Bake native images for security scanning
@@ -82,9 +93,9 @@ jobs:
         with:
           load: true
           set: |
-            server.platform=linux/arm64
-            admin-tools.platform=linux/arm64
-            auto-setup.platform=linux/arm64
+            server.platform=linux/${NATIVE_ARCH}
+            admin-tools.platform=linux/${NATIVE_ARCH}
+            auto-setup.platform=linux/${NATIVE_ARCH}
 
       - name: Bake and push multiarch images
         if: ${{ github.event_name == 'push' && !env.ACT }}
