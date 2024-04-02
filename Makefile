@@ -41,8 +41,7 @@ update-submodules:
 # $* expands to the stem that matches the %, so when the target is amd64-bins $* expands to amd64
 %-bins:
 	mkdir -p build/$*
-	cd $(DOCKERIZE_ROOT) && CGO_ENABLED=$(CGO_ENABLED) GOOS=linux GOARCH=$* go build -o dockerize .
-	@cp $(DOCKERIZE_ROOT)/dockerize build/$*/
+	cd $(DOCKERIZE_ROOT) && CGO_ENABLED=$(CGO_ENABLED) GOOS=linux GOARCH=$* GOBIN=../build/$*/ go install .
 	@GOOS=linux GOARCH=$* CGO_ENABLED=$(CGO_ENABLED) make -C $(TEMPORAL_ROOT) bins
 	@cp $(TEMPORAL_ROOT)/temporal-server build/$*/
 	@cp $(TEMPORAL_ROOT)/temporal-cassandra-tool build/$*/
