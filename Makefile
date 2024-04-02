@@ -69,15 +69,16 @@ simulate-push:
 COMMIT =?
 .PHONY: simulate-dispatch
 simulate-dispatch:
-	@act workflow_dispatch -s GITHUB_TOKEN="$(shell gh auth token)" -j build-push-images -P ubuntu-latest-16-cores=catthehacker/ubuntu:act-latest --input commit=$(COMMIT)
+	@act workflow_dispatch -s GITHUB_TOKEN="$(shell gh auth token)" -j build-image -P ubuntu-latest-16-cores=catthehacker/ubuntu:act-latest --input commit=$(COMMIT)
 
 # We hard-code the native arch here as the docker machine for mac doesn't support cross-platform builds (unless running within act)
-.PHONY: build
-build: $(NATIVE_ARCH)-bins
-	$(BAKE) --set "*.platform=linux/$(NATIVE_ARCH)" --set="*.output=type=$(BAKE_OUTPUT)"
+# This target also ignores the BAKE_OUTPUT variable to prevent us from uploading a single-architecture image
+.PHONY: build-native
+build-native: $(NATIVE_ARCH)-bins
+	$(BAKE) --set "*.platform=linux/$(NATIVE_ARCH)" --load
 
-.PHONY: build-x
-build-x: bins
+.PHONY: build
+build: bins
 	$(BAKE) --set="*.output=type=$(BAKE_OUTPUT)"
 
 .PHONY: docker-server
