@@ -1,36 +1,7 @@
-ARG BASE_BUILDER_IMAGE=temporalio/base-builder:1.14.7
-ARG BASE_SERVER_IMAGE=temporalio/base-server:1.15.6
+ARG BASE_SERVER_IMAGE=temporalio/base-server:1.15.7
 
-##### Builder #####
-FROM ${BASE_BUILDER_IMAGE} AS temporal-builder
-ARG TEMPORAL_CLI_VERSION=latest
-
-WORKDIR /home/builder
-
-# cache Temporal packages as a docker layer
-COPY ./temporal/go.mod ./temporal/go.sum ./temporal/
-RUN --mount=type=cache,target=/root/.cache/go-build (cd ./temporal && go mod download all)
-
-# cache tctl packages as a docker layer
-COPY ./tctl/go.mod ./tctl/go.sum ./tctl/
-RUN --mount=type=cache,target=/root/.cache/go-build (cd ./tctl && go mod download all)
-
-# install Temporal CLI
-RUN sh -c "$(curl -sSf https://temporal.download/cli.sh)" -- --dir ./cli --version "$TEMPORAL_CLI_VERSION" && \
-    mv ./cli/bin/temporal ./cli/ && chown 0:0 ./cli/temporal
-
-# build
-COPY ./tctl ./tctl
-COPY ./temporal ./temporal
-# Git info is needed for Go build to attach VCS information properly.
-# See the `buildvcs` Go flag: https://pkg.go.dev/cmd/go
-COPY ./.git ./.git
-COPY ./.gitmodules ./.gitmodules
-RUN --mount=type=cache,target=/root/.cache/go-build (cd ./temporal && make temporal-server)
-RUN --mount=type=cache,target=/root/.cache/go-build (cd ./tctl && make build)
-
-##### Temporal server #####
 FROM ${BASE_SERVER_IMAGE} as temporal-server
+ARG TARGETARCH
 ARG TEMPORAL_SHA=unknown
 ARG TCTL_SHA=unknown
 
@@ -51,10 +22,11 @@ ENV TEMPORAL_SHA=${TEMPORAL_SHA}
 ENV TCTL_SHA=${TCTL_SHA}
 
 # binaries
-COPY --from=temporal-builder /home/builder/tctl/tctl /usr/local/bin
-COPY --from=temporal-builder /home/builder/tctl/tctl-authorization-plugin /usr/local/bin
-COPY --from=temporal-builder /home/builder/temporal/temporal-server /usr/local/bin
-COPY --from=temporal-builder /home/builder/cli/temporal /usr/local/bin
+COPY ./build/${TARGETARCH}/dockerize /usr/local/bin/dockerize
+COPY ./build/${TARGETARCH}/tctl /usr/local/bin
+COPY ./build/${TARGETARCH}/tctl-authorization-plugin /usr/local/bin
+COPY ./build/${TARGETARCH}/temporal-server /usr/local/bin
+COPY ./build/${TARGETARCH}/temporal /usr/local/bin
 
 # configs
 COPY ./temporal/config/dynamicconfig/docker.yaml /etc/temporal/config/dynamicconfig/docker.yaml
@@ -77,11 +49,11 @@ FROM temporal-server as auto-setup
 WORKDIR /etc/temporal
 
 # binaries
-COPY --from=admin-tools /usr/local/bin/temporal-cassandra-tool /usr/local/bin
-COPY --from=admin-tools /usr/local/bin/temporal-sql-tool /usr/local/bin
+COPY ./build/${TARGETARCH}/temporal-cassandra-tool /usr/local/bin
+COPY ./build/${TARGETARCH}/temporal-sql-tool /usr/local/bin
 
 # configs
-COPY --from=admin-tools /etc/temporal/schema /etc/temporal/schema
+COPY  ./temporal/schema /etc/temporal/schema
 
 # scripts
 COPY ./docker/entrypoint.sh /etc/temporal/entrypoint.sh
