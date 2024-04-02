@@ -64,16 +64,24 @@ jobs:
           echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
           cat $GITHUB_OUTPUT
 
-      - name: Prepare Go Build Cache for Docker
-        uses: actions/cache@v3
+      - uses: actions/setup-go@v5
         with:
-          path: go-build-cache
-          key: ${{ runner.os }}-go-build-cache-${{ hashFiles('**/go.sum') }}
+          cache-dependency-path: "**/*.sum"
+          go-version-file: 'temporal/go.mod'
 
-      - name: Inject go-build-cache into docker
-        uses: reproducible-containers/buildkit-cache-dance@v2.1.3
-        with:
-          cache-source: go-build-cache
+      - name: Compile binaries
+        run: make bins
+
+      - name: Get native architecture
+        run: |
+          case ${RUNNER_ARCH} in
+            X*)
+                echo NATIVE_ARCH=amd64 >> $GITHUB_ENV
+                ;;
+            ARM*)
+                echo NATIVE_ARCH=arm64 >> $GITHUB_ENV
+                ;;
+          esac
 
       # You can't use `load` when building a multiarch image, so we build and load the
       # native image and build multiarch images later
@@ -82,9 +90,9 @@ jobs:
         with:
           load: true
           set: |
-            server.platform=linux/arm64
-            admin-tools.platform=linux/arm64
-            auto-setup.platform=linux/arm64
+            server.platform=linux/${{ env.NATIVE_ARCH }}
+            admin-tools.platform=linux/${{ env.NATIVE_ARCH }}
+            auto-setup.platform=linux/${{ env.NATIVE_ARCH }}
 
       - name: Bake and push multiarch images
         if: ${{ github.event_name == 'push' && !env.ACT }}
