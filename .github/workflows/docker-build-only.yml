@@ -97,16 +97,8 @@ jobs:
           echo "IMAGE_TAG=sha-$(git submodule status -- temporal | cut -c2-8)" >> $GITHUB_ENV
           echo "TAG_LATEST=true" >> $GITHUB_ENV
 
-
       - name: Bake images
-        uses: docker/bake-action@v4
-        with:
-          push: false
-          load: true
-          set: |
-            server.platform=linux/amd64
-            admin-tools.platform=linux/amd64
-            auto-setup.platform=linux/amd64
+        run: BAKE_OUTPUT=docker make build-native
 
       - name: Ensure images work
         run: make IMAGE_TAG=${{env.IMAGE_TAG}} test
