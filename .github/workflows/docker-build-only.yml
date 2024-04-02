@@ -98,7 +98,7 @@ jobs:
           echo "TAG_LATEST=true" >> $GITHUB_ENV
 
       - name: Bake images
-        run: BAKE_OUTPUT=docker make build
+        run: BAKE_OUTPUT=docker make build-native
 
       - name: Ensure images work
         run: make IMAGE_TAG=${{env.IMAGE_TAG}} test

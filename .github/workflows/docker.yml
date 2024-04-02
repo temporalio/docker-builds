@@ -72,7 +72,7 @@ jobs:
       # You can't use `load` when building a multiarch image, so we build and load the
       # native image and build multiarch images later
       - name: Bake native images for security scanning
-        run: BAKE_OUTPUT=docker make build
+        run: BAKE_OUTPUT=docker make build-native
 
       - name: Bake and push multiarch images
         if: ${{ github.event_name == 'push' && !env.ACT }}
