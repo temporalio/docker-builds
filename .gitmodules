@@ -6,3 +6,9 @@
 	path = tctl
 	url = https://github.com/temporalio/tctl
 	branch = main
+[submodule "dockerize"]
+	path = dockerize
+	url = https://github.com/jwilder/dockerize.git
+[submodule "cli"]
+	path = cli
+	url = https://github.com/temporalio/cli.git

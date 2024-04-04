@@ -1,10 +1,9 @@
-FROM golang:1.20-alpine3.18 AS base-ci-builder
+FROM golang:1.22-alpine3.19 AS base-ci-builder
 
 RUN apk add --update --no-cache \
     make \
     git \
     protobuf \
     build-base \
+    sed \
     shellcheck
-
-RUN wget -O- https://raw.githubusercontent.com/fossas/spectrometer/master/install.sh | sh
