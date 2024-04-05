@@ -1,60 +1,120 @@
-.ONESHELL:
-.PHONY:
-
 all: install
 
 ##### Variables ######
 COLOR := "\e[1;36m%s\e[0m\n"
 
-IMAGE_TAG ?= sha-$(shell git rev-parse --short HEAD)
-# Pass "registry" to automatically push image to the docker hub.
-DOCKER_BUILDX_OUTPUT ?= image
+# Disable cgo by default.
+CGO_ENABLED ?= 0
 
 TEMPORAL_ROOT := temporal
 TCTL_ROOT := tctl
-IMAGE_REPO ?= temporaliotest
-
+CLI_ROOT := cli
+DOCKERIZE_ROOT := dockerize
+IMAGE_TAG ?= sha-$(shell git rev-parse --short HEAD)
 TEMPORAL_SHA := $(shell sh -c 'git submodule status -- temporal | cut -c2-40')
 TCTL_SHA := $(shell sh -c "git submodule status -- tctl | cut -c2-40")
-SERVER_BUILD_ARGS := --build-arg TEMPORAL_SHA=$(TEMPORAL_SHA) --build-arg TCTL_SHA=$(TCTL_SHA)
+
+DOCKER ?= docker buildx
+BAKE := IMAGE_TAG=$(IMAGE_TAG) TEMPORAL_SHA=$(TEMPORAL_SHA) TCTL_SHA=$(TCTL_SHA) $(DOCKER) bake
+NATIVE_ARCH := $(shell go env GOARCH)
+
+# Default to loading into the local docker context. Provide the value 'registry' if you wish to push the images
+BAKE_OUTPUT ?= docker
 
 ##### Scripts ######
+.PHONY: install
 install: install-submodules
+clean:
+	rm -rf ./build
 
+.PHONY: update
 update: update-submodules
 
+.PHONY: install-submodules
 install-submodules:
-	@printf $(COLOR) "Installing temporal and tctl submodules..."
-	git submodule update --init $(TEMPORAL_ROOT) $(TCTL_ROOT)
+	@printf $(COLOR) "Installing submodules..."
+	git submodule update --init
 
+.PHONY: update-submodules
 update-submodules:
 	@printf $(COLOR) "Updatinging temporal and tctl submodules..."
 	git submodule update --force --remote $(TEMPORAL_ROOT) $(TCTL_ROOT)
 
 ##### Docker #####
-docker-server:
-	@printf $(COLOR) "Building docker image $(IMAGE_REPO)/server:$(IMAGE_TAG)..."
-	docker build . -f server.Dockerfile -t $(IMAGE_REPO)/server:$(IMAGE_TAG) $(SERVER_BUILD_ARGS)
 
-docker-admin-tools: docker-server
-	@printf $(COLOR) "Build docker image $(IMAGE_REPO)/admin-tools:$(IMAGE_TAG)..."
-	docker build . -f admin-tools.Dockerfile -t $(IMAGE_REPO)/admin-tools:$(IMAGE_TAG) --build-arg SERVER_IMAGE=$(IMAGE_REPO)/server:$(IMAGE_TAG)
+# If you're new to Make, this is a pattern rule: https://www.gnu.org/software/make/manual/html_node/Pattern-Rules.html#Pattern-Rules
+# $* expands to the stem that matches the %, so when the target is amd64-bins $* expands to amd64
+%-bins:
+	@mkdir -p build/$*
+	@cd $(DOCKERIZE_ROOT) && CGO_ENABLED=$(CGO_ENABLED) GOOS=linux GOARCH=$* go build -o ../build/$*/dockerize .
+	@GOOS=linux GOARCH=$* CGO_ENABLED=$(CGO_ENABLED) make -C $(TEMPORAL_ROOT) bins
+	@cp $(TEMPORAL_ROOT)/temporal-server build/$*/
+	@cp $(TEMPORAL_ROOT)/temporal-cassandra-tool build/$*/
+	@cp $(TEMPORAL_ROOT)/temporal-sql-tool build/$*/
+	@cp $(TEMPORAL_ROOT)/tdbg build/$*/
+	@GOOS=linux GOARCH=$* CGO_ENABLED=$(CGO_ENABLED) make -C $(CLI_ROOT) build
+	@cp ./$(CLI_ROOT)/temporal build/$*/
+	@GOOS=linux GOARCH=$* CGO_ENABLED=$(CGO_ENABLED) make -C $(TCTL_ROOT) build
+	@cp ./$(TCTL_ROOT)/tctl build/$*/
+	@cp ./$(TCTL_ROOT)/tctl-authorization-plugin build/$*/
 
-docker-auto-setup: docker-admin-tools
-	@printf $(COLOR) "Build docker image $(IMAGE_REPO)/auto-setup:$(IMAGE_TAG)..."
-	docker build . -f auto-setup.Dockerfile -t $(IMAGE_REPO)/auto-setup:$(IMAGE_TAG) --build-arg SERVER_IMAGE=$(IMAGE_REPO)/server:$(IMAGE_TAG) --build-arg ADMIN_TOOLS_IMAGE=$(IMAGE_REPO)/admin-tools:$(IMAGE_TAG)
+.PHONY: bins
+.NOTPARALLEL: bins
+bins: install-submodules amd64-bins arm64-bins
 
+.PHONY: simulate-push
+simulate-push:
+	@act push -s GITHUB_TOKEN="$(shell gh auth token)" -j build-push-images -P ubuntu-latest-16-cores=catthehacker/ubuntu:act-latest
+
+COMMIT =?
+.PHONY: simulate-dispatch
+simulate-dispatch:
+	@act workflow_dispatch -s GITHUB_TOKEN="$(shell gh auth token)" -j build-image -P ubuntu-latest-16-cores=catthehacker/ubuntu:act-latest --input commit=$(COMMIT)
+
+# We hard-code the native arch here as the docker machine for mac doesn't support cross-platform builds (unless running within act)
+# This target also ignores the BAKE_OUTPUT variable to prevent us from uploading a single-architecture image
+.PHONY: build-native
+build-native: $(NATIVE_ARCH)-bins
+	$(BAKE) --set "*.platform=linux/$(NATIVE_ARCH)" --load
+
+.PHONY: build
+build: bins
+	$(BAKE) --set="*.output=type=$(BAKE_OUTPUT)"
+
+.PHONY: docker-server
+docker-server: $(NATIVE_ARCH)-bins
+	@printf $(COLOR) "Building docker image temporalio/server:$(IMAGE_TAG)..."
+	$(BAKE) server --set "*.platform=linux/$(NATIVE_ARCH)"
+
+.PHONY: docker-admin-tools
+docker-admin-tools: $(NATIVE_ARCH)-bins
+	@printf $(COLOR) "Build docker image temporalio/admin-tools:$(IMAGE_TAG)..."
+	$(BAKE) admin-tools --set "*.platform=linux/$(NATIVE_ARCH)"
+
+.PHONY: docker-auto-setup
+docker-auto-setup: $(NATIVE_ARCH)-bins
+	@printf $(COLOR) "Build docker image temporalio/auto-setup:$(IMAGE_TAG)..."
+	$(BAKE) auto-setup --set "*.platform=linux/$(NATIVE_ARCH)"
+
+.PHONY: docker-buildx-container
 docker-buildx-container:
 	docker buildx create --name builder-x --driver docker-container --use
 
-docker-server-x:
-	@printf $(COLOR) "Building cross-platform docker image $(IMAGE_REPO)/server:$(IMAGE_TAG)..."
-	docker buildx build . -f server.Dockerfile -t $(IMAGE_REPO)/server:$(IMAGE_TAG) --platform linux/amd64,linux/arm64 --output type=$(DOCKER_BUILDX_OUTPUT) $(SERVER_BUILD_ARGS)
+.PHONY: docker-server-x
+docker-server-x: bins
+	@printf $(COLOR) "Building cross-platform docker image temporalio/server:$(IMAGE_TAG)..."
+	$(BAKE) server
 
-docker-admin-tools-x: docker-server-x
-	@printf $(COLOR) "Build cross-platform docker image $(IMAGE_REPO)/admin-tools:$(IMAGE_TAG)..."
-	docker buildx build . -f admin-tools.Dockerfile -t $(IMAGE_REPO)/admin-tools:$(IMAGE_TAG) --platform linux/amd64,linux/arm64 --output type=$(DOCKER_BUILDX_OUTPUT) --build-arg SERVER_IMAGE=$(IMAGE_REPO)/server:$(IMAGE_TAG)
+.PHONY: docker-admin-tools-x
+docker-admin-tools-x: bins
+	@printf $(COLOR) "Build cross-platform docker image temporalio/admin-tools:$(IMAGE_TAG)..."
+	$(BAKE) admin-tools
 
-docker-auto-setup-x: docker-admin-tools-x
-	@printf $(COLOR) "Build cross-platform docker image $(IMAGE_REPO)/auto-setup:$(IMAGE_TAG)..."
-	docker buildx build . -f auto-setup.Dockerfile -t $(IMAGE_REPO)/auto-setup:$(IMAGE_TAG) --platform linux/amd64,linux/arm64 --output type=$(DOCKER_BUILDX_OUTPUT) --build-arg SERVER_IMAGE=$(IMAGE_REPO)/server:$(IMAGE_TAG) --build-arg ADMIN_TOOLS_IMAGE=$(IMAGE_REPO)/admin-tools:$(IMAGE_TAG)
+.PHONY: docker-auto-setup-x
+docker-auto-setup-x: bins
+	@printf $(COLOR) "Build cross-platform docker image temporalio/auto-setup:$(DOCKER_IMAGE_TAG)..."
+	$(BAKE) auto-setup
+
+.PHONY: test
+test:
+	IMAGE_TAG=$(IMAGE_TAG) ./test.sh
