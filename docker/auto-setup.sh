@@ -187,12 +187,15 @@ setup_mysql_schema() {
     temporal-sql-tool --plugin "${DB}" --ep "${MYSQL_SEEDS}" -u "${MYSQL_USER}" -p "${DB_PORT}" "${MYSQL_CONNECT_ATTR[@]}" --db "${DBNAME}" setup-schema -v 0.0
     temporal-sql-tool --plugin "${DB}" --ep "${MYSQL_SEEDS}" -u "${MYSQL_USER}" -p "${DB_PORT}" "${MYSQL_CONNECT_ATTR[@]}" --db "${DBNAME}" update-schema -d "${SCHEMA_DIR}"
 
-    VISIBILITY_SCHEMA_DIR=${TEMPORAL_HOME}/schema/mysql/${MYSQL_VERSION_DIR}/visibility/versioned
-    if [[ ${SKIP_DB_CREATE} != true ]]; then
-        temporal-sql-tool --plugin "${DB}" --ep "${MYSQL_SEEDS}" -u "${MYSQL_USER}" -p "${DB_PORT}" "${MYSQL_CONNECT_ATTR[@]}" --db "${VISIBILITY_DBNAME}" create
+    # Only setup visibility schema if ES is not enabled
+    if [[ ${ENABLE_ES} == false ]]; then
+      VISIBILITY_SCHEMA_DIR=${TEMPORAL_HOME}/schema/mysql/${MYSQL_VERSION_DIR}/visibility/versioned
+      if [[ ${SKIP_DB_CREATE} != true ]]; then
+          temporal-sql-tool --plugin "${DB}" --ep "${MYSQL_SEEDS}" -u "${MYSQL_USER}" -p "${DB_PORT}" "${MYSQL_CONNECT_ATTR[@]}" --db "${VISIBILITY_DBNAME}" create
+      fi
+      temporal-sql-tool --plugin "${DB}" --ep "${MYSQL_SEEDS}" -u "${MYSQL_USER}" -p "${DB_PORT}" "${MYSQL_CONNECT_ATTR[@]}" --db "${VISIBILITY_DBNAME}" setup-schema -v 0.0
+      temporal-sql-tool --plugin "${DB}" --ep "${MYSQL_SEEDS}" -u "${MYSQL_USER}" -p "${DB_PORT}" "${MYSQL_CONNECT_ATTR[@]}" --db "${VISIBILITY_DBNAME}" update-schema -d "${VISIBILITY_SCHEMA_DIR}"
     fi
-    temporal-sql-tool --plugin "${DB}" --ep "${MYSQL_SEEDS}" -u "${MYSQL_USER}" -p "${DB_PORT}" "${MYSQL_CONNECT_ATTR[@]}" --db "${VISIBILITY_DBNAME}" setup-schema -v 0.0
-    temporal-sql-tool --plugin "${DB}" --ep "${MYSQL_SEEDS}" -u "${MYSQL_USER}" -p "${DB_PORT}" "${MYSQL_CONNECT_ATTR[@]}" --db "${VISIBILITY_DBNAME}" update-schema -d "${VISIBILITY_SCHEMA_DIR}"
 }
 
 setup_postgres_schema() {
@@ -244,48 +247,51 @@ setup_postgres_schema() {
         --tls-server-name "${POSTGRES_TLS_SERVER_NAME}" \
         update-schema -d "${SCHEMA_DIR}"
 
-    VISIBILITY_SCHEMA_DIR=${TEMPORAL_HOME}/schema/postgresql/${POSTGRES_VERSION_DIR}/visibility/versioned
-    if [[ ${VISIBILITY_DBNAME} != "${POSTGRES_USER}" && ${SKIP_DB_CREATE} != true ]]; then
-        temporal-sql-tool \
-            --plugin ${DB} \
-            --ep "${POSTGRES_SEEDS}" \
-            -u "${POSTGRES_USER}" \
-            -p "${DB_PORT}" \
-            --db "${VISIBILITY_DBNAME}" \
-            --tls="${POSTGRES_TLS_ENABLED}" \
-            --tls-disable-host-verification="${POSTGRES_TLS_DISABLE_HOST_VERIFICATION}" \
-            --tls-cert-file "${POSTGRES_TLS_CERT_FILE}" \
-            --tls-key-file "${POSTGRES_TLS_KEY_FILE}" \
-            --tls-ca-file "${POSTGRES_TLS_CA_FILE}" \
-            --tls-server-name "${POSTGRES_TLS_SERVER_NAME}" \
-            create
+    # Only setup visibility schema if ES is not enabled
+    if [[ ${ENABLE_ES} == false ]]; then
+      VISIBILITY_SCHEMA_DIR=${TEMPORAL_HOME}/schema/postgresql/${POSTGRES_VERSION_DIR}/visibility/versioned
+      if [[ ${VISIBILITY_DBNAME} != "${POSTGRES_USER}" && ${SKIP_DB_CREATE} != true ]]; then
+          temporal-sql-tool \
+              --plugin ${DB} \
+              --ep "${POSTGRES_SEEDS}" \
+              -u "${POSTGRES_USER}" \
+              -p "${DB_PORT}" \
+              --db "${VISIBILITY_DBNAME}" \
+              --tls="${POSTGRES_TLS_ENABLED}" \
+              --tls-disable-host-verification="${POSTGRES_TLS_DISABLE_HOST_VERIFICATION}" \
+              --tls-cert-file "${POSTGRES_TLS_CERT_FILE}" \
+              --tls-key-file "${POSTGRES_TLS_KEY_FILE}" \
+              --tls-ca-file "${POSTGRES_TLS_CA_FILE}" \
+              --tls-server-name "${POSTGRES_TLS_SERVER_NAME}" \
+              create
+      fi
+      temporal-sql-tool \
+          --plugin ${DB} \
+          --ep "${POSTGRES_SEEDS}" \
+          -u "${POSTGRES_USER}" \
+          -p "${DB_PORT}" \
+          --db "${VISIBILITY_DBNAME}" \
+          --tls="${POSTGRES_TLS_ENABLED}" \
+          --tls-disable-host-verification="${POSTGRES_TLS_DISABLE_HOST_VERIFICATION}" \
+          --tls-cert-file "${POSTGRES_TLS_CERT_FILE}" \
+          --tls-key-file "${POSTGRES_TLS_KEY_FILE}" \
+          --tls-ca-file "${POSTGRES_TLS_CA_FILE}" \
+          --tls-server-name "${POSTGRES_TLS_SERVER_NAME}" \
+          setup-schema -v 0.0
+      temporal-sql-tool \
+          --plugin ${DB} \
+          --ep "${POSTGRES_SEEDS}" \
+          -u "${POSTGRES_USER}" \
+          -p "${DB_PORT}" \
+          --db "${VISIBILITY_DBNAME}" \
+          --tls="${POSTGRES_TLS_ENABLED}" \
+          --tls-disable-host-verification="${POSTGRES_TLS_DISABLE_HOST_VERIFICATION}" \
+          --tls-cert-file "${POSTGRES_TLS_CERT_FILE}" \
+          --tls-key-file "${POSTGRES_TLS_KEY_FILE}" \
+          --tls-ca-file "${POSTGRES_TLS_CA_FILE}" \
+          --tls-server-name "${POSTGRES_TLS_SERVER_NAME}" \
+          update-schema -d "${VISIBILITY_SCHEMA_DIR}"
     fi
-    temporal-sql-tool \
-        --plugin ${DB} \
-        --ep "${POSTGRES_SEEDS}" \
-        -u "${POSTGRES_USER}" \
-        -p "${DB_PORT}" \
-        --db "${VISIBILITY_DBNAME}" \
-        --tls="${POSTGRES_TLS_ENABLED}" \
-        --tls-disable-host-verification="${POSTGRES_TLS_DISABLE_HOST_VERIFICATION}" \
-        --tls-cert-file "${POSTGRES_TLS_CERT_FILE}" \
-        --tls-key-file "${POSTGRES_TLS_KEY_FILE}" \
-        --tls-ca-file "${POSTGRES_TLS_CA_FILE}" \
-        --tls-server-name "${POSTGRES_TLS_SERVER_NAME}" \
-        setup-schema -v 0.0
-    temporal-sql-tool \
-        --plugin ${DB} \
-        --ep "${POSTGRES_SEEDS}" \
-        -u "${POSTGRES_USER}" \
-        -p "${DB_PORT}" \
-        --db "${VISIBILITY_DBNAME}" \
-        --tls="${POSTGRES_TLS_ENABLED}" \
-        --tls-disable-host-verification="${POSTGRES_TLS_DISABLE_HOST_VERIFICATION}" \
-        --tls-cert-file "${POSTGRES_TLS_CERT_FILE}" \
-        --tls-key-file "${POSTGRES_TLS_KEY_FILE}" \
-        --tls-ca-file "${POSTGRES_TLS_CA_FILE}" \
-        --tls-server-name "${POSTGRES_TLS_SERVER_NAME}" \
-        update-schema -d "${VISIBILITY_SCHEMA_DIR}"
 }
 
 setup_schema() {
