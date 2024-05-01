@@ -35,11 +35,11 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v2
         with:
           ref: ${{ github.event.inputs.commit }}
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v4
         with:
           go-version-file: "src/go.mod"
 
