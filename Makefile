@@ -52,7 +52,7 @@ update-submodules:
 	@cp $(TEMPORAL_ROOT)/temporal-cassandra-tool build/$*/
 	@cp $(TEMPORAL_ROOT)/temporal-sql-tool build/$*/
 	@cp $(TEMPORAL_ROOT)/tdbg build/$*/
-	@GOOS=linux GOARCH=$* CGO_ENABLED=$(CGO_ENABLED) make -C $(CLI_ROOT) build
+	@cd $(CLI_ROOT) && GOOS=linux GOARCH=$* CGO_ENABLED=$(CGO_ENABLED) go build ./cmd/temporal
 	@cp ./$(CLI_ROOT)/temporal build/$*/
 	@GOOS=linux GOARCH=$* CGO_ENABLED=$(CGO_ENABLED) make -C $(TCTL_ROOT) build
 	@cp ./$(TCTL_ROOT)/tctl build/$*/
