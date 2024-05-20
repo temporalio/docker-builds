@@ -12,6 +12,9 @@ on:
       branch:
         description: "Branch of the submodule to update"
         required: true
+      commit:
+        description: "Commit of the submodule to check out"
+        required: false
 
 jobs:
   sync:
@@ -65,6 +68,15 @@ jobs:
           fi
           git config --file=.gitmodules submodule."$SUBMODULE".branch "$BRANCH"
           git submodule update --init --recursive --remote "$SUBMODULE"
+
+      - name: Check out requested commit
+        if:  github.event.inputs.commit
+        env:
+          SUBMODULE: ${{ github.event.inputs.repo }}
+          COMMIT: ${{ github.event.inputs.commit }}
+        run: |
+          # We know the submodule exists by this point
+          cd $(git config --file=.gitmodules --get submodule."$SUBMODULE".path) && git checkout "$COMMIT"
 
       - name: Commit update
         env:
