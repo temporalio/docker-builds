@@ -58,6 +58,7 @@ update-submodules:
 	@cp ./$(TCTL_ROOT)/tctl build/$*/
 	@cp ./$(TCTL_ROOT)/tctl-authorization-plugin build/$*/
 	@gh release -R temporalio/cli download $(CLI_VER) -p "*linux_$(*).tar.gz" -O - | tar --to-stdout -z -x -v -f - temporal > build/$*/temporal
+	@chmod +x build/$*/temporal
 
 .PHONY: bins
 .NOTPARALLEL: bins
