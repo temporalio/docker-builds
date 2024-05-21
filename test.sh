@@ -29,7 +29,7 @@ is_ready 2>&1
 RES=$?
 if [ "$RES" != "0" ]; then
     docker compose exec temporal-admin-tools temporal operator cluster health
-    docker compose logs temporal --tail 5
+    docker compose logs temporal --tail 20
 else
     echo "OK"
 fi
