@@ -48,7 +48,7 @@ jobs:
             cli_sha=$(shell sh -c 'git submodule status -- cli | cut -c2-40')
             echo "TAG=${today}${patch}+server-${temporal_sha}-cli-${cli_sha}" >> "${GITHUB_ENV}"
       - name: Copy images
-        if: ! ${{ inputs.dry-run }}
+        if: ${{ ! inputs.dry-run }}
         env:
           COMMIT: ${{ github.event.inputs.commit }}
           TAG: ${{ env.TAG }}
