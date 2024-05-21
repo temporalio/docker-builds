@@ -49,7 +49,7 @@ jobs:
           - 5000:5000
     steps:
       - name: Checkout docker builds repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           # Must specify repo path, or it'll use path of calling workflow (since this is a reusable wf)
           repository: temporalio/docker-builds
@@ -98,12 +98,17 @@ jobs:
         run: make IMAGE_TAG=${{env.IMAGE_TAG}} test
 
       - name: Save autosetup image
-        run: docker save --output="/tmp/temporal-autosetup.tar" temporaliotest/auto-setup:latest
+        run: |
+          docker save \
+            --output="/tmp/temporal-autosetup.tar" \
+            temporaliotest/auto-setup:"${{env.IMAGE_TAG}}"
 
-      # Upload-artifact has no good way to flatten paths, so we need to move the compose file
-      # to avoid some disgustingly long inner path inside the artifact zip.
-      - name: Copy compose file
-        run: cp ./temporal/develop/docker-compose/docker-compose.yml /tmp/docker-compose.yml
+      - name: Prepare artifact
+        run: |
+          # Upload-artifact has no good way to flatten paths, so we need to move the compose file
+          # to avoid some disgustingly long inner path inside the artifact zip.
+          cp ./temporal/develop/docker-compose/docker-compose.yml /tmp/docker-compose.yml
+          echo -n "${{env.IMAGE_TAG}}" > /tmp/image_tag
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
@@ -112,3 +117,4 @@ jobs:
           path: |
             /tmp/temporal-autosetup.tar
             /tmp/docker-compose.yml
+            /tmp/image_tag

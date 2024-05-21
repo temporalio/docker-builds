@@ -1,0 +1,59 @@
+name: Features Integration
+
+on: # rebuild any PRs and main branch changes
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions: read-all
+
+concurrency: # Auto-cancel existing runs in the PR when a new commit is pushed
+  group: ${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  build-docker-image:
+    uses: ./.github/workflows/docker-build-only.yml
+
+  feature-tests-ts:
+    needs: build-docker-image
+    uses: temporalio/features/.github/workflows/typescript.yaml@main
+    with:
+      # This field is not actually used by these workflow if docker-image-artifact-name
+      # is set, but it's marked as required, so supply some string.
+      version: __latest_features_docker_image__
+      version-is-repo-ref: false
+      docker-image-artifact-name: temporal-server-docker
+
+  feature-tests-go:
+    needs: build-docker-image
+    uses: temporalio/features/.github/workflows/go.yaml@main
+    with:
+      version: __latest_features_docker_image__
+      version-is-repo-ref: false
+      docker-image-artifact-name: temporal-server-docker
+
+  feature-tests-python:
+    needs: build-docker-image
+    uses: temporalio/features/.github/workflows/python.yaml@main
+    with:
+      version: __latest_features_docker_image__
+      version-is-repo-ref: false
+      docker-image-artifact-name: temporal-server-docker
+
+  feature-tests-java:
+    needs: build-docker-image
+    uses: temporalio/features/.github/workflows/java.yaml@main
+    with:
+      version: __latest_features_docker_image__
+      version-is-repo-ref: false
+      docker-image-artifact-name: temporal-server-docker
+
+  feature-tests-dotnet:
+    needs: build-docker-image
+    uses: temporalio/features/.github/workflows/dotnet.yaml@main
+    with:
+      version: __latest_features_docker_image__
+      version-is-repo-ref: false
+      docker-image-artifact-name: temporal-server-docker
