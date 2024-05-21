@@ -39,7 +39,7 @@ jobs:
         with:
           ref: ${{ github.event.inputs.commit }}
 
-      - uses: actions/setup-go@v4
+      - uses: actions/setup-go@v5
         with:
           go-version-file: "src/go.mod"
 
