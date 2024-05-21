@@ -36,7 +36,8 @@ jobs:
       # Main
       - uses: actions/checkout@v4
       # For the action itself
-      - uses: actions/checkout@v4
+      - name: Check out target commit
+        uses: actions/checkout@v4
         with:
           path: target
           submodules: "true"
@@ -46,15 +47,32 @@ jobs:
           go-version-file: "src/go.mod"
       - name: Calculate admintools tag
         run: |
+          get_tag() {
+            # We need to remove the `shallow` marker for this submodule or else
+            # `git describe --tags` won't find our tags
+            cd "target/$1"
+            # We need to fetch the tags before git describe will do what we want
+            # We _only_ fetch the tags to save time
+            git fetch origin 'refs/tags/*:refs/tags/*' >&2
+            rm -f ../.git/modules/$1/shallow
+            git describe --tags --always | cut -d '-' -f-2
+          }
+
           today=$(date "+%Y.%-m.%-d" | tr -d '\n')
           patch=
           if [ -n "${{inputs.patch}}" ]; then
             patch="-p${{inputs.patch}}"
           fi
-          temporal_ver=$(cd target/temporal && git describe --tags | cut -d '-' -f-2)
-          cli_ver=$(cd target/cli && git describe --tags | cut -d '-' -f-2)
-          tctl_ver=$(cd target/tctl && git describe --tags | cut -d '-' -f-2)
-          echo "TAG=${today}${patch}+server-${temporal_ver}.cli-${cli_ver}.tctl-${tctl_ver}" >> "${GITHUB_ENV}"
+
+          tag="${today}${patch}+"
+          while read module; do
+            tag="${tag}${module}-$(get_tag ${module})."
+          done < <(git submodule status | cut -d ' ' -f3 | grep -v dockerize)
+
+          # remove trailing period
+          tag=$(echo "${tag}" | sed 's/\.$//')
+
+          echo "TAG=${tag}" >> "${GITHUB_ENV}"
       - name: Copy images
         env:
           COMMIT: ${{ github.event.inputs.commit }}
