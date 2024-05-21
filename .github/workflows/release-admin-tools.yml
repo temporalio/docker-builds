@@ -53,13 +53,12 @@ jobs:
             git describe --tags --always | cut -d '-' -f-2
           }
 
-          today=$(date "+%Y.%-m.%-d")
-          patch=
+          tag=$(date "+%Y.%-m.%-d")
           if [ -n "${{inputs.patch}}" ]; then
-            patch="-p${{inputs.patch}}"
+            tag="${tag}-p${{inputs.patch}}"
           fi
 
-          tag="${today}${patch}+"
+          tag="${tag}+"
           while read module; do
             tag="${tag}${module}-$(get_tag ${module})."
           done < <(git submodule status | cut -d ' ' -f3 | grep -v dockerize)
