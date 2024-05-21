@@ -21,11 +21,6 @@ on:
         description: "Also update major tag"
         required: true
         default: false
-      dry-run:
-        description: "Whether or not this is a dry run"
-        type: boolean
-        required: false
-        default: true
 
 jobs:
   release-admin-tools:
@@ -69,10 +64,7 @@ jobs:
             tag="${tag}${module}-$(get_tag ${module})."
           done < <(git submodule status | cut -d ' ' -f3 | grep -v dockerize)
 
-          # remove trailing period
-          tag=$(echo "${tag}" | sed 's/\.$//')
-
-          echo "TAG=${tag}" >> "${GITHUB_ENV}"
+          echo "TAG=${tag%.}" >> "${GITHUB_ENV}"
       - name: Copy images
         env:
           COMMIT: ${{ github.event.inputs.commit }}
