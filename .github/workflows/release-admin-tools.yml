@@ -34,9 +34,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: "true"
       - uses: actions/setup-go@v5
         with:
-          go-version-file: "**/go.mod"
+          go-version-file: "src/go.mod"
       - name: Calculate admintools tag
         run: |
             today=$(date "+%Y.%m.%d" | tr -d '\n')
