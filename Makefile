@@ -8,8 +8,8 @@ CGO_ENABLED ?= 0
 
 TEMPORAL_ROOT := temporal
 TCTL_ROOT := tctl
-CLI_ROOT := cli
 DOCKERIZE_ROOT := dockerize
+CLI_VER := v0.12.0
 IMAGE_TAG ?= sha-$(shell git rev-parse --short HEAD)
 TEMPORAL_SHA := $(shell sh -c 'git submodule status -- temporal | cut -c2-40')
 TCTL_SHA := $(shell sh -c "git submodule status -- tctl | cut -c2-40")
@@ -44,6 +44,8 @@ update-submodules:
 
 # If you're new to Make, this is a pattern rule: https://www.gnu.org/software/make/manual/html_node/Pattern-Rules.html#Pattern-Rules
 # $* expands to the stem that matches the %, so when the target is amd64-bins $* expands to amd64
+#
+# NOTE(tdeebswihart): Please forgive me for the `gh` invocation below, but it means there are no temporary files I need to care about
 %-bins:
 	@mkdir -p build/$*
 	@cd $(DOCKERIZE_ROOT) && CGO_ENABLED=$(CGO_ENABLED) GOOS=linux GOARCH=$* go build -o ../build/$*/dockerize .
@@ -52,11 +54,10 @@ update-submodules:
 	@cp $(TEMPORAL_ROOT)/temporal-cassandra-tool build/$*/
 	@cp $(TEMPORAL_ROOT)/temporal-sql-tool build/$*/
 	@cp $(TEMPORAL_ROOT)/tdbg build/$*/
-	@cd $(CLI_ROOT) && GOOS=linux GOARCH=$* CGO_ENABLED=$(CGO_ENABLED) go build ./cmd/temporal
-	@cp ./$(CLI_ROOT)/temporal build/$*/
 	@GOOS=linux GOARCH=$* CGO_ENABLED=$(CGO_ENABLED) make -C $(TCTL_ROOT) build
 	@cp ./$(TCTL_ROOT)/tctl build/$*/
 	@cp ./$(TCTL_ROOT)/tctl-authorization-plugin build/$*/
+	@gh release -R temporalio/cli download $(CLI_VER) -p "*linux_$(*).tar.gz" -O - | tar --to-stdout -z -x -v -f - temporal > build/$*/temporal
 
 .PHONY: bins
 .NOTPARALLEL: bins
