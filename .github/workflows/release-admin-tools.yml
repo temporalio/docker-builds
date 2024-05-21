@@ -33,9 +33,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Main
+      - uses: actions/checkout@v4
+      # For the action itself
       - uses: actions/checkout@v4
         with:
+          path: target
           submodules: "true"
+          ref: ${{ github.event.inputs.commit }}
       - uses: actions/setup-go@v5
         with:
           go-version-file: "src/go.mod"
@@ -46,9 +51,9 @@ jobs:
           if [ -n "${{inputs.patch}}" ]; then
             patch="-p${{inputs.patch}}"
           fi
-          temporal_ver=$(cd temporal && git describe --tags | cut -d '-' -f-2)
-          cli_ver=$(cd cli && git describe --tags | cut -d '-' -f-2)
-          tctl_ver=$(cd tctl && git describe --tags | cut -d '-' -f-2)
+          temporal_ver=$(cd target/temporal && git describe --tags | cut -d '-' -f-2)
+          cli_ver=$(cd target/cli && git describe --tags | cut -d '-' -f-2)
+          tctl_ver=$(cd target/tctl && git describe --tags | cut -d '-' -f-2)
           echo "TAG=${today}${patch}+server-${temporal_ver}.cli-${cli_ver}.tctl-${tctl_ver}" >> "${GITHUB_ENV}"
       - name: Copy images
         env:
