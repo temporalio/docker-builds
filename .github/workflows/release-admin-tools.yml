@@ -1,4 +1,4 @@
-name: Release Temporal Images
+name: Release Admin Tools Image
 
 permissions: read-all
 
@@ -6,10 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       commit:
-        description: "Commit sha"
-        required: true
-      tag:
-        description: "The tag for the new images"
+        description: "Repo Commit sha"
         required: true
       admintools_tag:
         description: "The tag for the new admintools image"
@@ -34,20 +31,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version-file: "src/go.mod"
-      - name: Copy temporal images
-        env:
-          COMMIT: ${{ github.event.inputs.commit }}
-          TAG: ${{ github.event.inputs.tag }}
-          USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          PASSWORD: ${{ secrets.DOCKER_PAT }}
-          IMAGES: server auto-setup
-          SRC_REPO: temporaliotest
-          DST_REPO: temporalio
-          LATEST: ${{ github.event.inputs.latest }}
-          MAJOR: ${{ github.event.inputs.major }}
-        run: go run src/release_temporal/main.go
-      - name: Copy admintools images
+          go-version-file: "**/go.mod"
+      - name: Copy images
         env:
           COMMIT: ${{ github.event.inputs.commit }}
           TAG: ${{ github.event.inputs.admintools_tag }}
