@@ -58,7 +58,7 @@ jobs:
             git describe --tags --always | cut -d '-' -f-2
           }
 
-          today=$(date "+%Y.%-m.%-d" | tr -d '\n')
+          today=$(date "+%Y.%-m.%-d")
           patch=
           if [ -n "${{inputs.patch}}" ]; then
             patch="-p${{inputs.patch}}"
