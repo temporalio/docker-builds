@@ -28,7 +28,7 @@ on:
         default: true
 
 jobs:
-  retag-and-release:
+  release-admin-tools:
     name: "Re-tag and release images"
     runs-on: ubuntu-latest
 
@@ -41,16 +41,16 @@ jobs:
           go-version-file: "src/go.mod"
       - name: Calculate admintools tag
         run: |
-            today=$(date "+%Y.%m.%d" | tr -d '\n')
-            patch=
-            if [ -n "${{inputs.patch}}" ]; then
-               patch="_${{inputs.patch}}"
-            fi
-            temporal_sha=$(shell sh -c 'git submodule status -- temporal | cut -c2-40')
-            cli_sha=$(shell sh -c 'git submodule status -- cli | cut -c2-40')
-            echo "TAG=${today}${patch}+server-${temporal_sha}-cli-${cli_sha}" >> "${GITHUB_ENV}"
+          today=$(date "+%Y.%-m.%-d" | tr -d '\n')
+          patch=
+          if [ -n "${{inputs.patch}}" ]; then
+            patch="-p${{inputs.patch}}"
+          fi
+          temporal_ver=$(cd temporal && git describe --tags | cut -d '-' -f-2)
+          cli_ver=$(cd cli && git describe --tags | cut -d '-' -f-2)
+          tctl_ver=$(cd tctl && git describe --tags | cut -d '-' -f-2)
+          echo "TAG=${today}${patch}+server-${temporal_ver}.cli-${cli_ver}.tctl-${tctl_ver}" >> "${GITHUB_ENV}"
       - name: Copy images
-        if: ${{ ! inputs.dry-run }}
         env:
           COMMIT: ${{ github.event.inputs.commit }}
           TAG: ${{ env.TAG }}
