@@ -70,7 +70,7 @@ jobs:
           TAG: ${{ env.TAG }}
           USERNAME: ${{ secrets.DOCKER_USERNAME }}
           PASSWORD: ${{ secrets.DOCKER_PAT }}
-          IMAGES: admintools
+          IMAGES: admin-tools
           SRC_REPO: temporaliotest
           DST_REPO: temporalio
           LATEST: ${{ github.event.inputs.latest }}
