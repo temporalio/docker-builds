@@ -11,9 +11,6 @@ on:
       tag:
         description: "The tag for the new images"
         required: true
-      admintools_tag:
-        description: "The tag for the new admintools image"
-        required: true
       latest:
         type: boolean
         description: "Also update latest tag"
@@ -48,14 +45,8 @@ jobs:
           MAJOR: ${{ github.event.inputs.major }}
         run: go run src/release_temporal/main.go
       - name: Copy admintools images
-        env:
-          COMMIT: ${{ github.event.inputs.commit }}
-          TAG: ${{ github.event.inputs.admintools_tag }}
-          USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          PASSWORD: ${{ secrets.DOCKER_PAT }}
-          IMAGES: admintools
-          SRC_REPO: temporaliotest
-          DST_REPO: temporalio
-          LATEST: ${{ github.event.inputs.latest }}
-          MAJOR: ${{ github.event.inputs.major }}
-        run: go run src/release_temporal/main.go
+        uses: ./.github/workflows/release-admin-tools.yml
+        with:
+          commit: ${{ github.event.inputs.commit }}
+          latest: ${{ github.events.inputs.latest }}
+          major: ${{ github.events.inputs.major }}
