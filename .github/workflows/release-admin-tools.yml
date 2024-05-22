@@ -9,8 +9,8 @@ on:
         description: "Repo Commit sha"
         type: string
         required: true
-      patch:
-        description: "The patch version of the admintools image. This is added to the server version"
+      revision:
+        description: "The revision of the admintools image. This is added to the server version"
         type: string
         required: true
       latest:
@@ -52,10 +52,10 @@ jobs:
             # We _only_ fetch the tags to save time
             git fetch origin 'refs/tags/*:refs/tags/*' >&2
             rm -f ../.git/modules/$1/shallow
-            git describe --tags --always | cut -d '-' -f-2
+            git describe --tags | cut -d '-' -f-2
           }
 
-          echo "TAG=$(get_tag temporal)-${{inputs.patch}}" >> "${GITHUB_ENV}"
+          echo "TAG=$(get_tag temporal)-${{inputs.revision}}" >> "${GITHUB_ENV}"
       - name: Copy images
         env:
           COMMIT: ${{ github.event.inputs.commit }}
