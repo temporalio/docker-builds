@@ -7,10 +7,12 @@ on:
     inputs:
       commit:
         description: "Repo Commit sha"
+        type: string
         required: true
       patch:
-        description: "The optional patch version of the admintools image"
-        required: false
+        description: "The patch version of the admintools image. This is added to the server version"
+        type: string
+        required: true
       latest:
         type: boolean
         description: "Also update latest tag"
@@ -53,17 +55,7 @@ jobs:
             git describe --tags --always | cut -d '-' -f-2
           }
 
-          tag=$(date "+%Y.%-m.%-d")
-          if [ -n "${{inputs.patch}}" ]; then
-            tag="${tag}-p${{inputs.patch}}"
-          fi
-
-          tag="${tag}+"
-          while read module; do
-            tag="${tag}${module}-$(get_tag ${module})."
-          done < <(git submodule status | cut -d ' ' -f3 | grep -v dockerize)
-
-          echo "TAG=${tag%.}" >> "${GITHUB_ENV}"
+          echo "TAG=$(get_tag temporal)-${{inputs.patch}}" >> "${GITHUB_ENV}"
       - name: Copy images
         env:
           COMMIT: ${{ github.event.inputs.commit }}
