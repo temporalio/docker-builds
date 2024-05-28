@@ -47,7 +47,7 @@ update-submodules:
 %-bins:
 	@mkdir -p build/$*
 	@cd $(DOCKERIZE_ROOT) && CGO_ENABLED=$(CGO_ENABLED) GOOS=linux GOARCH=$* go build -o ../build/$*/dockerize .
-	@GOOS=linux GOARCH=$* CGO_ENABLED=$(CGO_ENABLED) make -C $(TEMPORAL_ROOT) bins
+	@GOOS=linux GOARCH=$* CGO_ENABLED=$(CGO_ENABLED) make -C $(TEMPORAL_ROOT) clean-bins bins
 	@cp $(TEMPORAL_ROOT)/temporal-server build/$*/
 	@cp $(TEMPORAL_ROOT)/temporal-cassandra-tool build/$*/
 	@cp $(TEMPORAL_ROOT)/temporal-sql-tool build/$*/
