@@ -11,7 +11,7 @@ set -eu -o pipefail
 : "${KEYSPACE:=}"
 if [ -n "${KEYSPACE}" ]; then
     echo "The KEYSPACE environment variable is deprecated. Please set CASSANDRA_KEYSPACE=${KEYSPACE} instead." >&2
-    export CASSANDRA_KEYSPACE="${KEYSPACE}"
+    CASSANDRA_KEYSPACE="${KEYSPACE}"
 fi
 : "${CASSANDRA_KEYSPACE:=temporal}"
 : "${CASSANDRA_SEEDS:=}"
@@ -21,25 +21,25 @@ fi
 : "${CASSANDRA_TLS_ENABLED:=}"
 if [ -n "${CASSANDRA_TLS_ENABLED}" ]; then
     echo "The CASSANDRA_TLS_ENABLED environment variable is deprecated. Please set CASSANDRA_ENABLE_TLS=${CASSANDRA_TLS_ENABLED} instead." >&2
-    export CASSANDRA_ENABLE_TLS="${CASSANDRA_TLS_ENABLED}"
+    CASSANDRA_ENABLE_TLS="${CASSANDRA_TLS_ENABLED}"
 fi
 : "${CASSANDRA_ENABLE_TLS:=}"
 : "${CASSANDRA_CERT:=}"
 if [ -n "${CASSANDRA_CERT}" ]; then
     echo "The CASSANDRA_CERT environment variable is deprecated. Please set CASSANDRA_TLS_CERT=${CASSANDRA_CERT} instead." >&2
-    export CASSANDRA_TLS_CERT="${CASSANDRA_CERT}"
+    CASSANDRA_TLS_CERT="${CASSANDRA_CERT}"
 fi
 : "${CASSANDRA_TLS_CERT:=}"
 : "${CASSANDRA_CERT_KEY:=}"
 if [ -n "${CASSANDRA_CERT_KEY}" ]; then
     echo "The CASSANDRA_CERT_KEY environment variable is deprecated. Please set CASSANDRA_TLS_CERT=${CASSANDRA_CERT_KEY} instead." >&2
-    export CASSANDRA_TLS_CERT_KEY="${CASSANDRA_CERT_KEY}"
+    CASSANDRA_TLS_CERT_KEY="${CASSANDRA_CERT_KEY}"
 fi
 : "${CASSANDRA_TLS_KEY:=}"
 : "${CASSANDRA_CA:=}"
 if [ -n "${CASSANDRA_CA}" ]; then
     echo "The CASSANDRA_CA environment variable is deprecated. Please set CASSANDRA_TLS_CA=${CASSANDRA_CA} instead." >&2
-    export CASSANDRA_TLS_CA="${CASSANDRA_CA}"
+    CASSANDRA_TLS_CA="${CASSANDRA_CA}"
 fi
 : "${CASSANDRA_TLS_CA:=}"
 : "${CASSANDRA_REPLICATION_FACTOR:=1}"
@@ -54,38 +54,115 @@ if [ -n "${DB}" ]; then
         echo "The DB environment variable is deprecated. Please unset DB, cassandra is the default." >&2
     else
         echo "The DB environment variable is deprecated. Please set SQL_PLUGIN=${DB} instead." >&2
-        export SQL_PLUGIN="${DB}"
+        SQL_PLUGIN="${DB}"
     fi
 fi
 : "${SQL_PLUGIN:=}"
+: "${POSTGRES_SEEDS:=}"
+if [ -n "${POSTGRES_SEEDS}" ]; then
+    echo "The POSTGRES_SEEDS environment variable is deprecated. Please set SQL_HOST=${POSTGRES_SEEDS} instead." >&2
+    SQL_HOST="${POSTGRES_SEEDS}"
+fi
+: "${MYSQL_SEEDS:=}"
+if [ -n "${MYSQL_SEEDS}" ]; then
+    echo "The MYSQL_SEEDS environment variable is deprecated. Please set SQL_HOST=${MYSQL_SEEDS} instead." >&2
+    SQL_HOST="${MYSQL_SEEDS}"
+fi
 : "${SQL_HOST:=}"
 if [ $SQL_PLUGIN == "postgres12" ] || [ $SQL_PLUGIN == "postgres12_pgx" ]; then
     DEFAULT_SQL_PORT=5432
 elif [ $SQL_PLUGIN == "mysql8" ]; then
     DEFAULT_SQL_PORT=3306
 fi
+: "${DB_PORT:=}"
+if [ -n "${DB_PORT}" ]; then
+    echo "The DB_PORT environment variable is deprecated. Please set SQL_PORT=${DB_PORT} instead." >&2
+    SQL_PORT="${DB_PORT}"
+fi
 : "${SQL_PORT:=$DEFAULT_SQL_PORT}"
+: "${POSTGRES_USER:=}"
+if [ -n "${POSTGRES_USER}" ]; then
+    echo "The POSTGRES_USER environment variable is deprecated. Please set SQL_USER=${POSTGRES_USER} instead." >&2
+    SQL_USER="${POSTGRES_USER}"
+fi
+: "${MYSQL_USER:=}"
+if [ -n "${MYSQL_USER}" ]; then
+    echo "The MYSQL_USER environment variable is deprecated. Please set SQL_USER=${MYSQL_USER} instead." >&2
+    SQL_USER="${MYSQL_USER}"
+fi
 : "${SQL_USER:=}"
+: "${POSTGRES_PWD:=}"
+if [ -n "${POSTGRES_PWD}" ]; then
+    echo "The POSTGRES_PWD environment variable is deprecated. Please set SQL_PASSWORD instead." >&2
+    SQL_PASSWORD="${POSTGRES_PWD}"
+fi
+: "${MYSQL_PWD:=}"
+if [ -n "${MYSQL_PWD}" ]; then
+    echo "The MYSQL_PWD environment variable is deprecated. Please set SQL_PASSWORD instead." >&2
+    SQL_PASSWORD="${MYSQL_PWD}"
+fi
 : "${SQL_PASSWORD:=}"
 : "${SQL_CONNECT_ATTRIBUTES:=}"
 : "${MYSQL_TX_ISOLATION_COMPAT:=false}"
 if [[ ${MYSQL_TX_ISOLATION_COMPAT} == true ]]; then
     echo "The MYSQL_TX_ISOLATION_COMPAT environment variable is deprecated. Please set SQL_CONNECT_ATTRIBUTES=\"tx_isolation=READ-COMMITTED\" instead." >&2
     if [ -z ${SQL_CONNECT_ATTRIBUTES} ]; then
-        export SQL_CONNECT_ATTRIBUTES="tx_isolation=READ-COMMITTED"
+        SQL_CONNECT_ATTRIBUTES="tx_isolation=READ-COMMITTED"
     else
-        export SQL_CONNECT_ATTRIBUTES="$SQL_CONNECT_ATTRIBUTES&tx_isolation=READ-COMMITTED"
+        SQL_CONNECT_ATTRIBUTES="$SQL_CONNECT_ATTRIBUTES&tx_isolation=READ-COMMITTED"
     fi
 fi
 : "${DBNAME:=}"
 if [ -n "${DBNAME}" ]; then
     echo "The DBNAME environment variable is deprecated. Please set SQL_DATABASE=${DBNAME} instead." >&2
-    export SQL_DATABASE="${DBNAME}"
+    SQL_DATABASE="${DBNAME}"
 fi
 : "${SQL_DATABASE:=temporal}"
+: "${VISIBILITY_DBNAME:=}"
+if [ -n "${VISIBILITY_DBNAME}" ]; then
+    echo "The VISIBILITY_DBNAME environment variable is deprecated. Please set SQL_VISIBILITY_DATABASE=${VISIBILITY_DBNAME} instead." >&2
+    SQL_VISIBILITY_DATABASE="${VISIBILITY_DBNAME}"
+fi
 : "${SQL_VISIBILITY_DATABASE:=temporal_visibility}"
+: "${POSTGRES_TLS_ENABLED:=false}"
+if [ -n "${POSTGRES_TLS_ENABLED}" ]; then
+    echo "The POSTGRES_TLS_ENABLED environment variable is deprecated. Please set SQL_TLS=${POSTGRES_TLS_ENABLED} instead." >&2
+    SQL_TLS="${POSTGRES_TLS_ENABLED}"
+fi
+: "${SQL_TLS:=false}"
+: "${POSTGRES_TLS_DISABLE_HOST_VERIFICATION:=false}"
+if [ -n "${POSTGRES_TLS_DISABLE_HOST_VERIFICATION}" ]; then
+    echo "The POSTGRES_TLS_DISABLE_HOST_VERIFICATION environment variable is deprecated. Please set SQL_TLS_DISABLE_HOST_VERIFICATION=${POSTGRES_TLS_DISABLE_HOST_VERIFICATION} instead." >&2
+    SQL_TLS_DISABLE_HOST_VERIFICATION="${POSTGRES_TLS_DISABLE_HOST_VERIFICATION}"
+fi
+: "${SQL_TLS_DISABLE_HOST_VERIFICATION:=false}"
+: "${POSTGRES_TLS_CERT_FILE:=}"
+if [ -n "${POSTGRES_TLS_CERT_FILE}" ]; then
+    echo "The POSTGRES_TLS_CERT_FILE environment variable is deprecated. Please set SQL_TLS_CERT_FILE=${POSTGRES_TLS_CERT_FILE} instead." >&2
+    SQL_TLS_CERT_FILE="${POSTGRES_TLS_CERT_FILE}"
+fi
+: "${SQL_TLS_CERT_FILE:=}"
+: "${POSTGRES_TLS_KEY_FILE:=}"
+if [ -n "${POSTGRES_TLS_KEY_FILE}" ]; then
+    echo "The POSTGRES_TLS_KEY_FILE environment variable is deprecated. Please set SQL_TLS_KEY_FILE=${POSTGRES_TLS_KEY_FILE} instead." >&2
+    SQL_TLS_KEY_FILE="${POSTGRES_TLS_KEY_FILE}"
+fi
+: "${SQL_TLS_KEY_FILE:=}"
+: "${POSTGRES_TLS_CA_FILE:=}"
+if [ -n "${POSTGRES_TLS_CA_FILE}" ]; then
+    echo "The POSTGRES_TLS_CA_FILE environment variable is deprecated. Please set SQL_TLS_CA_FILE=${POSTGRES_TLS_CA_FILE} instead." >&2
+    SQL_TLS_CA_FILE="${POSTGRES_TLS_CA_FILE}"
+fi
+: "${SQL_TLS_CA_FILE:=}"
+: "${POSTGRES_TLS_SERVER_NAME:=}"
+if [ -n "${POSTGRES_TLS_SERVER_NAME}" ]; then
+    echo "The POSTGRES_TLS_SERVER_NAME environment variable is deprecated. Please set SQL_TLS_SERVER_NAME=${POSTGRES_TLS_SERVER_NAME} instead." >&2
+    SQL_TLS_SERVER_NAME="${POSTGRES_TLS_SERVER_NAME}"
+fi
+: "${SQL_TLS_SERVER_NAME:=}"
 
-export SQL_PLUGIN SQL_HOST SQL_PORT SQL_USER SQL_PASSWORD SQL_DATABASE SQL_VISIBILITY_DATABASE SQL_CONNECT_ATTRIBUTES
+export SQL_PLUGIN SQL_HOST SQL_PORT SQL_USER SQL_PASSWORD SQL_DATABASE SQL_VISIBILITY_DATABASE SQL_CONNECT_ATTRIBUTES \
+    SQL_TLS SQL_TLS_DISABLE_HOST_VERIFICATION SQL_TLS_CERT_FILE SQL_TLS_KEY_FILE SQL_TLS_CA_FILE SQL_TLS_SERVER_NAME
 
 # Elasticsearch
 : "${ENABLE_ES:=false}"
