@@ -8,19 +8,55 @@ set -eu -o pipefail
 : "${SKIP_DB_CREATE:=false}"
 
 # Cassandra
-: "${KEYSPACE:=temporal}"
-
+: "${KEYSPACE:=}"
+if [ -n "${KEYSPACE}" ]; then
+    echo "The KEYSPACE environment variable is deprecated. Please set CASSANDRA_KEYSPACE=${KEYSPACE} instead." >&2
+    export CASSANDRA_KEYSPACE="${KEYSPACE}"
+fi
+: "${CASSANDRA_KEYSPACE:=temporal}"
 : "${CASSANDRA_SEEDS:=}"
 : "${CASSANDRA_PORT:=9042}"
 : "${CASSANDRA_USER:=}"
 : "${CASSANDRA_PASSWORD:=}"
 : "${CASSANDRA_TLS_ENABLED:=}"
+if [ -n "${CASSANDRA_TLS_ENABLED}" ]; then
+    echo "The CASSANDRA_TLS_ENABLED environment variable is deprecated. Please set CASSANDRA_ENABLE_TLS=${CASSANDRA_TLS_ENABLED} instead." >&2
+    export CASSANDRA_ENABLE_TLS="${CASSANDRA_TLS_ENABLED}"
+fi
+: "${CASSANDRA_ENABLE_TLS:=}"
 : "${CASSANDRA_CERT:=}"
+if [ -n "${CASSANDRA_CERT}" ]; then
+    echo "The CASSANDRA_CERT environment variable is deprecated. Please set CASSANDRA_TLS_CERT=${CASSANDRA_CERT} instead." >&2
+    export CASSANDRA_TLS_CERT="${CASSANDRA_CERT}"
+fi
+: "${CASSANDRA_TLS_CERT:=}"
 : "${CASSANDRA_CERT_KEY:=}"
+if [ -n "${CASSANDRA_CERT_KEY}" ]; then
+    echo "The CASSANDRA_CERT_KEY environment variable is deprecated. Please set CASSANDRA_TLS_CERT=${CASSANDRA_CERT_KEY} instead." >&2
+    export CASSANDRA_TLS_CERT_KEY="${CASSANDRA_CERT_KEY}"
+fi
+: "${CASSANDRA_TLS_KEY:=}"
 : "${CASSANDRA_CA:=}"
+if [ -n "${CASSANDRA_CA}" ]; then
+    echo "The CASSANDRA_CA environment variable is deprecated. Please set CASSANDRA_TLS_CA=${CASSANDRA_CA} instead." >&2
+    export CASSANDRA_TLS_CA="${CASSANDRA_CA}"
+fi
+: "${CASSANDRA_TLS_CA:=}"
 : "${CASSANDRA_REPLICATION_FACTOR:=1}"
 
+export CASSANDRA_SEEDS CASSANDRA_PORT CASSANDRA_USER CASSANDRA_PASSWORD CASSANDRA_KEYSPACE \
+    CASSANDRA_ENABLE_TLS CASSANDRA_TLS_CERT CASSANDRA_TLS_KEY CASSANDRA_TLS_CA CASSANDRA_REPLICATION_FACTOR
+
 # SQL
+: "${DB:=}"
+if [ -n "${DB}" ]; then
+    if [ ${DB} == "cassandra" ]; then
+        echo "The DB environment variable is deprecated. Please unset DB, cassandra is the default." >&2
+    else
+        echo "The DB environment variable is deprecated. Please set SQL_PLUGIN=${DB} instead." >&2
+        export SQL_PLUGIN="${DB}"
+    fi
+fi
 : "${SQL_PLUGIN:=}"
 : "${SQL_HOST:=}"
 if [ $SQL_PLUGIN == "postgres12" || $SQL_PLUGIN == "postgres12_pgx" ]; then
@@ -32,8 +68,24 @@ fi
 : "${SQL_USER:=}"
 : "${SQL_PASSWORD:=}"
 : "${SQL_CONNECT_ATTRIBUTES:=}"
+: "${MYSQL_TX_ISOLATION_COMPAT:=false}"
+if [[ ${MYSQL_TX_ISOLATION_COMPAT} == true ]]; then
+    echo "The MYSQL_TX_ISOLATION_COMPAT environment variable is deprecated. Please set SQL_CONNECT_ATTRIBUTES=\"tx_isolation=READ-COMMITTED\" instead." >&2
+    if [ -z ${SQL_CONNECT_ATTRIBUTES} ]; then
+        export SQL_CONNECT_ATTRIBUTES="tx_isolation=READ-COMMITTED"
+    else
+        export SQL_CONNECT_ATTRIBUTES="$SQL_CONNECT_ATTRIBUTES&tx_isolation=READ-COMMITTED"
+    fi
+fi
+: "${DBNAME:=}"
+if [ -n "${DBNAME}" ]; then
+    echo "The DBNAME environment variable is deprecated. Please set SQL_DATABASE=${DBNAME} instead." >&2
+    export SQL_DATABASE="${DBNAME}"
+fi
 : "${SQL_DATABASE:=temporal}"
 : "${SQL_VISIBILITY_DATABASE:=temporal_visibility}"
+
+export SQL_PLUGIN SQL_HOST SQL_PORT SQL_USER SQL_PASSWORD SQL_DATABASE SQL_VISIBILITY_DATABASE SQL_CONNECT_ATTRIBUTES
 
 # Elasticsearch
 : "${ENABLE_ES:=false}"
@@ -86,17 +138,7 @@ validate_db_env() {
 }
 
 wait_for_cassandra() {
-    # TODO (alex): Remove exports
-    export CASSANDRA_USER=${CASSANDRA_USER}
-    export CASSANDRA_PORT=${CASSANDRA_PORT}
-    export CASSANDRA_ENABLE_TLS=${CASSANDRA_TLS_ENABLED}
-    export CASSANDRA_TLS_CERT=${CASSANDRA_CERT}
-    export CASSANDRA_TLS_KEY=${CASSANDRA_CERT_KEY}
-    export CASSANDRA_TLS_CA=${CASSANDRA_CA}
-
-    export CASSANDRA_PASSWORD=${CASSANDRA_PASSWORD}
-
-    until temporal-cassandra-tool --ep "${CASSANDRA_SEEDS}" validate-health; do
+    until temporal-cassandra-tool validate-health; do
         echo 'Waiting for Cassandra to start up.'
         sleep 1
     done
@@ -139,16 +181,6 @@ wait_for_db() {
 }
 
 setup_cassandra_schema() {
-    # TODO (alex): Remove exports
-    export CASSANDRA_USER=${CASSANDRA_USER}
-    export CASSANDRA_PORT=${CASSANDRA_PORT}
-    export CASSANDRA_ENABLE_TLS=${CASSANDRA_TLS_ENABLED}
-    export CASSANDRA_TLS_CERT=${CASSANDRA_CERT}
-    export CASSANDRA_TLS_KEY=${CASSANDRA_CERT_KEY}
-    export CASSANDRA_TLS_CA=${CASSANDRA_CA}
-
-    export CASSANDRA_PASSWORD=${CASSANDRA_PASSWORD}
-
     SCHEMA_DIR=${TEMPORAL_HOME}/schema/cassandra/temporal/versioned
     if [[ ${SKIP_DB_CREATE} != true ]]; then
         temporal-cassandra-tool --ep "${CASSANDRA_SEEDS}" create -k "${KEYSPACE}" --rf "${CASSANDRA_REPLICATION_FACTOR}"
