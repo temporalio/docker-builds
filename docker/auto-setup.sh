@@ -8,9 +8,10 @@ set -eu -o pipefail
 : "${SKIP_DB_CREATE:=false}"
 
 deprecate() {
-	if [[ -n ${!1} ]]; then
-		echo "The ${1} environment variable is deprecated. Please set ${2}=${!1} instead." >&2
-		export $2=${!1}
+	local from=$1 to=$2
+	if [[ -n ${!from:=} ]]; then
+		echo "The ${from} environment variable is deprecated. Please set ${to}=${!from} instead." >&2
+		export $to=${!from}
 	fi
 }
 
