@@ -32,8 +32,8 @@ fi
 : "${CASSANDRA_TLS_CERT:=}"
 : "${CASSANDRA_CERT_KEY:=}"
 if [ -n "${CASSANDRA_CERT_KEY}" ]; then
-    echo "The CASSANDRA_CERT_KEY environment variable is deprecated. Please set CASSANDRA_TLS_CERT=${CASSANDRA_CERT_KEY} instead." >&2
-    CASSANDRA_TLS_CERT_KEY="${CASSANDRA_CERT_KEY}"
+    echo "The CASSANDRA_CERT_KEY environment variable is deprecated. Please set CASSANDRA_TLS_KEY=${CASSANDRA_CERT_KEY} instead." >&2
+    CASSANDRA_TLS_KEY="${CASSANDRA_CERT_KEY}"
 fi
 : "${CASSANDRA_TLS_KEY:=}"
 : "${CASSANDRA_CA:=}"
