@@ -8,7 +8,7 @@ set -eu -o pipefail
 : "${SKIP_DB_CREATE:=false}"
 
 deprecate() {
-	if [ -n ${!1} ]; then
+	if [[ -n ${!1} ]]; then
 		echo "The ${1} environment variable is deprecated. Please set ${2}=${!1} instead." >&2
 		export $2=${!1}
 	fi
@@ -36,8 +36,8 @@ export CASSANDRA_SEEDS CASSANDRA_PORT CASSANDRA_USER CASSANDRA_PASSWORD CASSANDR
 
 # SQL
 : "${DB:=}"
-if [ -n "${DB}" ]; then
-    if [ ${DB} == "cassandra" ]; then
+if [[ -n ${DB} ]]; then
+    if [[ ${DB} == "cassandra" ]]; then
         echo "The DB environment variable is deprecated. Please unset DB, cassandra is the default." >&2
     else
         deprecate DB SQL_PLUGIN
@@ -47,9 +47,9 @@ fi
 deprecate POSTGRES_SEEDS SQL_HOST
 deprecate MYSQL_SEEDS SQL_HOST
 : "${SQL_HOST:=}"
-if [ $SQL_PLUGIN == "postgres12" ] || [ $SQL_PLUGIN == "postgres12_pgx" ]; then
+if [[ ${SQL_PLUGIN} == "postgres12" ]] || [[ ${SQL_PLUGIN} == "postgres12_pgx" ]]; then
     DEFAULT_SQL_PORT=5432
-elif [ $SQL_PLUGIN == "mysql8" ]; then
+elif [[ ${SQL_PLUGIN} == "mysql8" ]]; then
     DEFAULT_SQL_PORT=3306
 fi
 deprecate DB_PORT SQL_PORT
@@ -64,7 +64,7 @@ deprecate MYSQL_PWD SQL_PASSWORD
 : "${MYSQL_TX_ISOLATION_COMPAT:=false}"
 if [[ ${MYSQL_TX_ISOLATION_COMPAT} == true ]]; then
     echo "The MYSQL_TX_ISOLATION_COMPAT environment variable is deprecated. Please set SQL_CONNECT_ATTRIBUTES=\"tx_isolation=READ-COMMITTED\" instead." >&2
-    if [ -z ${SQL_CONNECT_ATTRIBUTES} ]; then
+    if [[ -z ${SQL_CONNECT_ATTRIBUTES} ]]; then
         SQL_CONNECT_ATTRIBUTES="tx_isolation=READ-COMMITTED"
     else
         SQL_CONNECT_ATTRIBUTES="$SQL_CONNECT_ATTRIBUTES&tx_isolation=READ-COMMITTED"
@@ -194,7 +194,7 @@ setup_cassandra_schema() {
 
 setup_mysql_schema() {
     if [[ ${MYSQL_TX_ISOLATION_COMPAT} == true ]]; then
-        if [ -z ${SQL_CONNECT_ATTRIBUTES} ]; then
+        if [ -z "${SQL_CONNECT_ATTRIBUTES}" ]; then
             export SQL_CONNECT_ATTRIBUTES="tx_isolation=READ-COMMITTED"
         else
             export SQL_CONNECT_ATTRIBUTES="$SQL_CONNECT_ATTRIBUTES&tx_isolation=READ-COMMITTED"
