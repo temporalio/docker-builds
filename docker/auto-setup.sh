@@ -59,7 +59,7 @@ if [ -n "${DB}" ]; then
 fi
 : "${SQL_PLUGIN:=}"
 : "${SQL_HOST:=}"
-if [ $SQL_PLUGIN == "postgres12" || $SQL_PLUGIN == "postgres12_pgx" ]; then
+if [ $SQL_PLUGIN == "postgres12" ] || [ $SQL_PLUGIN == "postgres12_pgx" ]; then
     DEFAULT_SQL_PORT=5432
 elif [ $SQL_PLUGIN == "mysql8" ]; then
     DEFAULT_SQL_PORT=3306
