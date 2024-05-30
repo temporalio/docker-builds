@@ -136,7 +136,7 @@ sql_visibility_env() {
 }
 
 cassandra_env() {
-    CASSANDRA_SEEDS=${CASSANDRA_SEEDS} CASSANDRA_PORT=${CASSANDRA_PORT} \
+    CASSANDRA_HOST=${CASSANDRA_SEEDS} CASSANDRA_SEEDS=${CASSANDRA_SEEDS} CASSANDRA_PORT=${CASSANDRA_PORT} \
     CASSANDRA_USER=${CASSANDRA_USER} CASSANDRA_PASSWORD=${CASSANDRA_PASSWORD} \
     CASSANDRA_KEYSPACE=${CASSANDRA_KEYSPACE} \
     CASSANDRA_ENABLE_TLS=${CASSANDRA_ENABLE_TLS} \
@@ -166,7 +166,7 @@ validate_db_env() {
 }
 
 wait_for_cassandra() {
-    until temporal-cassandra-tool validate-health; do
+    until cassandra_env temporal-cassandra-tool validate-health; do
         echo 'Waiting for Cassandra to start up.'
         sleep 1
     done
@@ -199,7 +199,7 @@ wait_for_db() {
 setup_cassandra_schema() {
     SCHEMA_DIR=${TEMPORAL_HOME}/schema/cassandra/temporal/versioned
     if [[ ${SKIP_DB_CREATE} != true ]]; then
-        cassandra_env temporal-cassandra-tool create
+        cassandra_env temporal-cassandra-tool create -k "${CASSANDRA_KEYSPACE}" --rf "${CASSANDRA_REPLICATION_FACTOR}"
     fi
     cassandra_env temporal-cassandra-tool setup-schema -v 0.0
     cassandra_env temporal-cassandra-tool update-schema -d "${SCHEMA_DIR}"
