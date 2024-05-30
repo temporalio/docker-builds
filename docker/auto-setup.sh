@@ -6,12 +6,17 @@ set -eu -o pipefail
 
 : "${SKIP_SCHEMA_SETUP:=false}"
 : "${SKIP_DB_CREATE:=false}"
+: "${SKIP_VISIBILITY_DB_CREATE:=${SKIP_DB_CREATE}}"
+: "${SKIP_DEFAULT_NAMESPACE_CREATION:=false}"
+: "${DEFAULT_NAMESPACE:=default}"
+: "${DEFAULT_NAMESPACE_RETENTION:=24h}"
+: "${SKIP_ADD_CUSTOM_SEARCH_ATTRIBUTES:=false}"
 
 deprecate() {
 	local from=$1 to=$2
 	if [[ -n ${!from:=} ]]; then
 		echo "The ${from} environment variable is deprecated. Please set ${to}=${!from} instead." >&2
-		export $to=${!from}
+		declare $to ${!from}
 	fi
 }
 
@@ -31,9 +36,6 @@ deprecate CASSANDRA_CERT_KEY CASSANDRA_TLS_KEY
 deprecate CASSANDRA_CA CASSANDRA_TLS_CA
 : "${CASSANDRA_TLS_CA:=}"
 : "${CASSANDRA_REPLICATION_FACTOR:=1}"
-
-export CASSANDRA_SEEDS CASSANDRA_PORT CASSANDRA_USER CASSANDRA_PASSWORD CASSANDRA_KEYSPACE \
-    CASSANDRA_ENABLE_TLS CASSANDRA_TLS_CERT CASSANDRA_TLS_KEY CASSANDRA_TLS_CA CASSANDRA_REPLICATION_FACTOR
 
 # SQL
 : "${DB:=}"
@@ -88,9 +90,6 @@ deprecate POSTGRES_TLS_CA_FILE SQL_TLS_CA_FILE
 deprecate POSTGRES_TLS_SERVER_NAME SQL_TLS_SERVER_NAME
 : "${SQL_TLS_SERVER_NAME:=}"
 
-export SQL_PLUGIN SQL_HOST SQL_PORT SQL_USER SQL_PASSWORD SQL_DATABASE SQL_VISIBILITY_DATABASE SQL_CONNECT_ATTRIBUTES \
-    SQL_TLS SQL_TLS_DISABLE_HOST_VERIFICATION SQL_TLS_CERT_FILE SQL_TLS_KEY_FILE SQL_TLS_CA_FILE SQL_TLS_SERVER_NAME
-
 # Elasticsearch
 : "${ENABLE_ES:=false}"
 : "${ES_SCHEME:=http}"
@@ -108,17 +107,43 @@ export SQL_PLUGIN SQL_HOST SQL_PORT SQL_USER SQL_PASSWORD SQL_DATABASE SQL_VISIB
 # TEMPORAL_CLI_ADDRESS is deprecated and support for it will be removed in the future release.
 : "${TEMPORAL_CLI_ADDRESS:=}"
 
-: "${SKIP_DEFAULT_NAMESPACE_CREATION:=false}"
-: "${DEFAULT_NAMESPACE:=default}"
-: "${DEFAULT_NAMESPACE_RETENTION:=24h}"
-
-: "${SKIP_ADD_CUSTOM_SEARCH_ATTRIBUTES:=false}"
-
 # === Helper functions ===
 
 die() {
     echo "$*" 1>&2
     exit 1
+}
+
+sql_env() {
+    SQL_PLUGIN=${SQL_PLUGIN} \
+    SQL_HOST=${SQL_HOST} SQL_PORT=${SQL_PORT} SQL_USER=${SQL_USER} SQL_PASSWORD=${SQL_PASSWORD} \
+    SQL_CONNECT_ATTRIBUTES=${SQL_CONNECT_ATTRIBUTES} \
+    SQL_DATABASE=${SQL_DATABASE} \
+    SQL_TLS=${SQL_TLS} \
+    SQL_TLS_CERT_FILE=${SQL_TLS_CERT_FILE} SQL_TLS_KEY_FILE=${SQL_TLS_KEY_FILE} SQL_TLS_CA_FILE=${SQL_TLS_CA_FILE} \
+    SQL_TLS_SERVER_NAME=${SQL_TLS_SERVER_NAME} SQL_TLS_DISABLE_HOST_VERIFICATION=${SQL_TLS_DISABLE_HOST_VERIFICATION} \
+    "$@"
+}
+
+sql_visibility_env() {
+    SQL_PLUGIN=${SQL_PLUGIN} \
+    SQL_HOST=${SQL_HOST} SQL_PORT=${SQL_PORT} SQL_USER=${SQL_USER} SQL_PASSWORD=${SQL_PASSWORD} \
+    SQL_CONNECT_ATTRIBUTES=${SQL_CONNECT_ATTRIBUTES} \
+    SQL_DATABASE=${SQL_VISIBILITY_DATABASE} \
+    SQL_TLS=${SQL_TLS} \
+    SQL_TLS_CERT_FILE=${SQL_TLS_CERT_FILE} SQL_TLS_KEY_FILE=${SQL_TLS_KEY_FILE} SQL_TLS_CA_FILE=${SQL_TLS_CA_FILE} \
+    SQL_TLS_SERVER_NAME=${SQL_TLS_SERVER_NAME} SQL_TLS_DISABLE_HOST_VERIFICATION=${SQL_TLS_DISABLE_HOST_VERIFICATION} \
+    "$@"
+}
+
+cassandra_env() {
+    CASSANDRA_SEEDS=${CASSANDRA_SEEDS} CASSANDRA_PORT=${CASSANDRA_PORT} \
+    CASSANDRA_USER=${CASSANDRA_USER} CASSANDRA_PASSWORD=${CASSANDRA_PASSWORD} \
+    CASSANDRA_KEYSPACE=${CASSANDRA_KEYSPACE} \
+    CASSANDRA_ENABLE_TLS=${CASSANDRA_ENABLE_TLS} \
+    CASSANDRA_TLS_CERT=${CASSANDRA_TLS_CERT} CASSANDRA_TLS_KEY=${CASSANDRA_TLS_KEY} CASSANDRA_TLS_CA=${CASSANDRA_TLS_CA} \
+    CASSANDRA_REPLICATION_FACTOR=${CASSANDRA_REPLICATION_FACTOR} \
+    "$@"
 }
 
 # === Main database functions ===
@@ -149,31 +174,19 @@ wait_for_cassandra() {
     echo 'Cassandra started.'
 }
 
-wait_for_mysql() {
+wait_for_sql() {
     until nc -z "${SQL_HOST}" "${SQL_PORT}"; do
-        echo 'Waiting for MySQL to start up.'
+        echo 'Waiting for SQL service to start up.'
         sleep 1
     done
 
-    echo 'MySQL started.'
-}
-
-wait_for_postgres() {
-    until nc -z "${SQL_HOST}" "${SQL_PORT}"; do
-        echo 'Waiting for PostgreSQL to startup.'
-        sleep 1
-    done
-
-    echo 'PostgreSQL started.'
+    echo 'SQL service up.'
 }
 
 wait_for_db() {
     case ${SQL_PLUGIN} in
-      mysql8)
-          wait_for_mysql
-          ;;
-      postgres12 | postgres12_pgx)
-          wait_for_postgres
+      mysql8 | postgres12 | postgres12_pgx)
+          wait_for_sql
           ;;
       "")
           wait_for_cassandra
@@ -187,13 +200,13 @@ wait_for_db() {
 setup_cassandra_schema() {
     SCHEMA_DIR=${TEMPORAL_HOME}/schema/cassandra/temporal/versioned
     if [[ ${SKIP_DB_CREATE} != true ]]; then
-        temporal-cassandra-tool --ep "${CASSANDRA_SEEDS}" create -k "${KEYSPACE}" --rf "${CASSANDRA_REPLICATION_FACTOR}"
+        cassandra_env temporal-cassandra-tool create
     fi
-    temporal-cassandra-tool --ep "${CASSANDRA_SEEDS}" -k "${KEYSPACE}" setup-schema -v 0.0
-    temporal-cassandra-tool --ep "${CASSANDRA_SEEDS}" -k "${KEYSPACE}" update-schema -d "${SCHEMA_DIR}"
+    cassandra_env temporal-cassandra-tool setup-schema -v 0.0
+    cassandra_env temporal-cassandra-tool update-schema -d "${SCHEMA_DIR}"
 }
 
-setup_mysql_schema() {
+setup_sql_schema() {
     if [[ ${MYSQL_TX_ISOLATION_COMPAT} == true ]]; then
         if [ -z "${SQL_CONNECT_ATTRIBUTES}" ]; then
             export SQL_CONNECT_ATTRIBUTES="tx_isolation=READ-COMMITTED"
@@ -202,55 +215,49 @@ setup_mysql_schema() {
         fi
     fi
 
-    MYSQL_VERSION_DIR=v8
-    SCHEMA_DIR=${TEMPORAL_HOME}/schema/mysql/${MYSQL_VERSION_DIR}/temporal/versioned
+    case ${SQL_PLUGIN} in
+        mysql8)
+            MYSQL_VERSION_DIR=v8
+            SCHEMA_DIR=${TEMPORAL_HOME}/schema/mysql/${MYSQL_VERSION_DIR}/temporal/versioned
+            VISIBILITY_SCHEMA_DIR=${TEMPORAL_HOME}/schema/mysql/${MYSQL_VERSION_DIR}/visibility/versioned
+            ;;
+        postgres12 | postgres12_pgx)
+            POSTGRES_VERSION_DIR=v12
+            SCHEMA_DIR=${TEMPORAL_HOME}/schema/postgresql/${POSTGRES_VERSION_DIR}/temporal/versioned
+            VISIBILITY_SCHEMA_DIR=${TEMPORAL_HOME}/schema/postgresql/${POSTGRES_VERSION_DIR}/visibility/versioned
+            if [[ ${SQL_DATABASE} == "${SQL_USER}" ]]; then
+                SKIP_DB_CREATE=true
+            fi
+            if [[ ${SQL_VISIBILITY_DATABASE} == "${SQL_USER}" ]]; then
+                SKIP_VISIBILITY_DB_CREATE=true
+            fi
+            ;;
+        *)
+            die "Unsupported SQL plugin: ${SQL_PLUGIN}."
+            ;;
+    esac
+
     if [[ ${SKIP_DB_CREATE} != true ]]; then
-        temporal-sql-tool create
+        sql_env temporal-sql-tool create
     fi
-    temporal-sql-tool setup-schema -v 0.0
-    temporal-sql-tool update-schema -d "${SCHEMA_DIR}"
+    sql_env temporal-sql-tool setup-schema -v 0.0
+    sql_env temporal-sql-tool update-schema -d "${SCHEMA_DIR}"
 
     # Only setup visibility schema if ES is not enabled
     if [[ ${ENABLE_ES} == false ]]; then
-      VISIBILITY_SCHEMA_DIR=${TEMPORAL_HOME}/schema/mysql/${MYSQL_VERSION_DIR}/visibility/versioned
-      if [[ ${SKIP_DB_CREATE} != true ]]; then
-          temporal-sql-tool  --db "${VISIBILITY_DBNAME}" create
+      if [[ ${SKIP_VISIBILITY_DB_CREATE} != true ]]; then
+          sql_visibility_env temporal-sql-tool create
       fi
-      temporal-sql-tool --db "${SQL_VISIBILITY_DATABASE}" setup-schema -v 0.0
-      temporal-sql-tool --db "${SQL_VISIBILITY_DATABASE}" update-schema -d "${VISIBILITY_SCHEMA_DIR}"
-    fi
-}
-
-setup_postgres_schema() {
-    POSTGRES_VERSION_DIR=v12
-    SCHEMA_DIR=${TEMPORAL_HOME}/schema/postgresql/${POSTGRES_VERSION_DIR}/temporal/versioned
-    # Create database only if its name is different from the user name. Otherwise PostgreSQL container itself will create database.
-    if [[ ${SQL_DATABASE} != "${SQL_USER}" && ${SKIP_DB_CREATE} != true ]]; then
-        temporal-sql-tool create
-    fi
-    temporal-sql-tool setup-schema -v 0.0
-    temporal-sql-tool update-schema -d "${SCHEMA_DIR}"
-
-    # Only setup visibility schema if ES is not enabled
-    if [[ ${ENABLE_ES} == false ]]; then
-      VISIBILITY_SCHEMA_DIR=${TEMPORAL_HOME}/schema/postgresql/${POSTGRES_VERSION_DIR}/visibility/versioned
-      if [[ ${VISIBILITY_DBNAME} != "${POSTGRES_USER}" && ${SKIP_DB_CREATE} != true ]]; then
-          temporal-sql-tool --db "${SQL_VISIBILITY_DATABASE}" create
-      fi
-      temporal-sql-tool --db "${SQL_VISIBILITY_DATABASE}" setup-schema -v 0.0
-      temporal-sql-tool --db "${SQL_VISIBILITY_DATABASE}" update-schema -d "${VISIBILITY_SCHEMA_DIR}"
+      sql_visibility_env temporal-sql-tool setup-schema -v 0.0
+      sql_visibility_env temporal-sql-tool update-schema -d "${VISIBILITY_SCHEMA_DIR}"
     fi
 }
 
 setup_schema() {
     case ${SQL_PLUGIN} in
-      mysql8)
-          echo 'Setup MySQL schema.'
-          setup_mysql_schema
-          ;;
-      postgres12 | postgres12_pgx)
-          echo 'Setup PostgreSQL schema.'
-          setup_postgres_schema
+      mysql8 | postgres12 | postgres12_pgx)
+          echo 'Setup SQL schema.'
+          setup_sql_schema
           ;;
       "")
           echo 'Setup Cassandra schema.'
