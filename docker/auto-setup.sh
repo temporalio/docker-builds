@@ -50,13 +50,12 @@ fi
 deprecate POSTGRES_SEEDS SQL_HOST
 deprecate MYSQL_SEEDS SQL_HOST
 : "${SQL_HOST:=}"
-if [[ ${SQL_PLUGIN} == "postgres12" ]] || [[ ${SQL_PLUGIN} == "postgres12_pgx" ]]; then
-    DEFAULT_SQL_PORT=5432
-elif [[ ${SQL_PLUGIN} == "mysql8" ]]; then
-    DEFAULT_SQL_PORT=3306
-fi
 deprecate DB_PORT SQL_PORT
-: "${SQL_PORT:=$DEFAULT_SQL_PORT}"
+if [[ ${SQL_PLUGIN} == "postgres12" ]] || [[ ${SQL_PLUGIN} == "postgres12_pgx" ]]; then
+    : "${SQL_PORT:=5432}"
+elif [[ ${SQL_PLUGIN} == "mysql8" ]]; then
+    : "${SQL_PORT:=3306}"
+fi
 deprecate POSTGRES_USER SQL_USER
 deprecate MYSQL_USER SQL_USER
 : "${SQL_USER:=}"
