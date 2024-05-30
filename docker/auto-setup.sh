@@ -15,7 +15,7 @@ set -eu -o pipefail
 deprecate() {
 	local from=$1 to=$2
 	if [[ -n ${!from:=} ]]; then
-		echo "The ${from} environment variable is deprecated. Please set ${to}=${!from} instead." >&2
+		echo "The ${from} environment variable is deprecated. Please set ${to} instead." >&2
 		declare $to=${!from}
 	fi
 }
