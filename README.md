@@ -19,7 +19,7 @@ All build steps require a set of Docker base images.
 They are released by a user whenever a new version of a base image is needed.
 
 * [release-base-image](./actions/workflows/release-base-image.yml):
-  build and release Docker a **single** base image (`temporalio/base-*`) to DockerHub's [temporalio](https://hub.docker.com/u/temporalio)
+  build and release a **single** Docker base image (`temporalio/base-*`) to DockerHub's [temporalio](https://hub.docker.com/u/temporalio)
 * [release-all-base-image](./actions/workflows/release-all-base-image.yml):
   build and release **all** Docker base images (`temporalio/base-*`) to DockerHub's [temporalio](https://hub.docker.com/u/temporalio)
 
