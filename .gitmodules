@@ -12,3 +12,4 @@
 [submodule "cli"]
 	path = cli
 	url = https://github.com/temporalio/cli.git
+	branch = main
