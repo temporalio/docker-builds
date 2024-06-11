@@ -18,9 +18,9 @@ There are 3 distinct phases:
 All build steps require a set of Docker base images.
 They are released by a user whenever a new version of a base image is needed.
 
-* [release-base-image](./actions/workflows/release-base-image.yml):
+* [release-base-image](https://github.com/temporalio/docker-builds/actions/workflows/release-base-image.yml):
   build and release a **single** Docker base image (`temporalio/base-*`) to DockerHub [temporalio](https://hub.docker.com/u/temporalio)
-* [release-all-base-image](./actions/workflows/release-all-base-image.yml):
+* [release-all-base-image](https://github.com/temporalio/docker-builds/actions/workflows/release-all-base-image.yml):
   build and release **all** Docker base images (`temporalio/base-*`) to DockerHub [temporalio](https://hub.docker.com/u/temporalio)
 
 Read [more details about base images](./docker/base-images/README.md).
@@ -29,26 +29,26 @@ Read [more details about base images](./docker/base-images/README.md).
 
 For every commit to Temporal Server's main and release branch,
 its [Trigger Publish](https://github.com/temporalio/temporal/blob/main/.github/workflows/trigger-publish.yml)
-will invoke [update-submodules](./actions/workflows/update-submodules.yml)
+will invoke [update-submodules](https://github.com/temporalio/docker-builds/actions/workflows/update-submodules.yml)
 to update all submodules to their latest commit - and run the following actions:
 
-* [lint](./actions/workflows/lint.yml):
+* [lint](https://github.com/temporalio/docker-builds/actions/workflows/lint.yml):
   lint repo's shell scripts
-* [docker](./actions/workflows/docker.yml):
+* [docker](https://github.com/temporalio/docker-builds/actions/workflows/docker.yml):
   build Docker images and publish to DockerHub [temporaliotest](https://hub.docker.com/u/temporaliotest)
-* [docker-build-only](./actions/workflows/docker-build-only.yml):
+* [docker-build-only](https://github.com/temporalio/docker-builds/actions/workflows/docker-build-only.yml):
   build Docker images, but don't publish (used by `features-integration` workflow)
-* [features-integration](./actions/workflows/features-integration.yml):
+* [features-integration](https://github.com/temporalio/docker-builds/actions/workflows/features-integration.yml):
   run integration tests against [features repo](https://github.com/temporalio/features)
 
 ### (3) Docker release images
 
 Users can publish any of the previously built images via:
 
-* [release-admin-tools](./actions/workflows/release-admin-tools.yml):
+* [release-admin-tools](https://github.com/temporalio/docker-builds/actions/workflows/release-admin-tools.yml):
   copy `admin-tools` image from DockerHub [temporaliotest](https://hub.docker.com/u/temporaliotest) to
   DockerHub [temporalio](https://hub.docker.com/u/temporalio)
-* [release-temporal](./actions/workflows/release-temporal.yml):
+* [release-temporal](https://github.com/temporalio/docker-builds/actions/workflows/release-temporal.yml):
   copy `server` and `auto-setup` images from DockerHub [temporaliotest](https://hub.docker.com/u/temporaliotest) to
   DockerHub [temporalio](https://hub.docker.com/u/temporalio)
 
