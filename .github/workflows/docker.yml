@@ -76,8 +76,9 @@ jobs:
         run: BAKE_OUTPUT=docker make build-native
 
       - name: Bake and push multiarch images
-        if: ${{ github.event_name == 'push' && !env.ACT }}
-        run: BAKE_OUTPUT=registry make build
+        run: |
+          sed -i 's/make -C \$(TEMPORAL_ROOT) bins/make -C \$(TEMPORAL_ROOT) clean-bins bins/g' Makefile
+          BAKE_OUTPUT=registry make build
 
       # TODO: can we loop this somehow?
       - name: Run Trivy vulnerability scanner on Server image
