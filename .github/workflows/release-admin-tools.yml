@@ -1,4 +1,4 @@
-name: Release Admin Tools Image
+name: Release AdminTools Image
 
 permissions: read-all
 
@@ -6,65 +6,35 @@ on:
   workflow_dispatch:
     inputs:
       commit:
-        description: "Repo Commit sha"
-        type: string
+        description: "Commit sha"
         required: true
-      patch:
-        description: "The patch version of the admintools image. This is added to the server version"
-        type: string
+      tag:
+        description: "The tag for the new image (e.g. 1.23.4-tctl-1.0-cli-1.0)"
         required: true
       latest:
         type: boolean
         description: "Also update latest tag"
         required: true
         default: false
-      major:
-        type: boolean
-        description: "Also update major tag"
-        required: true
-        default: false
 
 jobs:
-  release-admin-tools:
+  retag-and-release:
     name: "Re-tag and release images"
     runs-on: ubuntu-latest
 
     steps:
-      # Main
       - uses: actions/checkout@v4
-      # For the action itself
-      - name: Check out target commit
-        uses: actions/checkout@v4
-        with:
-          path: target
-          submodules: "true"
-          ref: ${{ github.event.inputs.commit }}
       - uses: actions/setup-go@v5
         with:
           go-version-file: "src/go.mod"
-      - name: Calculate admintools tag
-        run: |
-          get_tag() {
-            # We need to remove the `shallow` marker for this submodule or else
-            # `git describe --tags` won't find our tags
-            cd "target/$1"
-            # We need to fetch the tags before git describe will do what we want
-            # We _only_ fetch the tags to save time
-            git fetch origin 'refs/tags/*:refs/tags/*' >&2
-            rm -f ../.git/modules/$1/shallow
-            git describe --tags --always | cut -d '-' -f-2
-          }
-
-          echo "TAG=$(get_tag temporal)-${{inputs.patch}}" >> "${GITHUB_ENV}"
-      - name: Copy images
+      - name: Copy admintools image
         env:
           COMMIT: ${{ github.event.inputs.commit }}
-          TAG: ${{ env.TAG }}
+          TAG: ${{ github.event.inputs.tag }}
           USERNAME: ${{ secrets.DOCKER_USERNAME }}
           PASSWORD: ${{ secrets.DOCKER_PAT }}
           IMAGES: admin-tools
           SRC_REPO: temporaliotest
           DST_REPO: temporalio
           LATEST: ${{ github.event.inputs.latest }}
-          MAJOR: ${{ github.event.inputs.major }}
         run: go run src/image_copy/main.go
