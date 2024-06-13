@@ -9,7 +9,7 @@ on:
         description: "Commit sha"
         required: true
       tag:
-        description: "The tag for the new image"
+        description: "The tag for the new image (e.g. 1.23.4-tctl-1.0-cli-1.0)"
         required: true
       latest:
         type: boolean
