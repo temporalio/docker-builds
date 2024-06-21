@@ -1,12 +1,15 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"os"
 	"os/exec"
 	"strings"
 )
+
+const binFolder = "/usr/local/bin"
 
 type Env struct {
 	srcTag       string
@@ -67,21 +70,68 @@ func getTags(dstTag string, updateMajor bool) []string {
 	return tags
 }
 
+func verifyImage(imageTag, platform, check string) {
+	fmt.Printf("verifying binaries in '%s' from '%s' for platform '%s' are '%s'\n", binFolder, imageTag, platform, check)
+
+	cmd := exec.Command(
+		"docker",
+		"run",
+		"--platform", platform,
+		"--user=root",
+		"--rm",
+		"--entrypoint=sh",
+		imageTag,
+		"-c", `
+apk add -U file > /dev/null
+
+count=0
+for file in `+binFolder+`/*; do
+  if [ -f "$file" ]; then
+    count=$((count+1))
+    if file "$file" | grep -q "`+check+`"; then
+      echo "$file is `+check+`"
+    else
+      echo "$file is not `+check+`"
+      file "$file"
+      exit 1
+    fi
+  fi
+done
+
+if [ $count -lt 1 ]; then
+  echo "no binaries were found"
+  exit 1
+fi
+`)
+
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	cmd.Stderr = &out
+	err := cmd.Run()
+	fmt.Println(out.String())
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+}
+
 func copyImages() {
 	env := loadEnv()
 
 	for _, image := range env.images {
-		src := fmt.Sprintf("docker://%s/%s:%s", env.srcRepo, image, env.srcTag)
-		destCreds := fmt.Sprintf("--dest-creds=%s:%s", env.username, env.password)
+		src := fmt.Sprintf("%s/%s:%s", env.srcRepo, image, env.srcTag)
+		verifyImage(src, "linux/arm64", "ARM")
+		verifyImage(src, "linux/amd64", "x86")
 
+		srcWithProto := fmt.Sprintf("docker://%s", src)
+		destCreds := fmt.Sprintf("--dest-creds=%s:%s", env.username, env.password)
 		for _, tag := range env.dstTags {
 			dst := fmt.Sprintf("docker://%s/%s:%s", env.dstRepo, image, tag)
-			skopeo([]string{"copy", destCreds, "--all", src, dst})
+			skopeo([]string{"copy", destCreds, "--all", srcWithProto, dst})
 		}
 
 		if env.setLatestTag {
 			dst_latest := fmt.Sprintf("docker://%s/%s:latest", env.dstRepo, image)
-			skopeo([]string{"copy", destCreds, "--all", src, dst_latest})
+			skopeo([]string{"copy", destCreds, "--all", srcWithProto, dst_latest})
 		}
 	}
 }
