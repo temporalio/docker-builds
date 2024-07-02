@@ -70,8 +70,8 @@ func getTags(dstTag string, updateMajor bool) []string {
 	return tags
 }
 
-func verifyImage(imageTag, platform, check string) {
-	fmt.Printf("verifying binaries in '%s' from '%s' for platform '%s' are '%s'\n", binFolder, imageTag, platform, check)
+func mustHaveArchitecture(imageTag, platform, expectedArch string) {
+	fmt.Printf("verifying binaries in '%s' from '%s' for platform '%s' are '%s'\n", binFolder, imageTag, platform, expectedArch)
 
 	cmd := exec.Command(
 		"docker",
@@ -88,10 +88,10 @@ count=0
 for file in `+binFolder+`/*; do
   if [ -f "$file" ]; then
     count=$((count+1))
-    if file "$file" | grep -q "`+check+`"; then
-      echo "$file is `+check+`"
+    if file "$file" | grep -q "`+expectedArch+`"; then
+      echo "$file is `+expectedArch+`"
     else
-      echo "$file is not `+check+`"
+      echo "$file is not `+expectedArch+`"
       file "$file"
       exit 1
     fi
@@ -119,8 +119,8 @@ func copyImages() {
 
 	for _, image := range env.images {
 		src := fmt.Sprintf("%s/%s:%s", env.srcRepo, image, env.srcTag)
-		verifyImage(src, "linux/arm64", "ARM")
-		verifyImage(src, "linux/amd64", "x86")
+		mustHaveArchitecture(src, "linux/arm64", "ARM")
+		mustHaveArchitecture(src, "linux/amd64", "x86")
 
 		srcWithProto := fmt.Sprintf("docker://%s", src)
 		destCreds := fmt.Sprintf("--dest-creds=%s:%s", env.username, env.password)
