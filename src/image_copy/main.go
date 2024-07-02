@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"log"
 	"os"
@@ -103,12 +102,8 @@ if [ $count -lt 1 ]; then
   exit 1
 fi
 `)
-
-	var out bytes.Buffer
-	cmd.Stdout = &out
-	cmd.Stderr = &out
-	err := cmd.Run()
-	fmt.Println(out.String())
+	out, err := cmd.CombinedOutput()
+	fmt.Println(string(out))
 	if err != nil {
 		log.Fatal(err.Error())
 	}
