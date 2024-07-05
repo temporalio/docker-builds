@@ -1,4 +1,4 @@
-Temporal requires an RDBMS backend; this Docker setup script supports Cassandra (default), MySQL, or PostgreSQL.
+Temporal requires a database backend; this Docker setup script supports Cassandra (default), MySQL, or PostgreSQL.
 
 Optionally also supports Elasticsearch for [visibility](https://docs.temporal.io/self-hosted-guide/visibility).
 
@@ -6,7 +6,7 @@ Optionally also supports Elasticsearch for [visibility](https://docs.temporal.io
 
 `DB` (default: `cassandra`)
 
-This variable specifies the type of database you're connecting to. Allowed values are `cassandra`, `mysql`, and `postgres`.
+This variable specifies the type of database you're connecting to. Allowed values are `cassandra`, `mysql8`, and `postgres12`.
 
 `SKIP_SCHEMA_SETUP` (default: `false`)
 
@@ -26,6 +26,8 @@ This variable specifies the name of your Cassandra keyspace.
 
 `CASSANDRA_SEEDS` (defaults to unset)
 
+This variable specifies your Cassndra hostname.
+
 `CASSANDRA_PORT` (default: 9042)
 
 This variable specifies the port to connect to Cassandra on.
@@ -38,7 +40,9 @@ This variable specifies your Cassandra username.
 
 This variable specifies your Cassandra password.
 
-`CASSANDRA_TLS_ENABLED` (defaults to unset)
+`CASSANDRA_TLS_ENABLED` (default: `false`)
+
+This variable specifies whether you are using TLS to connect to Cassandra.
 
 `CASSANDRA_CERT` (defaults to unset)
 
@@ -60,6 +64,8 @@ This variable specifies the port to connect to MySQL/PostgreSQL on.
 
 `MYSQL_SEEDS` (defaults to unset)
 
+This variable specifies your MySQL hostname.
+
 `MYSQL_USER` (defaults to unset)
 
 This variable specifies your MySQL username.
@@ -71,6 +77,8 @@ This variable specifies your MySQL password.
 `MYSQL_TX_ISOLATION_COMPAT` (defaults to `false`)
 
 `POSTGRES_SEEDS` (defaults to unset)
+
+This variable specifies your Postgres hostname.
 
 `POSTGRES_USER` (defaults to unset)
 
@@ -100,6 +108,8 @@ This variable specifies your PostgreSQL password.
 
 `ES_SEEDS` (defaults to unset)
 
+This variable specifies a comma-separated list of Elasticsearch nodes.
+
 `ES_PORT` (defaults to `9200`)
 
 This variable specifies the port to connect to Elasticsearch on.
@@ -126,13 +136,11 @@ This variable specifies the name of your [secondary visibility](https://docs.tem
 
 `ES_SCHEMA_SETUP_TIMEOUT_IN_SECONDS` (defaults to `0`)
 
+This variable specifies the Elasticsearch schema setup timeout. The default value of 0 means that schema setup will not time out.
+
 ### Server setup
 
 `TEMPORAL_ADDRESS` (defaults to unset)
-
-`TEMPORAL_CLI_ADDRESS` (defaults to unset)
-
-This variable is deprecated and support for it will be removed in the future release.
 
 `SKIP_DEFAULT_NAMESPACE_CREATION` (defaults to `false`)
 
