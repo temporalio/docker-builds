@@ -46,17 +46,29 @@ This variable specifies whether you are using TLS to connect to Cassandra.
 
 `CASSANDRA_CERT` (defaults to unset)
 
+This variable specifies the path to your Cassandra security certificate, if you are using TLS.
+
 `CASSANDRA_CERT_KEY` (defaults to unset)
+
+This variable specifies the path to your Cassandra security certificate key, if you are using TLS.
 
 `CASSANDRA_CA` (defaults to unset)
 
+This variable specifies the host of your Cassandra security certificate authority, if needed.
+
 `CASSANDRA_REPLICATION_FACTOR` (defaults to `1`)
+
+This variable specifies [how many replicas](https://docs.apigee.com/private-cloud/v4.17.09/about-cassandra-replication-factor-and-consistency-level) your Cassandra database is using.
 
 ### MySQL/PostgreSQL
 
 `DBNAME` (defaults to `temporal`)
 
+This variable specifies the name of your MySQL / Postgres database.
+
 `VISIBILITY_DBNAME` (defaults to `temporal_visibility`)
+
+This variable specifies the name of your MySQL / Postgres visibility database, separate from the main Temporal database.
 
 `DB_PORT` (defautls to `3306`)
 
@@ -76,6 +88,8 @@ This variable specifies your MySQL password.
 
 `MYSQL_TX_ISOLATION_COMPAT` (defaults to `false`)
 
+This variable enables compatibility with pre-5.7.20 MySQL installations, if needed.
+
 `POSTGRES_SEEDS` (defaults to unset)
 
 This variable specifies your Postgres hostname.
@@ -90,21 +104,37 @@ This variable specifies your PostgreSQL password.
 
 `POSTGRES_TLS_ENABLED` (defaults to `false`)
 
+This variable specifies whether you are using TLS to connect to Postgres.
+
 `POSTGRES_TLS_DISABLE_HOST_VERIFICATION` (defaults to `false`)
+
+This variable specifies whether Postgres should skip host key verification (e.g., in case your hostnames have changed recently and you need to work around a false positive red flag).
 
 `POSTGRES_TLS_CERT_FILE` (defaults to unset)
 
+This variable specifies the path to your Postgres security certificate, if you are using TLS.
+
 `POSTGRES_TLS_KEY_FILE` (defaults to unset)
+
+This variable specifies the path to your Postgres security certificate key, if you are using TLS.
 
 `POSTGRES_TLS_CA_FILE` (defaults to unset)
 
+This variable specifies the path to your Postgres security certificate authority, if needed.
+
 `POSTGRES_TLS_SERVER_NAME` (defaults to unset)
+
+This variable specifies the host of your Postgres TLS server, if needed.
 
 ### Elasticsearch
 
 `ENABLE_ES` (defaults to `false`)
 
+This variable specifies whether you are using Elasticsearch.
+
 `ES_SCHEME` (defaults to `http`)
+
+This variable specifies how you are connecting to Elasticsearch. Allowed values are `http` and `https`.
 
 `ES_SEEDS` (defaults to unset)
 
@@ -144,8 +174,16 @@ This variable specifies the Elasticsearch schema setup timeout. The default valu
 
 `SKIP_DEFAULT_NAMESPACE_CREATION` (defaults to `false`)
 
+This variable specifies whether Temporal should skip creating a default namespace on install.
+
 `DEFAULT_NAMESPACE` (defaults to `default`)
+
+This variable specifies the name of the default namespace that your Temporal Service will use.
 
 `DEFAULT_NAMESPACE_RETENTION` (defaults to `24h`)
 
+This variable specifies how long the default namespace will retain data associated with [closed Workflow Executions](https://docs.temporal.io/clusters#retention-period).
+
 `SKIP_ADD_CUSTOM_SEARCH_ATTRIBUTES` (defaults to `false`)
+
+This variable specifies whether Temporal should skip adding custom search attributes on install.
