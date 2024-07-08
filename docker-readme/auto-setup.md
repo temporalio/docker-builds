@@ -108,7 +108,7 @@ This variable specifies whether you are using TLS to connect to Postgres.
 
 `POSTGRES_TLS_DISABLE_HOST_VERIFICATION` (defaults to `false`)
 
-This variable specifies whether Postgres should skip host key verification (e.g., in case your hostnames have changed recently and you need to work around a false positive red flag).
+This variable specifies whether Postgres should skip host key verification (e.g. if you can't easily verify server certs when using Amazon RDS).
 
 `POSTGRES_TLS_CERT_FILE` (defaults to unset)
 
