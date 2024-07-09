@@ -18,10 +18,42 @@ on:
         default: false
 
 jobs:
+  verify-arm64:
+    name: "Verify images are ARM"
+    runs-on: ubuntu-24.04-arm64-2-core
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: "src/go.mod"
+      - name: Verify image binaries
+        env:
+          COMMIT: ${{ github.event.inputs.commit }}
+          IMAGES: admin-tools
+          SRC_REPO: temporaliotest
+          ARCH: "ARM"
+        run: go run src/image_verify/main.go
+
+  verify-x86:
+    name: "Verify images are x86"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: "src/go.mod"
+      - name: Verify image binaries
+        env:
+          COMMIT: ${{ github.event.inputs.commit }}
+          IMAGES: admin-tools
+          SRC_REPO: temporaliotest
+          ARCH: "x86"
+        run: go run src/image_verify/main.go
+
   retag-and-release:
     name: "Re-tag and release images"
     runs-on: ubuntu-latest
-
+    needs: [verify-arm64, verify-x86]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5

@@ -69,64 +69,20 @@ func getTags(dstTag string, updateMajor bool) []string {
 	return tags
 }
 
-func mustHaveArchitecture(imageTag, platform, expectedArch string) {
-	fmt.Printf("verifying binaries in '%s' from '%s' for platform '%s' are '%s'\n", binFolder, imageTag, platform, expectedArch)
-
-	cmd := exec.Command(
-		"docker",
-		"run",
-		"--platform", platform,
-		"--user=root",
-		"--rm",
-		"--entrypoint=sh",
-		imageTag,
-		"-c", `
-apk add -U file > /dev/null
-
-count=0
-for file in `+binFolder+`/*; do
-  if [ -f "$file" ]; then
-    count=$((count+1))
-    if file "$file" | grep -q "`+expectedArch+`"; then
-      echo "$file is `+expectedArch+`"
-    else
-      echo "$file is not `+expectedArch+`"
-      file "$file"
-      exit 1
-    fi
-  fi
-done
-
-if [ $count -lt 1 ]; then
-  echo "no binaries were found"
-  exit 1
-fi
-`)
-	out, err := cmd.CombinedOutput()
-	fmt.Println(string(out))
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-}
-
 func copyImages() {
 	env := loadEnv()
 
 	for _, image := range env.images {
-		src := fmt.Sprintf("%s/%s:%s", env.srcRepo, image, env.srcTag)
-		mustHaveArchitecture(src, "linux/arm64", "ARM")
-		mustHaveArchitecture(src, "linux/amd64", "x86")
-
-		srcWithProto := fmt.Sprintf("docker://%s", src)
+		src := fmt.Sprintf("docker://%s", fmt.Sprintf("%s/%s:%s", env.srcRepo, image, env.srcTag))
 		destCreds := fmt.Sprintf("--dest-creds=%s:%s", env.username, env.password)
 		for _, tag := range env.dstTags {
 			dst := fmt.Sprintf("docker://%s/%s:%s", env.dstRepo, image, tag)
-			skopeo([]string{"copy", destCreds, "--all", srcWithProto, dst})
+			skopeo([]string{"copy", destCreds, "--all", src, dst})
 		}
 
 		if env.setLatestTag {
 			dst_latest := fmt.Sprintf("docker://%s/%s:latest", env.dstRepo, image)
-			skopeo([]string{"copy", destCreds, "--all", srcWithProto, dst_latest})
+			skopeo([]string{"copy", destCreds, "--all", src, dst_latest})
 		}
 	}
 }
