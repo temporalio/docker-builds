@@ -1,11 +1,15 @@
 package main
 
 import (
+	"encoding/base64"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
+	"time"
 )
 
 const binFolder = "/usr/local/bin"
@@ -69,43 +73,58 @@ func getTags(dstTag string, updateMajor bool) []string {
 	return tags
 }
 
-func mustHaveArchitecture(imageTag, platform, expectedArch string) {
-	fmt.Printf("verifying binaries in '%s' from '%s' for platform '%s' are '%s'\n", binFolder, imageTag, platform, expectedArch)
-
-	cmd := exec.Command(
-		"docker",
-		"run",
-		"--platform", platform,
-		"--user=root",
-		"--rm",
-		"--entrypoint=sh",
-		imageTag,
-		"-c", `
-apk add -U file > /dev/null
-
-count=0
-for file in `+binFolder+`/*; do
-  if [ -f "$file" ]; then
-    count=$((count+1))
-    if file "$file" | grep -q "`+expectedArch+`"; then
-      echo "$file is `+expectedArch+`"
-    else
-      echo "$file is not `+expectedArch+`"
-      file "$file"
-      exit 1
-    fi
-  fi
-done
-
-if [ $count -lt 1 ]; then
-  echo "no binaries were found"
-  exit 1
-fi
-`)
+func execCmd(name string, args ...string) string {
+	cmd := exec.Command(name, args...)
+	fmt.Println("\n> ", name, strings.Join(args, " "))
 	out, err := cmd.CombinedOutput()
-	fmt.Println(string(out))
+	if err != nil {
+		fmt.Println(out)
+		log.Fatal(err.Error())
+	}
+	return string(out)
+}
+
+func mustHaveArchitecture(imageTag, platform, expectedArch string) {
+	fmt.Printf("\nverifying binaries in '%s' from '%s' for platform '%s' are '%s'\n", binFolder, imageTag, platform, expectedArch)
+
+	// create local container from image
+	containerId := base64.RawURLEncoding.EncodeToString([]byte(fmt.Sprintf("%v-%v", platform, time.Now().UnixMilli())))
+	out := execCmd(
+		"docker",
+		"create",
+		"--name", containerId,
+		"--platform", platform,
+		imageTag)
+	fmt.Println(out)
+
+	// copy binaries to local tmp dir
+	tmpDir, err := os.MkdirTemp(os.TempDir(), containerId)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer os.RemoveAll(tmpDir)
+	out = execCmd(
+		"docker",
+		"cp",
+		containerId+":"+binFolder+"/.",
+		tmpDir)
+	fmt.Println(out)
+
+	// verify binaries
+	files, err := ioutil.ReadDir(tmpDir)
 	if err != nil {
 		log.Fatal(err.Error())
+	}
+	if len(files) == 0 {
+		panic("no binaries were found")
+	}
+	for _, file := range files {
+		out = execCmd("file", filepath.Join(tmpDir, file.Name()))
+		if !strings.Contains(out, expectedArch) {
+			panic(file.Name() + " is NOT " + expectedArch)
+		} else {
+			fmt.Println(file.Name() + " is " + expectedArch)
+		}
 	}
 }
 
