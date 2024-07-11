@@ -85,7 +85,7 @@ func execCmd(name string, args ...string) string {
 }
 
 func mustHaveArchitecture(imageTag, platform, expectedArch string) {
-	fmt.Printf("\nverifying binaries in '%s' from '%s' for platform '%s' are '%s'\n", binFolder, imageTag, platform, expectedArch)
+	fmt.Printf("\nverifying binaries in %q from %q for platform %q are %q\n", binFolder, imageTag, platform, expectedArch)
 
 	// create local container from image
 	containerId := base64.RawURLEncoding.EncodeToString([]byte(fmt.Sprintf("%v-%v", platform, time.Now().UnixMilli())))
