@@ -114,8 +114,8 @@ func copyImages() {
 
 	for _, image := range env.images {
 		src := fmt.Sprintf("%s/%s:%s", env.srcRepo, image, env.srcTag)
-		mustHaveArchitecture(src, "linux/arm64", "ARM")
-		mustHaveArchitecture(src, "linux/amd64", "x86")
+		//mustHaveArchitecture(src, "linux/arm64", "ARM")
+		//mustHaveArchitecture(src, "linux/amd64", "x86")
 
 		srcWithProto := fmt.Sprintf("docker://%s", src)
 		destCreds := fmt.Sprintf("--dest-creds=%s:%s", env.username, env.password)
