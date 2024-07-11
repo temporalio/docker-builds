@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -112,7 +111,7 @@ func mustHaveArchitecture(imageTag, platform, expectedArch string) {
 	fmt.Println(out)
 
 	// verify binaries
-	files, err := ioutil.ReadDir(tmpDir)
+	files, err := os.ReadDir(tmpDir)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
