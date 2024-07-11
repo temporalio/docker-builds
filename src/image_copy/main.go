@@ -96,6 +96,7 @@ func mustHaveArchitecture(imageTag, platform, expectedArch string) {
 		"--platform", platform,
 		imageTag)
 	fmt.Println(out)
+	defer execCmd("docker", "rm", containerId)
 
 	// copy binaries to local tmp dir
 	tmpDir, err := os.MkdirTemp(os.TempDir(), containerId)
