@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/base64"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -9,7 +8,8 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
-	"time"
+
+	"github.com/google/uuid"
 )
 
 const binFolder = "/usr/local/bin"
@@ -88,7 +88,7 @@ func mustHaveArchitecture(imageTag, platform, expectedArch string) {
 	fmt.Printf("\nverifying binaries in %q from %q for platform %q are %q\n", binFolder, imageTag, platform, expectedArch)
 
 	// create local container from image
-	containerId := base64.RawURLEncoding.EncodeToString([]byte(fmt.Sprintf("%v-%v", platform, time.Now().UnixMilli())))
+	containerId := uuid.NewString()
 	out := execCmd(
 		"docker",
 		"create",
