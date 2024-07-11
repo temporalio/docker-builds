@@ -78,7 +78,7 @@ func execCmd(name string, args ...string) string {
 	fmt.Println("\n> ", name, strings.Join(args, " "))
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		fmt.Println(out)
+		fmt.Println(string(out))
 		log.Fatal(err.Error())
 	}
 	return string(out)
@@ -116,12 +116,12 @@ func mustHaveArchitecture(imageTag, platform, expectedArch string) {
 		log.Fatal(err.Error())
 	}
 	if len(files) == 0 {
-		panic("no binaries were found")
+		log.Fatal("no binaries were found")
 	}
 	for _, file := range files {
 		out = execCmd("file", filepath.Join(tmpDir, file.Name()))
 		if !strings.Contains(out, expectedArch) {
-			panic(file.Name() + " is NOT " + expectedArch)
+			log.Fatal(file.Name() + " is NOT " + expectedArch)
 		} else {
 			fmt.Println(file.Name() + " is " + expectedArch)
 		}
