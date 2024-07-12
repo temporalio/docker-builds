@@ -4,6 +4,7 @@ go 1.21
 
 require (
 	github.com/Masterminds/semver/v3 v3.2.1
+	github.com/google/uuid v1.6.0
 	github.com/stretchr/testify v1.8.1
 )
 
