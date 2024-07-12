@@ -5,8 +5,13 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
+
+	"github.com/google/uuid"
 )
+
+const binFolder = "/usr/local/bin"
 
 type Env struct {
 	srcTag       string
@@ -67,21 +72,80 @@ func getTags(dstTag string, updateMajor bool) []string {
 	return tags
 }
 
+func execCmd(name string, args ...string) string {
+	cmd := exec.Command(name, args...)
+	fmt.Println("\n> ", name, strings.Join(args, " "))
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		fmt.Println(string(out))
+		log.Fatal(err.Error())
+	}
+	return string(out)
+}
+
+func mustHaveArchitecture(imageTag, platform, expectedArch string) {
+	fmt.Printf("\nverifying binaries in %q from %q for platform %q are %q\n", binFolder, imageTag, platform, expectedArch)
+
+	// create local container from image
+	containerId := uuid.NewString()
+	out := execCmd(
+		"docker",
+		"create",
+		"--name", containerId,
+		"--platform", platform,
+		imageTag)
+	fmt.Println(out)
+	defer execCmd("docker", "rm", containerId)
+
+	// copy binaries to local tmp dir
+	tmpDir, err := os.MkdirTemp(os.TempDir(), containerId)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer os.RemoveAll(tmpDir)
+	out = execCmd(
+		"docker",
+		"cp",
+		containerId+":"+binFolder+"/.",
+		tmpDir)
+	fmt.Println(out)
+
+	// verify binaries
+	files, err := os.ReadDir(tmpDir)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	if len(files) == 0 {
+		log.Fatal("no binaries were found")
+	}
+	for _, file := range files {
+		out = execCmd("file", filepath.Join(tmpDir, file.Name()))
+		if !strings.Contains(out, expectedArch) {
+			log.Fatal(file.Name() + " is NOT " + expectedArch)
+		} else {
+			fmt.Println(file.Name() + " is " + expectedArch)
+		}
+	}
+}
+
 func copyImages() {
 	env := loadEnv()
 
 	for _, image := range env.images {
-		src := fmt.Sprintf("docker://%s/%s:%s", env.srcRepo, image, env.srcTag)
-		destCreds := fmt.Sprintf("--dest-creds=%s:%s", env.username, env.password)
+		src := fmt.Sprintf("%s/%s:%s", env.srcRepo, image, env.srcTag)
+		mustHaveArchitecture(src, "linux/arm64", "ARM")
+		mustHaveArchitecture(src, "linux/amd64", "x86")
 
+		srcWithProto := fmt.Sprintf("docker://%s", src)
+		destCreds := fmt.Sprintf("--dest-creds=%s:%s", env.username, env.password)
 		for _, tag := range env.dstTags {
 			dst := fmt.Sprintf("docker://%s/%s:%s", env.dstRepo, image, tag)
-			skopeo([]string{"copy", destCreds, "--all", src, dst})
+			skopeo([]string{"copy", destCreds, "--all", srcWithProto, dst})
 		}
 
 		if env.setLatestTag {
 			dst_latest := fmt.Sprintf("docker://%s/%s:latest", env.dstRepo, image)
-			skopeo([]string{"copy", destCreds, "--all", src, dst_latest})
+			skopeo([]string{"copy", destCreds, "--all", srcWithProto, dst_latest})
 		}
 	}
 }
