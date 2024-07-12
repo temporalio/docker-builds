@@ -43,4 +43,5 @@ jobs:
           DST_REPO: temporalio
           LATEST: ${{ github.event.inputs.latest }}
           MAJOR: ${{ github.event.inputs.major }}
-        run: go run src/image_copy/main.go
+        working-directory: ./src
+        run: go run image_copy/main.go
