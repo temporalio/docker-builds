@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=alpine:3.19
+ARG BASE_IMAGE=alpine:3.20
 
 FROM ${BASE_IMAGE} AS builder
 
