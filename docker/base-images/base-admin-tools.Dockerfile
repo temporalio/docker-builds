@@ -3,6 +3,7 @@ ARG BASE_IMAGE=alpine:3.18
 FROM ${BASE_IMAGE} AS builder
 
 RUN apk add --update --no-cache \
+    python3~3.11 \
     py3-pip \
     python3-dev \
     musl-dev \
