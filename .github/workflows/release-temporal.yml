@@ -43,7 +43,8 @@ jobs:
           DST_REPO: temporalio
           LATEST: ${{ github.event.inputs.latest }}
           MAJOR: ${{ github.event.inputs.major }}
-        run: go run src/release_temporal/main.go
+        working-directory: ./src
+        run: go run release_temporal/main.go
       - name: Copy admintools images
         uses: ./.github/workflows/release-admin-tools.yml
         with:
