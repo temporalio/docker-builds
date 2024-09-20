@@ -11,8 +11,8 @@ ENV TEMPORAL_HOME=/etc/temporal
 EXPOSE 6933 6934 6935 6939 7233 7234 7235 7239
 
 # TODO switch WORKDIR to /home/temporal and remove "mkdir" and "chown" calls.
-RUN addgroup -g 1000 temporal
-RUN adduser -u 1000 -G temporal -D temporal
+RUN addgroup -g 2000 temporal
+RUN adduser -u 2000 -G temporal -D temporal
 RUN mkdir /etc/temporal/config
 RUN chown -R temporal:temporal /etc/temporal/config
 USER temporal
