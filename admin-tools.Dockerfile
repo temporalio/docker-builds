@@ -21,8 +21,8 @@ COPY  ./temporal/schema /etc/temporal/schema
 # Completion for temporal depends on the bash-completion package.
 RUN apk add bash-completion && \
     temporal completion bash > /etc/bash/temporal-completion.sh && \
-    addgroup -g 1000 temporal && \
-    adduser -u 1000 -G temporal -D temporal
+    addgroup -g 2000 temporal && \
+    adduser -u 2000 -G temporal -D temporal
 USER temporal
 WORKDIR /etc/temporal
 
