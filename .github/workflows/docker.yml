@@ -74,10 +74,14 @@ jobs:
       # native image and build multiarch images later
       - name: Bake native images for security scanning
         run: BAKE_OUTPUT=docker make build-native
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Bake and push multiarch images
         if: ${{ github.event_name == 'push' && !env.ACT }}
         run: BAKE_OUTPUT=registry make build
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # TODO: can we loop this somehow?
       - name: Run Trivy vulnerability scanner on Server image
