@@ -1,4 +1,4 @@
-Temporal requires a database backend -- one of Cassandra (default), MySQL, PostgreSQL, or SQLite.
+Temporal requires a database backend -- one of Cassandra (default), MySQL, or PostgreSQL.
 
 Optionally also supports Elasticsearch for [visibility](https://docs.temporal.io/self-hosted-guide/visibility).
 
@@ -42,27 +42,33 @@ This variable specifies whether you are using TLS to connect to Cassandra.
 
 This variable specifies the path to your Cassandra security certificate, if you are using TLS.
 
-`CASSANDRA_CERT_DATA`
+`CASSANDRA_CERT_DATA` (defaults to unset)
+
+This variable allows you to pass a Cassandra security certificate as an object rather than a file path.
 
 `CASSANDRA_CERT_KEY` (defaults to unset)
 
 This variable specifies the path to your Cassandra security certificate key, if you are using TLS.
 
-`CASSANDRA_CERT_KEY_DATA`
+`CASSANDRA_CERT_KEY_DATA` (defaults to unset)
+
+This variable allows you to pass a Cassandra security certificate key as an object rather than a file path.
 
 `CASSANDRA_CA` (defaults to unset)
 
-`CASSANDRA_CA_DATA` 
-
 This variable specifies the host of your Cassandra security certificate authority, if needed.
 
-`CASSANDRA_HOST_VERIFICATION`
+`CASSANDRA_CA_DATA` (defaults to unset)
 
-`CASSANDRA_HOST_NAME`
+`CASSANDRA_HOST_VERIFICATION` (default: `false`)
 
-`CASSANDRA_ADDRESS_TRANSLATOR`
+This variable specifies whether Cassandra should perform host key verification.
 
-`CASSANDRA_ADDRESS_TRANSLATOR_OPTIONS`
+`CASSANDRA_HOST_NAME` (defaults to unset)
+
+`CASSANDRA_ADDRESS_TRANSLATOR` (defaults to unset)
+
+`CASSANDRA_ADDRESS_TRANSLATOR_OPTIONS` (defaults to unset)
 
 ### MySQL/PostgreSQL
 
@@ -74,21 +80,21 @@ This variable specifies the name of your MySQL / Postgres database.
 
 This variable specifies the name of your MySQL / Postgres visibility database, separate from the main Temporal database.
 
-`VISIBILITY_DB_PORT`
+`VISIBILITY_DB_PORT` (defautls to `3306` for MySQL and `5432` for Postgres)
 
-`VISIBILITY_MYSQL_SEEDS`
+`VISIBILITY_MYSQL_SEEDS` (defaults to unset)
 
-`VISIBILITY_MYSQL_USER`
+`VISIBILITY_MYSQL_USER` (defaults to unset)
 
-`VISIBILITY_MYSQL_PWD`
+`VISIBILITY_MYSQL_PWD` (defaults to unset)
 
-`VISIBILITY_POSTGRES_SEEDS`
+`VISIBILITY_POSTGRES_SEEDS` (defaults to unset)
 
-`VISIBILITY_POSTGRES_USER`
+`VISIBILITY_POSTGRES_USER` (defaults to unset)
 
-`VISIBILITY_POSTGRES_PWD`
-
-`DB_PORT` (defautls to `3306`)
+`VISIBILITY_POSTGRES_PWD` (defaults to unset)
+ 
+`DB_PORT` (defautls to `3306` for MySQL and `5432` for Postgres)
 
 This variable specifies the port to connect to MySQL/PostgreSQL on.
 
@@ -108,23 +114,29 @@ This variable specifies your MySQL password.
 
 This variable enables compatibility with pre-5.7.20 MySQL installations, if needed.
 
-`SQL_VIS_MAX_CONNS`
+`SQL_VIS_MAX_CONNS` (defaults to `10`)
 
-`SQL_VIS_MAX_IDLE_CONNS`
+`SQL_VIS_MAX_IDLE_CONNS` (defaults to `10`)
 
-`SQL_VIS_MAX_CONN_TIME`
+`SQL_VIS_MAX_CONN_TIME` (defaults to `1h`)
 
-`SQL_TLS_ENABLED`
+`SQL_MAX_CONNS` (defaults to `20`)
 
-`SQL_CA`
+`SQL_MAX_IDLE_CONNS` (defaults to `20`)
 
-`SQL_CERT`
+`SQL_MAX_CONN_TIME` (defaults to `1h`)
 
-`SQL_CERT_KEY`
+`SQL_TLS_ENABLED` (defaults to `false`)
 
-`SQL_HOST_VERIFICATION`
+`SQL_CA` (defaults to unset)
 
-`SQL_HOST_NAME`
+`SQL_CERT` (defaults to unset)
+
+`SQL_CERT_KEY` (defaults to unset)
+
+`SQL_HOST_VERIFICATION` (defaults to `false`)
+
+`SQL_HOST_NAME` (defaults to unset)
 
 `POSTGRES_SEEDS` (defaults to unset)
 
@@ -204,100 +216,98 @@ This variable specifies the name of your [secondary visibility](https://docs.tem
 
 `TEMPORAL_BROADCAST_ADDRESS` (defaults to unset)
 
-`PPROF_PORT`
+`PPROF_PORT` (defaults to `0`)
 
-`TEMPORAL_TLS_REFRESH_INTERVAL`
+`TEMPORAL_TLS_REFRESH_INTERVAL` (defaults to `0s`)
 
-`TEMPORAL_TLS_EXPIRATION_CHECKS_WARNING_WINDOW`
+`TEMPORAL_TLS_EXPIRATION_CHECKS_WARNING_WINDOW` (defaults to `0s`)
 
-`TEMPORAL_TLS_EXPIRATION_CHECKS_ERROR_WINDOW`
+`TEMPORAL_TLS_EXPIRATION_CHECKS_ERROR_WINDOW` (defaults to `0s`)
 
-`TEMPORAL_TLS_EXPIRATION_CHECKS_CHECK_INTERVAL`
+`TEMPORAL_TLS_EXPIRATION_CHECKS_CHECK_INTERVAL` (defaults to `0s`)
 
-`TEMPORAL_TLS_REQUIRE_CLIENT_AUTH`
+`TEMPORAL_TLS_REQUIRE_CLIENT_AUTH` (defaults to `false`)
 
-`TEMPORAL_TLS_SERVER_CERT`
+`TEMPORAL_TLS_SERVER_CERT` (defaults to unset)
 
-`TEMPORAL_TLS_SERVER_CERT_DATA`
+`TEMPORAL_TLS_SERVER_CERT_DATA` (defaults to unset)
 
-`TEMPORAL_TLS_SERVER_KEY`
+`TEMPORAL_TLS_SERVER_KEY` (defaults to unset)
 
-`TEMPORAL_TLS_SERVER_KEY_DATA`
+`TEMPORAL_TLS_SERVER_KEY_DATA` (defaults to unset)
 
-`TEMPORAL_TLS_SERVER_CA_CERT`
+`TEMPORAL_TLS_SERVER_CA_CERT` (defaults to unset)
 
-`TEMPORAL_TLS_SERVER_CA_CERT_DATA`
+`TEMPORAL_TLS_SERVER_CA_CERT_DATA` (defaults to unset)
 
-`TEMPORAL_TLS_INTERNODE_SERVER_NAME`
+`TEMPORAL_TLS_INTERNODE_SERVER_NAME` (defaults to unset)
 
-`TEMPORAL_TLS_INTERNODE_DISABLE_HOST_VERIFICATION`
+`TEMPORAL_TLS_INTERNODE_DISABLE_HOST_VERIFICATION` (defaults to `false`)
 
-`TEMPORAL_TLS_FRONTEND_CERT`
+`TEMPORAL_TLS_FRONTEND_CERT` (defaults to unset)
 
-`TEMPORAL_TLS_FRONTEND_CERT_DATA`
+`TEMPORAL_TLS_FRONTEND_CERT_DATA` (defaults to unset)
 
-`TEMPORAL_TLS_FRONTEND_KEY`
+`TEMPORAL_TLS_FRONTEND_KEY` (defaults to unset)
 
-`TEMPORAL_TLS_FRONTEND_KEY_DATA`
+`TEMPORAL_TLS_FRONTEND_KEY_DATA` (defaults to unset)
 
-`TEMPORAL_TLS_FRONTEND_SERVER_NAME`
+`TEMPORAL_TLS_FRONTEND_SERVER_NAME` (defaults to unset)
 
-`TEMPORAL_TLS_FRONTEND_DISABLE_HOST_VERIFICATION`
+`TEMPORAL_TLS_FRONTEND_DISABLE_HOST_VERIFICATION` (defaults to `false`)
 
-`TEMPORAL_TLS_CLIENT1_CA_CERT`
+`TEMPORAL_TLS_CLIENT1_CA_CERT` (defaults to unset)
 
-`TEMPORAL_TLS_CLIENT1_CA_CERT_DATA`
+`TEMPORAL_TLS_CLIENT1_CA_CERT_DATA` (defaults to unset)
 
-`TEMPORAL_TLS_CLIENT2_CA_CERT`
+`TEMPORAL_TLS_CLIENT2_CA_CERT` (defaults to unset)
 
-`TEMPORAL_TLS_CLIENT2_CA_CERT_DATA`
+`TEMPORAL_TLS_CLIENT2_CA_CERT_DATA` (defaults to unset)
 
-`STATSD_ENDPOINT`
+`STATSD_ENDPOINT` (defaults to unset)
 
-`PROMETHEUS_ENDPOINT`
+`PROMETHEUS_ENDPOINT` (defaults to unset)
 
-`PROMETHEUS_TIMER_TYPE`
+`PROMETHEUS_TIMER_TYPE` (defaults to `histogram`)
 
-`PROMETHEUS_ENDPOINT`
+`TEMPORAL_JWT_KEY_SOURCE1` (defaults to unset)
 
-`TEMPORAL_JWT_KEY_SOURCE1`
+`TEMPORAL_JWT_KEY_SOURCE2` (defaults to unset)
 
-`TEMPORAL_JWT_KEY_SOURCE2`
+`TEMPORAL_JWT_KEY_REFRESH` (defaults to `1m`)
 
-`TEMPORAL_JWT_KEY_REFRESH`
+`TEMPORAL_JWT_PERMISSIONS_CLAIM` (defaults to `permissions`)
 
-`TEMPORAL_JWT_PERMISSIONS_CLAIM`
+`TEMPORAL_AUTH_AUTHORIZER` (defaults to unset)
 
-`TEMPORAL_AUTH_AUTHORIZER`
+`TEMPORAL_AUTH_CLAIM_MAPPER` (defaults to unset)
 
-`TEMPORAL_AUTH_CLAIM_MAPPER`
+`FRONTEND_GRPC_PORT` (defaults to `7233`)
 
-`FRONTEND_GRPC_PORT`
+`FRONTEND_HTTP_PORT` (defaults to `7243`)
 
-`FRONTEND_HTTP_PORT`
+`FRONTEND_MEMBERSHIP_PORT` (defaults to `6933`)
 
-`FRONTEND_MEMBERSHIP_PORT`
+`BIND_ON_IP` (defaults to `127.0.0.1`)
 
-`BIND_ON_IP`
+`INTERNAL_FRONTEND_GRPC_PORT` (defaults to `7236`)
 
-`INTERNAL_FRONTEND_GRPC_PORT`
+`INTERNAL_FRONTEND_MEMBERSHIP_PORT` (defaults to `6936`)
 
-`INTERNAL_FRONTEND_MEMBERSHIP_PORT`
+`MATCHING_GRPC_PORT` (defaults to `7235`)
 
-`MATCHING_GRPC_PORT`
+`MATCHING_MEMBERSHIP_PORT` (defaults to `6935`)
 
-`MATCHING_MEMBERSHIP_PORT`
+`HISTORY_GRPC_PORT` (defaults to `7234`)
 
-`HISTORY_GRPC_PORT`
+`HISTORY_MEMBERSHIP_PORT` (defaults to `6934`)
 
-`HISTORY_MEMBERSHIP_PORT`
+`WORKER_GRPC_PORT` (defaults to `7239`)
 
-`WORKER_GRPC_PORT`
+`WORKER_MEMBERSHIP_PORT` (defaults to `6939`)
 
-`WORKER_MEMBERSHIP_PORT`
+`USE_INTERNAL_FRONTEND` (defaults to unset)
 
-`USE_INTERNAL_FRONTEND`
+`PUBLIC_FRONTEND_ADDRESS` (defaults to unset)
 
-`PUBLIC_FRONTEND_ADDRESS`
-
-`DYNAMIC_CONFIG_FILE_PATH`
+`DYNAMIC_CONFIG_FILE_PATH` (defaults to `/etc/temporal/config/dynamicconfig/docker.yaml`)
