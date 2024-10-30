@@ -398,7 +398,7 @@ This variable specifies how frequently JWT keys should be refreshed.
 
 `TEMPORAL_JWT_PERMISSIONS_CLAIM` (defaults to `permissions`)
 
-This vairable specifies the name of your JWT permissions claim.
+This variable specifies the property name of your JWT permissions claim.
 
 `FRONTEND_GRPC_PORT` (defaults to `7233`)
 
