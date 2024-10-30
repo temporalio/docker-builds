@@ -370,7 +370,7 @@ This variable allows you to specify an endpoint to connect to [statsd](https://g
 
 `PROMETHEUS_ENDPOINT` (defaults to unset)
 
-This variable allows you to specify an endpoint to connect to Prometheus for observability.
+This variable allows you to specify an endpoint to listen on for scrape requests from Prometheus, for observability.
 
 `PROMETHEUS_TIMER_TYPE` (defaults to `histogram`)
 
