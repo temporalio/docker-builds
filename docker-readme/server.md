@@ -374,7 +374,7 @@ This variable allows you to specify an endpoint to listen on for scrape requests
 
 `PROMETHEUS_TIMER_TYPE` (defaults to `histogram`)
 
-This variable specifies which [type of metrics](https://prometheus.io/docs/concepts/metric_types/) should be available at your Prometheus endpoint.
+This variable specifies which [type of Prometheus metric](https://prometheus.io/docs/concepts/metric_types/) is used for timer metrics.
 
 `TEMPORAL_AUTH_AUTHORIZER` (defaults to unset)
 
