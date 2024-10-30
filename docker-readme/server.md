@@ -260,17 +260,33 @@ This variable specifies the name of your [secondary visibility](https://docs.tem
 
 ### Server configuration
 
+`BIND_ON_IP` (defaults to `127.0.0.1` / localhost)
+
+This variable spcifies the URL that the Temporal frontend service should be available at.
+
 `TEMPORAL_BROADCAST_ADDRESS` (defaults to unset)
+
+This variable needs to be specified when the IP Address used by connecting clients is different than your `BIND_ON_IP`, such as when you are listening on 0.0.0.0 or using a proxy IP address.
 
 `PPROF_PORT` (defaults to `0`)
 
+If specified, this variable will initialize [pprof](https://github.com/google/pprof) upon process start on the listed port.
+
 `TEMPORAL_TLS_REFRESH_INTERVAL` (defaults to `0s`)
+
+This variable specifies how often to refresh TLS certificates.
+
+`TEMPORAL_TLS_EXPIRATION_CHECKS_CHECK_INTERVAL` (defaults to `0s`)
+
+This variable specifies how often TLS certificates should be checked for expiration.
 
 `TEMPORAL_TLS_EXPIRATION_CHECKS_WARNING_WINDOW` (defaults to `0s`)
 
+This variable specifies the window within which pending TLS expiration should trigger a warning.
+
 `TEMPORAL_TLS_EXPIRATION_CHECKS_ERROR_WINDOW` (defaults to `0s`)
 
-`TEMPORAL_TLS_EXPIRATION_CHECKS_CHECK_INTERVAL` (defaults to `0s`)
+This variable specifies the window within which pending TLS expiration should throw an error.
 
 `TEMPORAL_TLS_REQUIRE_CLIENT_AUTH` (defaults to `false`)
 
@@ -326,7 +342,7 @@ This variable allows you to pass a frontend security certificate key as an objec
 
 `TEMPORAL_TLS_FRONTEND_DISABLE_HOST_VERIFICATION` (defaults to `false`)
 
-This variable specifies whether the frontned should skip host key verification.
+This variable specifies whether the frontend should skip host key verification.
 
 `TEMPORAL_TLS_FRONTEND_SERVER_NAME` (defaults to unset)
 
@@ -334,29 +350,55 @@ This variable specifies which hostname your frontend should validate against whe
 
 `TEMPORAL_TLS_CLIENT1_CA_CERT` (defaults to unset)
 
+This variable specifies the TLS certificate that the frontend presents to external clients.
+
 `TEMPORAL_TLS_CLIENT1_CA_CERT_DATA` (defaults to unset)
+
+This variable allows you to pass a client security certificate as an object rather than a file path.
 
 `TEMPORAL_TLS_CLIENT2_CA_CERT` (defaults to unset)
 
+This variable allows you to specify an additional TLS certificate that the frontend presents to external clients.
+
 `TEMPORAL_TLS_CLIENT2_CA_CERT_DATA` (defaults to unset)
+
+This variable allows you to pass an additional client security certificate as an object rather than a file path.
 
 `STATSD_ENDPOINT` (defaults to unset)
 
+This variable allows you to specify an endpoint to connect to [statsd](https://github.com/statsd/statsd) for observability.
+
 `PROMETHEUS_ENDPOINT` (defaults to unset)
+
+This variable allows you to specify an endpoint to connect to Prometheus for observability.
 
 `PROMETHEUS_TIMER_TYPE` (defaults to `histogram`)
 
-`TEMPORAL_JWT_KEY_SOURCE1` (defaults to unset)
-
-`TEMPORAL_JWT_KEY_SOURCE2` (defaults to unset)
-
-`TEMPORAL_JWT_KEY_REFRESH` (defaults to `1m`)
-
-`TEMPORAL_JWT_PERMISSIONS_CLAIM` (defaults to `permissions`)
+This variable specifies which [type of metrics](https://prometheus.io/docs/concepts/metric_types/) should be available at your Prometheus endpoint.
 
 `TEMPORAL_AUTH_AUTHORIZER` (defaults to unset)
 
+This variable allows you to configure the [Authorizer](https://docs.temporal.io/self-hosted-guide/security#authorizer-plugin) plugin.
+
 `TEMPORAL_AUTH_CLAIM_MAPPER` (defaults to unset)
+
+This variable allows you to configure the [ClaimMapper](https://docs.temporal.io/self-hosted-guide/security#claim-mapper) plugin.
+
+`TEMPORAL_JWT_KEY_SOURCE1` (defaults to unset)
+
+This variable allows you to specify a JWT key source for a [ClaimMapper](https://docs.temporal.io/self-hosted-guide/security#default-jwt-claimmapper) integration.
+
+`TEMPORAL_JWT_KEY_SOURCE2` (defaults to unset)
+
+This variable allows you to specify another JWT key source for a ClaimMapper integration.
+
+`TEMPORAL_JWT_KEY_REFRESH` (defaults to `1m`)
+
+This variable specifies how frequently JWT keys should be refreshed.
+
+`TEMPORAL_JWT_PERMISSIONS_CLAIM` (defaults to `permissions`)
+
+This vairable specifies the name of your JWT permissions claim.
 
 `FRONTEND_GRPC_PORT` (defaults to `7233`)
 
@@ -369,10 +411,6 @@ This variable specifies the port that Temporal's frontend service HTTP endpoint 
 `FRONTEND_MEMBERSHIP_PORT` (defaults to `6933`)
 
 This variable specifies the port that Temporal's frontend service membership endpoint is available on.
-
-`BIND_ON_IP` (defaults to `127.0.0.1` / localhost)
-
-This variable spcifies the URL that the Temporal frontend service should be available at.
 
 `INTERNAL_FRONTEND_GRPC_PORT` (defaults to `7236`)
 
@@ -408,6 +446,12 @@ This variable specifies the port that Temporal's worker service membership endpo
 
 `USE_INTERNAL_FRONTEND` (defaults to unset)
 
+This variable specifies whether to deploy an additional [internal frontend](https://github.com/temporalio/temporal/releases/tag/v1.20.0) service, needed for some auth configurations.
+
 `PUBLIC_FRONTEND_ADDRESS` (defaults to unset)
 
+This variable can be use to override the public frontend address derived from `BIND_ON_IP` and ``FRONTEND_GRPC_PORT`.
+
 `DYNAMIC_CONFIG_FILE_PATH` (defaults to `/etc/temporal/config/dynamicconfig/docker.yaml`)
+
+This variable specifies the path to a YAML file that [dynamic configuration](https://docs.temporal.io/references/dynamic-configuration) keys can be read from.
