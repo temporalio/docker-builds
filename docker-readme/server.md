@@ -262,7 +262,7 @@ This variable specifies the name of your [secondary visibility](https://docs.tem
 
 `BIND_ON_IP` (defaults to `127.0.0.1` / localhost)
 
-This variable spcifies the URL that the Temporal frontend service should be available at.
+This variable specifies the IP address that the Temporal frontend service should be available on.
 
 `TEMPORAL_BROADCAST_ADDRESS` (defaults to unset)
 
