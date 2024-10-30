@@ -56,9 +56,11 @@ This variable allows you to pass a Cassandra security certificate key as an obje
 
 `CASSANDRA_CA` (defaults to unset)
 
-This variable specifies the host of your Cassandra security certificate authority, if needed.
+This variable specifies the path to your Cassandra security certificate authority, if needed.
 
 `CASSANDRA_CA_DATA` (defaults to unset)
+
+This variable allows you to pass a Cassandra security certificate authority as an object rather than a file path.
 
 `CASSANDRA_HOST_VERIFICATION` (default: `false`)
 
@@ -66,9 +68,15 @@ This variable specifies whether Cassandra should perform host key verification.
 
 `CASSANDRA_HOST_NAME` (defaults to unset)
 
+This variable specifies the hostname of your Cassandra DB.
+
 `CASSANDRA_ADDRESS_TRANSLATOR` (defaults to unset)
 
+Cassandra drivers have an AddressTranslator interface that can translate IP addresses received from Cassandra nodes into locally queriable addresses. This can be useful in situations where the addresses received from Cassandra nodes are not reachable directly by the driver or are not the preferred address to use.
+
 `CASSANDRA_ADDRESS_TRANSLATOR_OPTIONS` (defaults to unset)
+
+This variable allows you to specify AddressTranslator [options](https://github.com/pingidentity/cassandra-spring-boot-starter/blob/master/README.md)
 
 ### MySQL/PostgreSQL
 
@@ -82,17 +90,31 @@ This variable specifies the name of your MySQL / Postgres visibility database, s
 
 `VISIBILITY_DB_PORT` (defautls to `3306` for MySQL and `5432` for Postgres)
 
+This variable specifies the port to connect to MySQL/PostgrSQL on for your visibility database.
+
 `VISIBILITY_MYSQL_SEEDS` (defaults to unset)
+
+This variable specifies your MySQL hostname for your visibility database.
 
 `VISIBILITY_MYSQL_USER` (defaults to unset)
 
+This variable specifies your MySQL username for your visibility database.
+
 `VISIBILITY_MYSQL_PWD` (defaults to unset)
+
+This variable specifies your MySQL password for your visibility database.
 
 `VISIBILITY_POSTGRES_SEEDS` (defaults to unset)
 
+This variable specifies your PostgreSQL hostname for your visibility database.
+
 `VISIBILITY_POSTGRES_USER` (defaults to unset)
 
+This variable specifies your PostgreSQL username for your visibility database.
+
 `VISIBILITY_POSTGRES_PWD` (defaults to unset)
+
+This variable specifies your PostgreSQL password for your visibility database.
  
 `DB_PORT` (defautls to `3306` for MySQL and `5432` for Postgres)
 
@@ -116,27 +138,51 @@ This variable enables compatibility with pre-5.7.20 MySQL installations, if need
 
 `SQL_VIS_MAX_CONNS` (defaults to `10`)
 
+This variables specifies the maximum allowed active connections to your visibility database.
+
 `SQL_VIS_MAX_IDLE_CONNS` (defaults to `10`)
+
+This variables specifies the maximum allowed idle connections to your visibility database.
 
 `SQL_VIS_MAX_CONN_TIME` (defaults to `1h`)
 
+This variable specifies how long connections to your visibility database are allowed to remain open.
+
 `SQL_MAX_CONNS` (defaults to `20`)
+
+This variables specifies the maximum allowed active database connections.
 
 `SQL_MAX_IDLE_CONNS` (defaults to `20`)
 
+This variables specifies the maximum allowed idle database connections.
+
 `SQL_MAX_CONN_TIME` (defaults to `1h`)
+
+This variable specifies how long connections to your database are allowed to remain open.
 
 `SQL_TLS_ENABLED` (defaults to `false`)
 
+This variale specifies whether you use TLS to connect to your SQL database.
+
 `SQL_CA` (defaults to unset)
+
+This variable specifies the path to your SQL security certificate authority, if needed.
 
 `SQL_CERT` (defaults to unset)
 
+This variable specifies the path to your SQL security certificate, if needed.
+
 `SQL_CERT_KEY` (defaults to unset)
+
+This variable specifies the path to your SQL security certificate key, if needed.
 
 `SQL_HOST_VERIFICATION` (defaults to `false`)
 
+This variable specifies whether your SQL database connection should perform hostname verification.
+
 `SQL_HOST_NAME` (defaults to unset)
+
+This variable specifies which hostname your database connection should validate against when using TLS.
 
 `POSTGRES_SEEDS` (defaults to unset)
 
