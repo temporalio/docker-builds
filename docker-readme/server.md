@@ -274,33 +274,63 @@ This variable specifies the name of your [secondary visibility](https://docs.tem
 
 `TEMPORAL_TLS_REQUIRE_CLIENT_AUTH` (defaults to `false`)
 
+This variable specifies whether Temporal clients (including all Workers, CLI and SDK code) are required to authenticate via TLS.
+
 `TEMPORAL_TLS_SERVER_CERT` (defaults to unset)
+
+This variable specifies the path to your Temporal security certificate, if you are using TLS.
 
 `TEMPORAL_TLS_SERVER_CERT_DATA` (defaults to unset)
 
+This variable allows you to pass a Temporal security certificate as an object rather than a file path.
+
 `TEMPORAL_TLS_SERVER_KEY` (defaults to unset)
+
+This variable specifies the path to your Temporal security certificate key, if you are using TLS.
 
 `TEMPORAL_TLS_SERVER_KEY_DATA` (defaults to unset)
 
+This variable allows you to pass a Temporal security certificate key as an object rather than a file path.
+
 `TEMPORAL_TLS_SERVER_CA_CERT` (defaults to unset)
+
+This variable specifies the path to your Temporal security certificate authority, if needed.
 
 `TEMPORAL_TLS_SERVER_CA_CERT_DATA` (defaults to unset)
 
-`TEMPORAL_TLS_INTERNODE_SERVER_NAME` (defaults to unset)
+This variable allows you to pass a Temporal security certificate authority as an object rather than a file path.
 
 `TEMPORAL_TLS_INTERNODE_DISABLE_HOST_VERIFICATION` (defaults to `false`)
 
+This variable specifies whether Temporal should skip host key verification when connecting to an internode (e.g., the history or matching services).
+
+`TEMPORAL_TLS_INTERNODE_SERVER_NAME` (defaults to unset)
+
+This variable specifies which hostname your internode connection should validate against when using TLS.
+
 `TEMPORAL_TLS_FRONTEND_CERT` (defaults to unset)
+
+This variable specifies the path to your frontend security certificate, if you are using TLS.
 
 `TEMPORAL_TLS_FRONTEND_CERT_DATA` (defaults to unset)
 
+This variable allows you to pass a frontend security certificate as an object rather than a file path.
+
 `TEMPORAL_TLS_FRONTEND_KEY` (defaults to unset)
+
+This variable specifies the path to your frontend security certificate key, if you are using TLS.
 
 `TEMPORAL_TLS_FRONTEND_KEY_DATA` (defaults to unset)
 
-`TEMPORAL_TLS_FRONTEND_SERVER_NAME` (defaults to unset)
+This variable allows you to pass a frontend security certificate key as an object rather than a file path.
 
 `TEMPORAL_TLS_FRONTEND_DISABLE_HOST_VERIFICATION` (defaults to `false`)
+
+This variable specifies whether the frontned should skip host key verification.
+
+`TEMPORAL_TLS_FRONTEND_SERVER_NAME` (defaults to unset)
+
+This variable specifies which hostname your frontend should validate against when using TLS.
 
 `TEMPORAL_TLS_CLIENT1_CA_CERT` (defaults to unset)
 
@@ -330,27 +360,51 @@ This variable specifies the name of your [secondary visibility](https://docs.tem
 
 `FRONTEND_GRPC_PORT` (defaults to `7233`)
 
+This variable specifies the port that Temporal's frontend service GRPC endpoint is available on.
+
 `FRONTEND_HTTP_PORT` (defaults to `7243`)
+
+This variable specifies the port that Temporal's frontend service HTTP endpoint is available on.
 
 `FRONTEND_MEMBERSHIP_PORT` (defaults to `6933`)
 
-`BIND_ON_IP` (defaults to `127.0.0.1`)
+This variable specifies the port that Temporal's frontend service membership endpoint is available on.
+
+`BIND_ON_IP` (defaults to `127.0.0.1` / localhost)
+
+This variable spcifies the URL that the Temporal frontend service should be available at.
 
 `INTERNAL_FRONTEND_GRPC_PORT` (defaults to `7236`)
 
+This variable specifies the port that Temporal's frontend service internal GRPC endpoint is available on.
+
 `INTERNAL_FRONTEND_MEMBERSHIP_PORT` (defaults to `6936`)
+
+This variable specifies the port that Temporal's frontend service internal membership endpoint is available on.
 
 `MATCHING_GRPC_PORT` (defaults to `7235`)
 
+This variable specifies the port that Temporal's matching service GRPC endpoint is available on.
+
 `MATCHING_MEMBERSHIP_PORT` (defaults to `6935`)
+
+This variable specifies the port that Temporal's matching service membership endpoint is available on.
 
 `HISTORY_GRPC_PORT` (defaults to `7234`)
 
+This variable specifies the port that Temporal's history service GRPC endpoint is available on.
+
 `HISTORY_MEMBERSHIP_PORT` (defaults to `6934`)
+
+This variable specifies the port that Temporal's history service membership endpoint is available on.
 
 `WORKER_GRPC_PORT` (defaults to `7239`)
 
+This variable specifies the port that Temporal's worker service GRPC endpoint is available on.
+
 `WORKER_MEMBERSHIP_PORT` (defaults to `6939`)
+
+This variable specifies the port that Temporal's worker service membership endpoint is available on.
 
 `USE_INTERNAL_FRONTEND` (defaults to unset)
 
