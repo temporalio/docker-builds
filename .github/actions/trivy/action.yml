@@ -39,8 +39,8 @@ runs:
       id: pull
       shell: bash
       run: |
-        oras pull ghcr.io/temporalio/private-actions/trivy-db:2
-        oras pull ghcr.io/temporalio/private-actions/trivy-java-db:1
+        oras pull ghcr.io/temporalio/trivy-db:2
+        oras pull ghcr.io/temporalio/trivy-java-db:1
 
     - name: Scan Container Image
       id: scan
