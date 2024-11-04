@@ -11,7 +11,10 @@ inputs:
 
 runs:
   using: "composite"
-  steps: 
+  permissions:
+    packages: read
+    contents: read
+  steps:
     - name: Set variables
       env:
         TAGS: ${{ inputs.image-tags }}
