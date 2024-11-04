@@ -29,9 +29,11 @@ runs:
       uses: oras-project/setup-oras@v1
 
     - name: Authenticate to GHCR
+      env:
+        PW: ${{ github.token }}
       id: ghcr
       shell: bash
-      run: echo "${{ secrets.GITHUB_TOKEN }}" | oras login ghcr.io -u $ --password-stdin
+      run: echo "$PW" | oras login ghcr.io -u $ --password-stdin
 
     - name: Pull Trivy DBs from GHCR
       id: pull
