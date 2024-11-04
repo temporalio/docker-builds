@@ -11,9 +11,6 @@ inputs:
 
 runs:
   using: "composite"
-  permissions:
-    packages: read
-    contents: read
   steps:
     - name: Set variables
       env:
