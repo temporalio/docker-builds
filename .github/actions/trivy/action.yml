@@ -31,10 +31,7 @@ runs:
     - name: Authenticate to GHCR
       id: ghcr
       shell: bash
-      run: |
-        oras login ghcr.io \
-          -u ${{ github.actor }} \
-          -p ${{ github.token }}
+      run: echo "${{ secrets.GITHUB_TOKEN }}" | oras login ghcr.io -u $ --password-stdin
 
     - name: Pull Trivy DBs from GHCR
       id: pull
