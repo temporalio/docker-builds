@@ -1,5 +1,5 @@
 name: 'Trivy Action'
-description: 'Docker Image Trivy security check combined action'
+description: 'Run Trivy vulnerability scanner'
 
 inputs:
   image-tags:
@@ -11,7 +11,7 @@ inputs:
 
 runs:
   using: "composite"
-  steps:
+  steps: 
     - name: Set variables
       env:
         TAGS: ${{ inputs.image-tags }}
@@ -23,16 +23,44 @@ runs:
         name=${NAME// /-}
         echo "tag=${tag}" >> $GITHUB_OUTPUT
         echo "name=${name}" >> $GITHUB_OUTPUT
+      
+    - name: Install ORAS
+      id: oras
+      uses: oras-project/setup-oras@v1
 
-    - name: Run Trivy vulnerability scanner on ${{ inputs.image-name }} image
-      uses: aquasecurity/trivy-action@master
+    - name: Authenticate to GHCR
+      env:
+        PW: ${{ github.token }}
+      id: ghcr
+      shell: bash
+      run: echo "$PW" | oras login ghcr.io -u $ --password-stdin
+
+    - name: Pull Trivy DBs from GHCR
+      id: pull
+      shell: bash
+      run: |
+        oras pull ghcr.io/temporalio/private-actions/trivy-db:2
+        oras pull ghcr.io/temporalio/private-actions/trivy-java-db:1
+
+    - name: Scan Container Image
+      id: scan
+      uses: aquasecurity/trivy-action@0.28.0
+      env:
+        TRIVY_DB_REPOSITORY: ghcr.io/temporalio/private-actions/trivy-db,public.ecr.aws/aquasecurity/trivy-db,ghcr.io/aquasecurity/trivy-db
+        TRIVY_JAVA_DB_REPOSITORY: ghcr.io/temporalio/private-actions/trivy-java-db,public.ecr.aws/aquasecurity/trivy-java-db,ghcr.io/aquasecurity/trivy-java-db
+        # Not 100% sure if these are required, but so far no issues.
+        TRIVY_USERNAME: ${{ github.actor }}
+        TRIVY_PASSWORD: ${{ github.token }}
       with:
+        cache: true
+        exit-code: 0
         image-ref: ${{ steps.vars.outputs.tag }}
         format: 'sarif'
         output: 'trivy-${{ steps.vars.outputs.name }}-results.sarif'
 
     - name: Upload ${{ inputs.image-name }} image Trivy scan results to GitHub Security tab
-      uses: github/codeql-action/upload-sarif@v2
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
       with:
         sarif_file: 'trivy-${{ steps.vars.outputs.name }}-results.sarif'
         category: trivy-${{ steps.vars.outputs.name }}-results
