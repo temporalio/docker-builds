@@ -33,7 +33,7 @@ runs:
         PW: ${{ github.token }}
       id: ghcr
       shell: bash
-      run: echo "$PW" | oras login ghcr.io -u $ --password-stdin
+      run: echo "$PW" | oras login ghcr.io -u github-actions --password-stdin
 
     - name: Pull Trivy DBs from GHCR
       id: pull
