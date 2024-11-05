@@ -9,6 +9,7 @@ on:
   push:
     branches:
       - main
+      - trivy #testing for 248
       - release/*
       - cloud/*
   pull_request:
