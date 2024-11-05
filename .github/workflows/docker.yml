@@ -84,6 +84,7 @@ jobs:
         run: BAKE_OUTPUT=registry make build
 
       - name: Run Trivy vulnerability scanner on ${{ matrix.image }} image
+        if: ${{ github.event_name == 'push' && !env.ACT }}
         uses: ./.github/actions/trivy
         with:
           image-tags: temporaliotest/${{ matrix.image }}:${{ env.IMAGE_TAG }}
