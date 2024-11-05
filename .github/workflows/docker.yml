@@ -83,8 +83,8 @@ jobs:
         if: ${{ github.event_name == 'push' }}
         run: BAKE_OUTPUT=registry make build
 
-      - name: Run Trivy vulnerability scanner on ${{ matrix.image }} image
-        if: ${{ github.event_name == 'push' }}
+      - name: Run Trivy container vulnerability scanner
+        #if: ${{ github.event_name == 'push' }}
         uses: ./.github/actions/trivy
         with:
           image-tags: temporaliotest/${{ matrix.image }}:${{ env.IMAGE_TAG }}
