@@ -22,6 +22,9 @@ on:
 
 jobs:
   build-push-images:
+    strategy:
+      matrix:
+        image: [server, admin-tools, auto-setup]
     runs-on: ubuntu-latest-16-cores
     # Usually, a successful job takes ~17 mins.
     # Anything more than 30 mins is a sign that job is stuck.
@@ -80,26 +83,11 @@ jobs:
         if: ${{ github.event_name == 'push' && !env.ACT }}
         run: BAKE_OUTPUT=registry make build
 
-      # TODO: can we loop this somehow?
-      - name: Run Trivy vulnerability scanner on Server image
+      - name: Run Trivy vulnerability scanner on ${{ matrix.image }} image
         uses: ./.github/actions/trivy
         with:
-          image-tags: temporaliotest/server:${{ env.IMAGE_TAG }}
-          image-name: server
-
-      - name: Run Trivy vulnerability scanner on Admin Tools image
-        if: ${{ github.event_name == 'push' && !env.ACT }}
-        uses: ./.github/actions/trivy
-        with:
-          image-tags: temporaliotest/admin-tools:${{ env.IMAGE_TAG }}
-          image-name: admin-tools
-
-      - name: Run Trivy vulnerability scanner on Auto Setup image
-        if: ${{ github.event_name == 'push' && !env.ACT }}
-        uses: ./.github/actions/trivy
-        with:
-          image-tags: temporaliotest/auto-setup:${{ env.IMAGE_TAG }}
-          image-name: auto-setup
+          image-tags: temporaliotest/${{ matrix.image }}:${{ env.IMAGE_TAG }}
+          image-name: ${{ matrix.image }}
 
       - name: Ensure images work
         run: make IMAGE_TAG=${{env.IMAGE_TAG}} test
