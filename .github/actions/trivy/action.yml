@@ -60,7 +60,7 @@ runs:
 
     - name: Upload ${{ inputs.image-name }} image Trivy scan results to GitHub Security tab
       uses: github/codeql-action/upload-sarif@v3
-      if: always()
+      #if: always()
       with:
         sarif_file: 'trivy-${{ steps.vars.outputs.name }}-results.sarif'
         category: trivy-${{ steps.vars.outputs.name }}-results
