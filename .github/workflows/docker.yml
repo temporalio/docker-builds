@@ -81,8 +81,7 @@ jobs:
         run: BAKE_OUTPUT=registry make build
 
       # TODO: can we loop this somehow?
-      - name: Run Trivy container vulnerability scanner
-        if: ${{ github.event_name == 'push' && !env.ACT }}
+      - name: Run Trivy vulnerability scanner on Server image
         uses: ./.github/actions/trivy
         with:
           image-tags: temporaliotest/server:${{ env.IMAGE_TAG }}
