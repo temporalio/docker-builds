@@ -2,6 +2,7 @@ name: Build Docker Images
 
 permissions:
   contents: read
+  packages: read
   security-events: write
 
 on:
