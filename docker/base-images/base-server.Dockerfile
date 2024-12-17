@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=alpine:3.20
+ARG BASE_IMAGE=alpine:3.21
 
 ##### base-server target #####
 FROM ${BASE_IMAGE} AS base-server
