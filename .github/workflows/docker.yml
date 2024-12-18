@@ -77,7 +77,7 @@ jobs:
         run: BAKE_OUTPUT=docker make build-native
 
       - name: Bake and push multiarch images
-        if: ${{ github.event_name == 'push' && !env.ACT }}
+        # if: ${{ github.event_name == 'push' && !env.ACT }}
         run: BAKE_OUTPUT=registry make build
 
       # TODO: can we loop this somehow?
