@@ -92,7 +92,7 @@ validate_db_env() {
           fi
           ;;
       *)
-          die "Unsupported driver specified: 'DB=${DB}'. Valid drivers are: mysql8, postgres12, postgres12_pgx, cassandra."
+          die "Unsupported driver specified: 'DB=${DB}'. Valid drivers are: mysql8, postgres12, postgres12_pgx, postgres13, postgres13_pgx, cassandra."
           ;;
     esac
 }
