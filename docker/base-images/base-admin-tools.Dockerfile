@@ -14,7 +14,8 @@ RUN pipx install --global cqlsh
 
 FROM ${BASE_IMAGE} AS base-admin-tools
 
-RUN apk add --update --no-cache \
+RUN apk upgrade --no-cache
+RUN apk add --no-cache \
     python3 \
     libev \
     ca-certificates \
