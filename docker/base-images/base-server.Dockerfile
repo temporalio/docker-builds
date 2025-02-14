@@ -2,14 +2,9 @@ ARG BASE_IMAGE=alpine:3.21
 
 FROM golang:1.23-alpine3.21 AS builder
 
-RUN apk add --update --no-cache \
-    git
-
 ARG DOCKERIZE_VERSION=v0.9.2
-RUN git clone https://github.com/jwilder/dockerize.git && \
-    cd dockerize && \
-    git checkout ${DOCKERIZE_VERSION} && \
-    CGO_ENABLED=0 go build -a -o /usr/local/bin/dockerize .
+RUN go install github.com/jwilder/dockerize@${DOCKERIZE_VERSION}
+RUN cp $(which dockerize) /usr/local/bin/dockerize
 
 ##### base-server target #####
 FROM ${BASE_IMAGE} AS base-server
