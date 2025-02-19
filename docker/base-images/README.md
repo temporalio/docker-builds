@@ -27,7 +27,7 @@ Create builder container once:
 make buildx-docker-container
 ```
 
-Add `-x` suffix to build target names tu build using `buildx` for both `linux/amd64` and `linux/arm64`.
+Add `-x` suffix to build target names to build using `buildx` for both `linux/amd64` and `linux/arm64`.
 
 For example:
 ```bash
