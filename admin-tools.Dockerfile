@@ -1,4 +1,4 @@
-ARG BASE_ADMIN_TOOLS_IMAGE=temporalio/base-admin-tools:1.12.10
+ARG BASE_ADMIN_TOOLS_IMAGE=temporalio/base-admin-tools:1.12.11
 
 ##### Admin Tools #####
 # This is injected as a context via the bakefile so we don't take it as an ARG
