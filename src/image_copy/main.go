@@ -119,7 +119,16 @@ func mustHaveArchitecture(imageTag, platform, expectedArch string) {
 		log.Fatal("no binaries were found")
 	}
 	for _, file := range files {
-		out = execCmd("file", filepath.Join(tmpDir, file.Name()))
+		fp := filepath.Join(tmpDir, file.Name())
+		info, err := os.Lstat(fp)
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+		if info.Mode()&os.ModeSymlink != 0 {
+			// skip symlinks
+			continue
+		}
+		out = execCmd("file", fp)
 		if !strings.Contains(out, expectedArch) {
 			log.Fatal(file.Name() + " is NOT " + expectedArch)
 		} else {
