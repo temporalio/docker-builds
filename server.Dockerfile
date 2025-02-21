@@ -1,4 +1,4 @@
-ARG BASE_SERVER_IMAGE=temporalio/base-server:1.15.10
+ARG BASE_SERVER_IMAGE=temporalio/base-server:1.15.11
 
 FROM ${BASE_SERVER_IMAGE} as temporal-server
 ARG TARGETARCH
@@ -22,7 +22,6 @@ ENV TEMPORAL_SHA=${TEMPORAL_SHA}
 ENV TCTL_SHA=${TCTL_SHA}
 
 # binaries
-COPY ./build/${TARGETARCH}/dockerize /usr/local/bin/dockerize
 COPY ./build/${TARGETARCH}/tctl /usr/local/bin
 COPY ./build/${TARGETARCH}/tctl-authorization-plugin /usr/local/bin
 COPY ./build/${TARGETARCH}/temporal-server /usr/local/bin
