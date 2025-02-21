@@ -9,7 +9,6 @@ CGO_ENABLED ?= 0
 TEMPORAL_ROOT := temporal
 TCTL_ROOT := tctl
 CLI_ROOT := cli
-DOCKERIZE_ROOT := dockerize
 IMAGE_TAG ?= sha-$(shell git rev-parse --short HEAD)
 TEMPORAL_SHA := $(shell sh -c 'git submodule status -- temporal | cut -c2-40')
 TCTL_SHA := $(shell sh -c "git submodule status -- tctl | cut -c2-40")
@@ -46,7 +45,6 @@ update-submodules:
 # $* expands to the stem that matches the %, so when the target is amd64-bins $* expands to amd64
 %-bins:
 	@mkdir -p build/$*
-	@cd $(DOCKERIZE_ROOT) && CGO_ENABLED=$(CGO_ENABLED) GOOS=linux GOARCH=$* go build -o ../build/$*/dockerize .
 	@GOOS=linux GOARCH=$* CGO_ENABLED=$(CGO_ENABLED) make -C $(TEMPORAL_ROOT) clean-bins bins
 	@cp $(TEMPORAL_ROOT)/temporal-server build/$*/
 	@cp $(TEMPORAL_ROOT)/temporal-cassandra-tool build/$*/
