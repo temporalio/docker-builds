@@ -59,5 +59,5 @@ Replace **YOUR_TAG** and **YOUR_CHECKOUT_COMMIT** to build manually:
 
 ```bash
 git checkout YOUR_CHECKOUT_COMMIT
-docker build . -f auto-setup.Dockerfile -t temporalio/auto-setup:YOUR_TAG
+docker build . -f server.Dockerfile -t temporalio/auto-setup:YOUR_TAG
 ```
