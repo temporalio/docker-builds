@@ -22,7 +22,7 @@ info_msg "Updating $SUBMODULE_PATH/ to latest tag"
 
 REPO_DIR=$(git rev-parse --show-toplevel)
 GITHUB_REPO=temporalio/$SUBMODULE_PATH
-LATEST_TAG=$(curl -s "https://api.github.com/repos/$GITHUB_REPO/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+LATEST_TAG=$(curl -s "https://api.github.com/repos/$GITHUB_REPO/releases/latest" | jq -r '.tag_name')
 if [[ -z "$LATEST_TAG" ]]; then
     error_msg "Error: Could not fetch latest release tag"
     exit 1
