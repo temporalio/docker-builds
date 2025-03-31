@@ -115,4 +115,9 @@ docker-auto-setup-x: bins
 
 .PHONY: test
 test:
-	IMAGE_TAG=$(IMAGE_TAG) ./test.sh
+	IMAGE_TAG=$(IMAGE_TAG) ./scripts/test.sh
+
+.PHONY: update-tool-submodules
+update-tool-submodules:
+	./scripts/update-tool-submodules.sh cli
+	./scripts/update-tool-submodules.sh tctl
