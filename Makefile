@@ -10,8 +10,8 @@ TEMPORAL_ROOT := temporal
 TCTL_ROOT := tctl
 CLI_ROOT := cli
 IMAGE_TAG ?= sha-$(shell git rev-parse --short HEAD)
-TEMPORAL_SHA := $(shell sh -c 'git submodule status -- temporal | cut -c2-40')
-TCTL_SHA := $(shell sh -c "git submodule status -- tctl | cut -c2-40")
+TEMPORAL_SHA := $(shell sh -c 'git submodule status -- temporal | cut -c2-41')
+TCTL_SHA := $(shell sh -c "git submodule status -- tctl | cut -c2-41")
 
 DOCKER ?= docker buildx
 BAKE := IMAGE_TAG=$(IMAGE_TAG) TEMPORAL_SHA=$(TEMPORAL_SHA) TCTL_SHA=$(TCTL_SHA) $(DOCKER) bake
