@@ -1,6 +1,6 @@
-ARG BASE_IMAGE=alpine:3.21
+ARG BASE_IMAGE=alpine:3.22
 
-FROM golang:1.23-alpine3.21 AS builder
+FROM golang:1.23-alpine3.22 AS builder
 
 ARG DOCKERIZE_VERSION=v0.9.2
 RUN go install github.com/jwilder/dockerize@${DOCKERIZE_VERSION}
