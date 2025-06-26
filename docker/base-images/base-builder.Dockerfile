@@ -1,4 +1,4 @@
-FROM golang:1.23.4-alpine3.22 AS base-builder
+FROM golang:1.24-alpine3.22 AS base-builder
 
 RUN apk upgrade --no-cache
 RUN apk add --no-cache \
