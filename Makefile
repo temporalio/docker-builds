@@ -124,6 +124,6 @@ update-tool-submodules:
 
 .PHONY: update-alpine
 update-alpine:
-	@printf ($COLOR) "Updating base images to latest the latest Alpine image..."
+	@printf $(COLOR) "Updating base images to latest the latest Alpine image..."
 	./scripts/update-alpine.sh
 
