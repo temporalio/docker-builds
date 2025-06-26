@@ -127,3 +127,8 @@ update-alpine:
 	@printf $(COLOR) "Updating base images to latest the latest Alpine image..."
 	./scripts/update-alpine.sh
 
+.PHONY: update-base-images
+update-base-images:
+	@printf $(COLOR) "Updating builds to use latest Temporal base images.."
+	./scripts/update-base-images.sh
+
