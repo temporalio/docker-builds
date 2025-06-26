@@ -36,7 +36,7 @@ install-submodules:
 
 .PHONY: update-submodules
 update-submodules:
-	@printf $(COLOR) "Updatinging temporal and tctl submodules..."
+	@printf $(COLOR) "Updating temporal and tctl submodules..."
 	git submodule update --force --remote $(TEMPORAL_ROOT) $(TCTL_ROOT)
 
 ##### Docker #####
@@ -121,3 +121,9 @@ test:
 update-tool-submodules:
 	./scripts/update-tool-submodules.sh cli
 	./scripts/update-tool-submodules.sh tctl
+
+.PHONY: update-alpine
+update-alpine:
+	@printf ($COLOR) "Updating base images to latest the latest Alpine image..."
+	./scripts/update-alpine.sh
+
