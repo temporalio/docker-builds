@@ -19,7 +19,7 @@ on:
         default: "temporalio/temporal"
       docker-builds-repo-ref:
         type: string
-        default: "publish-branch-tag"
+        default: "main"
   workflow_dispatch:
     inputs:
       commit:
