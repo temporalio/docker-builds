@@ -7,7 +7,11 @@ variable "IMAGE_REPO" {
   default = "temporaliotest"
 }
 
-variable "IMAGE_TAG" {
+variable "IMAGE_SHA_TAG" {
+  default = null
+}
+
+variable "IMAGE_BRANCH_TAG" {
   default = null
 }
 
@@ -35,7 +39,8 @@ target "server" {
   dockerfile = "server.Dockerfile"
   target = "server"
   tags = [
-    "${IMAGE_REPO}/server:${IMAGE_TAG}",
+    "${IMAGE_REPO}/server:${IMAGE_SHA_TAG}",
+    "${IMAGE_REPO}/server:${IMAGE_BRANCH_TAG}",
     TAG_LATEST ? "${IMAGE_REPO}/server:latest" : ""
   ]
   platforms = platforms
@@ -55,7 +60,8 @@ target "server" {
 target "admin-tools" {
   dockerfile = "admin-tools.Dockerfile"
   tags = [
-    "${IMAGE_REPO}/admin-tools:${IMAGE_TAG}",
+    "${IMAGE_REPO}/admin-tools:${IMAGE_SHA_TAG}",
+    "${IMAGE_REPO}/admin-tools:${IMAGE_BRANCH_TAG}",
     TAG_LATEST ? "${IMAGE_REPO}/admin-tools:latest" : ""
   ]
   platforms = platforms
@@ -75,7 +81,8 @@ target "auto-setup" {
   dockerfile = "server.Dockerfile"
   target = "auto-setup"
   tags = [
-    "${IMAGE_REPO}/auto-setup:${IMAGE_TAG}",
+    "${IMAGE_REPO}/auto-setup:${IMAGE_SHA_TAG}",
+    "${IMAGE_REPO}/auto-setup:${IMAGE_BRANCH_TAG}",
     TAG_LATEST ? "${IMAGE_REPO}/auto-setup:latest" : ""
   ]
   platforms = platforms

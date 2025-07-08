@@ -9,12 +9,19 @@ CGO_ENABLED ?= 0
 TEMPORAL_ROOT := temporal
 TCTL_ROOT := tctl
 CLI_ROOT := cli
-IMAGE_TAG ?= sha-$(shell git rev-parse --short HEAD)
+
 TEMPORAL_SHA := $(shell sh -c 'git submodule status -- temporal | cut -c2-40')
 TCTL_SHA := $(shell sh -c "git submodule status -- tctl | cut -c2-40")
 
+IMAGE_SHA_TAG ?= sha-$(shell git rev-parse --short HEAD)
+IMAGE_BRANCH_TAG ?= branch-$(shell git rev-parse --abbrev-ref HEAD)
+
 DOCKER ?= docker buildx
-BAKE := IMAGE_TAG=$(IMAGE_TAG) TEMPORAL_SHA=$(TEMPORAL_SHA) TCTL_SHA=$(TCTL_SHA) $(DOCKER) bake
+BAKE := IMAGE_SHA_TAG=$(IMAGE_SHA_TAG) \
+		IMAGE_BRANCH_TAG=$(IMAGE_BRANCH_TAG) \
+		TEMPORAL_SHA=$(TEMPORAL_SHA) \
+		TCTL_SHA=$(TCTL_SHA) \
+		$(DOCKER) bake
 NATIVE_ARCH := $(shell go env GOARCH)
 
 # Default to loading into the local docker context. Provide the value 'registry' if you wish to push the images
@@ -81,17 +88,17 @@ build: bins
 
 .PHONY: docker-server
 docker-server: $(NATIVE_ARCH)-bins
-	@printf $(COLOR) "Building docker image temporalio/server:$(IMAGE_TAG)..."
+	@printf $(COLOR) "Building docker image temporalio/server:$(IMAGE_SHA_TAG)..."
 	$(BAKE) server --set "*.platform=linux/$(NATIVE_ARCH)"
 
 .PHONY: docker-admin-tools
 docker-admin-tools: $(NATIVE_ARCH)-bins
-	@printf $(COLOR) "Build docker image temporalio/admin-tools:$(IMAGE_TAG)..."
+	@printf $(COLOR) "Build docker image temporalio/admin-tools:$(IMAGE_SHA_TAG)..."
 	$(BAKE) admin-tools --set "*.platform=linux/$(NATIVE_ARCH)"
 
 .PHONY: docker-auto-setup
 docker-auto-setup: $(NATIVE_ARCH)-bins
-	@printf $(COLOR) "Build docker image temporalio/auto-setup:$(IMAGE_TAG)..."
+	@printf $(COLOR) "Build docker image temporalio/auto-setup:$(IMAGE_SHA_TAG)..."
 	$(BAKE) auto-setup --set "*.platform=linux/$(NATIVE_ARCH)"
 
 .PHONY: docker-buildx-container
@@ -100,22 +107,22 @@ docker-buildx-container:
 
 .PHONY: docker-server-x
 docker-server-x: bins
-	@printf $(COLOR) "Building cross-platform docker image temporalio/server:$(IMAGE_TAG)..."
+	@printf $(COLOR) "Building cross-platform docker image temporalio/server:$(IMAGE_SHA_TAG)..."
 	$(BAKE) server
 
 .PHONY: docker-admin-tools-x
 docker-admin-tools-x: bins
-	@printf $(COLOR) "Build cross-platform docker image temporalio/admin-tools:$(IMAGE_TAG)..."
+	@printf $(COLOR) "Build cross-platform docker image temporalio/admin-tools:$(IMAGE_SHA_TAG)..."
 	$(BAKE) admin-tools
 
 .PHONY: docker-auto-setup-x
 docker-auto-setup-x: bins
-	@printf $(COLOR) "Build cross-platform docker image temporalio/auto-setup:$(DOCKER_IMAGE_TAG)..."
+	@printf $(COLOR) "Build cross-platform docker image temporalio/auto-setup:$(DOCKER_IMAGE_SHA_TAG)..."
 	$(BAKE) auto-setup
 
 .PHONY: test
 test:
-	IMAGE_TAG=$(IMAGE_TAG) ./scripts/test.sh
+	IMAGE_SHA_TAG=$(IMAGE_SHA_TAG) ./scripts/test.sh
 
 .PHONY: update-tool-submodules
 update-tool-submodules:

@@ -27,7 +27,7 @@ Read [more details about base images](./docker/base-images/README.md).
 
 ### (2) Docker pre-release images
 
-For every commit to Temporal Server's main and release branch,
+For every commit to Temporal Server's main and release branches,
 its [Trigger Publish](https://github.com/temporalio/temporal/blob/main/.github/workflows/trigger-publish.yml)
 will invoke [update-submodules](https://github.com/temporalio/docker-builds/actions/workflows/update-submodules.yml)
 to update all submodules to their latest commit - and run the following actions:

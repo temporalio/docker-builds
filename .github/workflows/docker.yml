@@ -8,9 +8,11 @@ permissions:
 on:
   push:
     branches:
+      # NOTE: We only publish Docker images for the main branch and branches that are used for release validation.
       - main
-      - release/*
       - cloud/*
+      - feature/*
+      - release/*
   pull_request:
     branches:
       - main
@@ -55,16 +57,23 @@ jobs:
       - name: Prepare build args
         id: build_args
         run: |
-          github_sha_short=${SHA:0:7}
-          echo "IMAGE_TAG=sha-${github_sha_short}" >> $GITHUB_ENV
+          # Generate SHA image tag
+          github_sha_short=${GITHUB_SHA:0:7}
+          echo "IMAGE_SHA_TAG=sha-${github_sha_short}" >> $GITHUB_ENV
+
+          # Generate branch image tag
+          branch_name=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
+          echo "IMAGE_BRANCH_TAG=branch-${branch_name}" >> $GITHUB_ENV
+
+          # Get submodule commit hashes
           TEMPORAL_SHA=$(git submodule status -- temporal | awk '{print $1}')
           echo "TEMPORAL_SHA=${TEMPORAL_SHA}" >> $GITHUB_ENV
           TCTL_SHA=$(git submodule status -- tctl | awk '{print $1}')
           echo "TCTL_SHA=${TCTL_SHA}" >> $GITHUB_ENV
-          TAG_LATEST=${{(github.event_name == 'push' && github.ref == 'refs/heads/main') && 'true' || 'false'}}
+
+          # Determine if we should tag as `latest`
+          TAG_LATEST=${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') && 'true' || 'false' }}
           echo "TAG_LATEST=${TAG_LATEST}" >> $GITHUB_ENV
-          echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
-          cat $GITHUB_OUTPUT
 
       - uses: actions/setup-go@v5
         with:
@@ -84,25 +93,25 @@ jobs:
       - name: Run Trivy vulnerability scanner on Server image
         uses: ./.github/actions/trivy
         with:
-          image-tags: temporaliotest/server:${{ env.IMAGE_TAG }}
+          image-tags: temporaliotest/server:${{ env.IMAGE_SHA_TAG }}
           image-name: server
 
       - name: Run Trivy vulnerability scanner on Admin Tools image
         if: ${{ github.event_name == 'push' && !env.ACT }}
         uses: ./.github/actions/trivy
         with:
-          image-tags: temporaliotest/admin-tools:${{ env.IMAGE_TAG }}
+          image-tags: temporaliotest/admin-tools:${{ env.IMAGE_SHA_TAG }}
           image-name: admin-tools
 
       - name: Run Trivy vulnerability scanner on Auto Setup image
         if: ${{ github.event_name == 'push' && !env.ACT }}
         uses: ./.github/actions/trivy
         with:
-          image-tags: temporaliotest/auto-setup:${{ env.IMAGE_TAG }}
+          image-tags: temporaliotest/auto-setup:${{ env.IMAGE_SHA_TAG }}
           image-name: auto-setup
 
       - name: Ensure images work
-        run: make IMAGE_TAG=${{env.IMAGE_TAG}} test
+        run: make IMAGE_SHA_TAG=${{env.IMAGE_SHA_TAG}} test
 
       - name: Upload compose logs
         if: always()
