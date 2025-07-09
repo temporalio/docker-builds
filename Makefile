@@ -15,11 +15,10 @@ TCTL_SHA := $(shell sh -c "git submodule status -- tctl | cut -c2-40")
 
 IMAGE_SHA_TAG ?= sha-$(shell git rev-parse --short HEAD)
 IMAGE_BRANCH_TAG ?= branch-$(shell git rev-parse --abbrev-ref HEAD)
-SAFE_IMAGE_BRANCH_TAG = $(shell echo $(IMAGE_BRANCH_TAG)  | tr 'A-Z' 'a-z' | sed 's/[^a-z0-9._-]/-/g')
 
 DOCKER ?= docker buildx
 BAKE := IMAGE_SHA_TAG=$(IMAGE_SHA_TAG) \
-		IMAGE_BRANCH_TAG=$(SAFE_IMAGE_BRANCH_TAG) \
+		IMAGE_BRANCH_TAG=$(IMAGE_BRANCH_TAG) \
 		TEMPORAL_SHA=$(TEMPORAL_SHA) \
 		TCTL_SHA=$(TCTL_SHA) \
 		$(DOCKER) bake

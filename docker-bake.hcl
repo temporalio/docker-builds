@@ -15,6 +15,10 @@ variable "IMAGE_BRANCH_TAG" {
   default = null
 }
 
+variable "SAFE_IMAGE_BRANCH_TAG" {
+  default = IMAGE_BRANCH_TAG != null ? replace(lower(IMAGE_BRANCH_TAG), "/[^a-z0-9._-]/", "-") : null
+}
+
 variable "TEMPORAL_SHA" {
   default = null
 }
@@ -40,7 +44,7 @@ target "server" {
   target = "server"
   tags = [
     "${IMAGE_REPO}/server:${IMAGE_SHA_TAG}",
-    "${IMAGE_REPO}/server:${IMAGE_BRANCH_TAG}",
+    "${IMAGE_REPO}/server:${SAFE_IMAGE_BRANCH_TAG}",
     TAG_LATEST ? "${IMAGE_REPO}/server:latest" : ""
   ]
   platforms = platforms
@@ -61,7 +65,7 @@ target "admin-tools" {
   dockerfile = "admin-tools.Dockerfile"
   tags = [
     "${IMAGE_REPO}/admin-tools:${IMAGE_SHA_TAG}",
-    "${IMAGE_REPO}/admin-tools:${IMAGE_BRANCH_TAG}",
+    "${IMAGE_REPO}/admin-tools:${SAFE_IMAGE_BRANCH_TAG}",
     TAG_LATEST ? "${IMAGE_REPO}/admin-tools:latest" : ""
   ]
   platforms = platforms
@@ -82,7 +86,7 @@ target "auto-setup" {
   target = "auto-setup"
   tags = [
     "${IMAGE_REPO}/auto-setup:${IMAGE_SHA_TAG}",
-    "${IMAGE_REPO}/auto-setup:${IMAGE_BRANCH_TAG}",
+    "${IMAGE_REPO}/auto-setup:${SAFE_IMAGE_BRANCH_TAG}",
     TAG_LATEST ? "${IMAGE_REPO}/auto-setup:latest" : ""
   ]
   platforms = platforms
