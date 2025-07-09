@@ -85,11 +85,11 @@ jobs:
       - name: Bake native images for security scanning
         run: BAKE_OUTPUT=docker make build-native
 
-      - name: Bake and push multiarch images
+      - name: 🐳 Bake and push multiarch images
         if: ${{ github.event_name == 'push' && !env.ACT }}
         run: |
           BAKE_OUTPUT=registry make build
-          echo "::notice::temporaliotest images: $(docker images --format "{{.Repository}}:{{.Tag}}" | grep temporaliotest | tr '\n' ' ')"
+          echo "::notice title=🐳 Docker images::$(docker images --format "{{.Repository}}:{{.Tag}}" | grep temporaliotest | tr '\n' ' ')"
 
       # TODO: can we loop this somehow?
       - name: Run Trivy vulnerability scanner on Server image
