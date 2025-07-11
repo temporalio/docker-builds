@@ -12,7 +12,7 @@ cleanup() {
 
 trap cleanup EXIT
 
-IMAGE_TAG="${IMAGE_TAG:-latest}"
+IMAGE_SHA_TAG="${IMAGE_SHA_TAG:-latest}"
 
 docker compose up -d >/dev/null 2>&1
 

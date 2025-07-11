@@ -87,28 +87,27 @@ jobs:
 
       - name: Configure image variables
         run: |
-          server_sha_short=${GITHUB_SHA:0:7}
-          echo "IMAGE_TAG=sha-$(git submodule status -- temporal | cut -c2-8)" >> $GITHUB_ENV
+          echo "IMAGE_SHA_TAG=sha-$(git submodule status -- temporal | cut -c2-8)" >> $GITHUB_ENV
           echo "TAG_LATEST=true" >> $GITHUB_ENV
 
       - name: Bake images
         run: BAKE_OUTPUT=docker make build-native
 
       - name: Ensure images work
-        run: make IMAGE_TAG=${{env.IMAGE_TAG}} test
+        run: make IMAGE_SHA_TAG=${{env.IMAGE_SHA_TAG}} test
 
       - name: Save autosetup image
         run: |
           docker save \
             --output="/tmp/temporal-autosetup.tar" \
-            temporaliotest/auto-setup:"${{env.IMAGE_TAG}}"
+            temporaliotest/auto-setup:"${{env.IMAGE_SHA_TAG}}"
 
       - name: Prepare artifact
         run: |
           # Upload-artifact has no good way to flatten paths, so we need to move the compose file
           # to avoid some disgustingly long inner path inside the artifact zip.
           cp ./temporal/develop/docker-compose/docker-compose.yml /tmp/docker-compose.yml
-          echo -n "${{env.IMAGE_TAG}}" > /tmp/image_tag
+          echo -n "${{env.IMAGE_SHA_TAG}}" > /tmp/image_sha_tag
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -117,4 +116,4 @@ jobs:
           path: |
             /tmp/temporal-autosetup.tar
             /tmp/docker-compose.yml
-            /tmp/image_tag
+            /tmp/image_sha_tag

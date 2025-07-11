@@ -43,7 +43,7 @@ services:
       - ENABLE_ES=true
       - ES_SEEDS=elasticsearch
       - ES_VERSION=v7
-    image: ${IMAGE_REPO}/auto-setup:${IMAGE_TAG}
+    image: ${IMAGE_REPO}/auto-setup:${IMAGE_SHA_TAG}
     networks:
       - temporal-network
     ports:
@@ -57,7 +57,7 @@ services:
     environment:
       - TEMPORAL_ADDRESS=temporal:7233 # used by temporal
       - TEMPORAL_CLI_ADDRESS=temporal:7233 # used by tctl
-    image: ${IMAGE_REPO}/admin-tools:${IMAGE_TAG}
+    image: ${IMAGE_REPO}/admin-tools:${IMAGE_SHA_TAG}
     networks:
       - temporal-network
     stdin_open: true
