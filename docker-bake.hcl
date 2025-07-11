@@ -7,25 +7,17 @@ variable "IMAGE_REPO" {
   default = "temporaliotest"
 }
 
-variable "IMAGE_SHA_TAG" {
-  default = null
-}
+variable "IMAGE_SHA_TAG" {}
 
-variable "IMAGE_BRANCH_TAG" {
-  default = null
-}
+variable "IMAGE_BRANCH_TAG" {}
 
 variable "SAFE_IMAGE_BRANCH_TAG" {
-  default = IMAGE_BRANCH_TAG != null ? replace(lower(IMAGE_BRANCH_TAG), "/[^a-z0-9._-]/", "-") : null
+  default = join("-", [for c in regexall("[a-z0-9]+", lower(IMAGE_BRANCH_TAG)) : c])
 }
 
-variable "TEMPORAL_SHA" {
-  default = null
-}
+variable "TEMPORAL_SHA" {}
 
-variable "TCTL_SHA" {
-  default = null
-}
+variable "TCTL_SHA" {}
 
 variable "TAG_LATEST" {
   default = false
