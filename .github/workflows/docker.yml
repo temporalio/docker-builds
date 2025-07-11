@@ -89,7 +89,8 @@ jobs:
         if: ${{ github.event_name == 'push' && !env.ACT }}
         run: |
           BAKE_OUTPUT=registry make build
-          echo "::notice title=🐳 Docker images::$(docker images --format "{{.Repository}}:{{.Tag}}" | grep temporaliotest | tr '\n' ' ')"
+          IMAGES=$(docker images --format "• {{.Repository}}:{{.Tag}}" | grep temporaliotest | tr '\n' ' ')
+          echo "::notice title=🐳 Docker images::${IMAGES}"
 
       # TODO: can we loop this somehow?
       - name: Run Trivy vulnerability scanner on Server image
