@@ -9,9 +9,8 @@ CGO_ENABLED ?= 0
 TEMPORAL_ROOT := temporal
 TCTL_ROOT := tctl
 CLI_ROOT := cli
-
-TEMPORAL_SHA := $(shell sh -c 'git submodule status -- temporal | cut -c2-40')
-TCTL_SHA := $(shell sh -c "git submodule status -- tctl | cut -c2-40")
+TEMPORAL_SHA := $(shell sh -c 'git submodule status -- temporal | cut -c2-41')
+TCTL_SHA := $(shell sh -c "git submodule status -- tctl | cut -c2-41")
 
 IMAGE_SHA_TAG ?= sha-$(shell git rev-parse --short HEAD)
 IMAGE_BRANCH_TAG ?= branch-$(shell git rev-parse --abbrev-ref HEAD)
