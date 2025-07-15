@@ -1,7 +1,7 @@
 [submodule "temporal"]
 	path = temporal
 	url = https://github.com/temporalio/temporal
-	branch = main
+	branch = cloud/v1.29.0-136-server-versiono
 [submodule "tctl"]
 	path = tctl
 	url = https://github.com/temporalio/tctl
