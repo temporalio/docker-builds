@@ -39,18 +39,22 @@ runs:
       id: pull
       shell: bash
       run: |
+        mkdir -p $GITHUB_WORKSPACE/.cache/trivy/db
         oras pull ghcr.io/temporalio/trivy-db:2
+        tar -xzf db.tar.gz -C $GITHUB_WORKSPACE/.cache/trivy/db
+        rm db.tar.gz
+
+        mkdir -p $GITHUB_WORKSPACE/.cache/trivy/java-db
         oras pull ghcr.io/temporalio/trivy-java-db:1
+        tar -xzf javadb.tar.gz -C $GITHUB_WORKSPACE/.cache/trivy/java-db
+        rm javadb.tar.gz
 
     - name: Scan Container Image
       id: scan
       uses: aquasecurity/trivy-action@0.32.0
       env:
-        TRIVY_DB_REPOSITORY: ghcr.io/temporalio/private-actions/trivy-db,public.ecr.aws/aquasecurity/trivy-db,ghcr.io/aquasecurity/trivy-db
-        TRIVY_JAVA_DB_REPOSITORY: ghcr.io/temporalio/private-actions/trivy-java-db,public.ecr.aws/aquasecurity/trivy-java-db,ghcr.io/aquasecurity/trivy-java-db
-        # Not 100% sure if these are required, but so far no issues.
-        TRIVY_USERNAME: ${{ github.actor }}
-        TRIVY_PASSWORD: ${{ github.token }}
+        TRIVY_SKIP_DB_UPDATE: true
+        TRIVY_SKIP_JAVA_DB_UPDATE: true
       with:
         cache: true
         exit-code: 0
