@@ -95,22 +95,20 @@ jobs:
       # TODO: can we loop this somehow?
       - name: Run Trivy vulnerability scanner on Server image
         uses: ./.github/actions/trivy
-        continue-on-error: true
+        # continue-on-error: true
         with:
           image-tags: temporaliotest/server:${{ env.IMAGE_SHA_TAG }}
           image-name: server
 
       - name: Run Trivy vulnerability scanner on Admin Tools image
-        if: ${{ github.event_name == 'push' && !env.ACT }}
-        continue-on-error: true
+        # continue-on-error: true
         uses: ./.github/actions/trivy
         with:
           image-tags: temporaliotest/admin-tools:${{ env.IMAGE_SHA_TAG }}
           image-name: admin-tools
 
       - name: Run Trivy vulnerability scanner on Auto Setup image
-        if: ${{ github.event_name == 'push' && !env.ACT }}
-        continue-on-error: true
+        # continue-on-error: true
         uses: ./.github/actions/trivy
         with:
           image-tags: temporaliotest/auto-setup:${{ env.IMAGE_SHA_TAG }}
