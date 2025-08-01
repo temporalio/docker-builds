@@ -100,14 +100,12 @@ jobs:
           image-name: server
 
       - name: Run Trivy vulnerability scanner on Admin Tools image
-        if: ${{ github.event_name == 'push' && !env.ACT }}
         uses: ./.github/actions/trivy
         with:
           image-tags: temporaliotest/admin-tools:${{ env.IMAGE_SHA_TAG }}
           image-name: admin-tools
 
       - name: Run Trivy vulnerability scanner on Auto Setup image
-        if: ${{ github.event_name == 'push' && !env.ACT }}
         uses: ./.github/actions/trivy
         with:
           image-tags: temporaliotest/auto-setup:${{ env.IMAGE_SHA_TAG }}
