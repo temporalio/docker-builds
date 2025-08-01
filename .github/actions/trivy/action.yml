@@ -23,38 +23,10 @@ runs:
         name=${NAME// /-}
         echo "tag=${tag}" >> $GITHUB_OUTPUT
         echo "name=${name}" >> $GITHUB_OUTPUT
-      
-    - name: Install ORAS
-      id: oras
-      uses: oras-project/setup-oras@v1
-
-    - name: Authenticate to GHCR
-      env:
-        PW: ${{ github.token }}
-      id: ghcr
-      shell: bash
-      run: echo "$PW" | oras login ghcr.io -u github-actions --password-stdin
-
-    - name: Pull Trivy DBs from GHCR
-      id: pull
-      shell: bash
-      run: |
-        mkdir -p $GITHUB_WORKSPACE/.cache/trivy/db
-        oras pull ghcr.io/temporalio/trivy-db:2
-        tar -xzf db.tar.gz -C $GITHUB_WORKSPACE/.cache/trivy/db
-        rm db.tar.gz
-
-        mkdir -p $GITHUB_WORKSPACE/.cache/trivy/java-db
-        oras pull ghcr.io/temporalio/trivy-java-db:1
-        tar -xzf javadb.tar.gz -C $GITHUB_WORKSPACE/.cache/trivy/java-db
-        rm javadb.tar.gz
 
     - name: Scan Container Image
       id: scan
       uses: aquasecurity/trivy-action@0.32.0
-      env:
-        TRIVY_SKIP_DB_UPDATE: true
-        TRIVY_SKIP_JAVA_DB_UPDATE: true
       with:
         cache: true
         exit-code: 0
