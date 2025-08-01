@@ -62,7 +62,7 @@ runs:
         TRIVY_SKIP_JAVA_DB_UPDATE: true
         TRIVY_CACHE_DIR: ${{ github.workspace }}/.cache/trivy
       run: |
-        trivy image --severity HIGH,CRITICAL --exit-code 0 --no-progress ${{ steps.vars.outputs.tag }} --format sarif --output trivy-${{ steps.vars.outputs.name }}-results.sarif
+        trivy image --severity HIGH,CRITICAL --no-progress ${{ steps.vars.outputs.tag }} --format sarif --output trivy-${{ steps.vars.outputs.name }}-results.sarif
 
     - name: Upload Trivy scan results
       uses: github/codeql-action/upload-sarif@v3
