@@ -24,15 +24,18 @@ runs:
         echo "tag=${tag}" >> $GITHUB_OUTPUT
         echo "name=${name}" >> $GITHUB_OUTPUT
 
+    - name: Install Trivy
+      uses: aquasecurity/setup-trivy@v0.2.3
+      with:
+        version: v0.65.0
+
     - name: Scan Container Image
       id: scan
-      uses: aquasecurity/trivy-action@0.32.0
-      with:
-        cache: true
-        exit-code: 0
-        image-ref: ${{ steps.vars.outputs.tag }}
-        format: 'table'
-        output: 'trivy-${{ steps.vars.outputs.name }}-results.sarif'
+      shell: bash
+      run: |
+        echo "Scanning image: ${{ steps.vars.outputs.tag }}" 
+        echo "Image name: ${{ steps.vars.outputs.name }}"
+        trivy image --severity HIGH,CRITICAL --exit-code 0 --no-progress ${{ steps.vars.outputs.tag }}
 
     # - name: Upload ${{ inputs.image-name }} image Trivy scan results to GitHub Security tab
     #   uses: github/codeql-action/upload-sarif@v3
