@@ -59,12 +59,12 @@ runs:
         cache: true
         exit-code: 0
         image-ref: ${{ steps.vars.outputs.tag }}
-        format: 'sarif'
+        format: 'table'
         output: 'trivy-${{ steps.vars.outputs.name }}-results.sarif'
 
-    - name: Upload ${{ inputs.image-name }} image Trivy scan results to GitHub Security tab
-      uses: github/codeql-action/upload-sarif@v3
-      #if: always()
-      with:
-        sarif_file: 'trivy-${{ steps.vars.outputs.name }}-results.sarif'
-        category: trivy-${{ steps.vars.outputs.name }}-results
+    # - name: Upload ${{ inputs.image-name }} image Trivy scan results to GitHub Security tab
+    #   uses: github/codeql-action/upload-sarif@v3
+    #   #if: always()
+    #   with:
+    #     sarif_file: 'trivy-${{ steps.vars.outputs.name }}-results.sarif'
+    #     category: trivy-${{ steps.vars.outputs.name }}-results
