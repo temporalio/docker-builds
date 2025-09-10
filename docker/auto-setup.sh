@@ -30,6 +30,12 @@ set -eu -o pipefail
 : "${MYSQL_USER:=}"
 : "${MYSQL_PWD:=}"
 : "${MYSQL_TX_ISOLATION_COMPAT:=false}"
+: "${MYSQL_TLS_ENABLED:=false}"
+: "${MYSQL_TLS_DISABLE_HOST_VERIFICATION:=false}"
+: "${MYSQL_TLS_CERT_FILE:=}"
+: "${MYSQL_TLS_KEY_FILE:=}"
+: "${MYSQL_TLS_CA_FILE:=}"
+: "${MYSQL_TLS_SERVER_NAME:=}"
 
 : "${POSTGRES_SEEDS:=}"
 : "${POSTGRES_USER:=}"
@@ -181,19 +187,101 @@ setup_mysql_schema() {
     MYSQL_VERSION_DIR=v8
     SCHEMA_DIR=${TEMPORAL_HOME}/schema/mysql/${MYSQL_VERSION_DIR}/temporal/versioned
     if [[ ${SKIP_DB_CREATE} != true ]]; then
-        temporal-sql-tool --plugin "${DB}" --ep "${MYSQL_SEEDS}" -u "${MYSQL_USER}" -p "${DB_PORT}" "${MYSQL_CONNECT_ATTR[@]}" --db "${DBNAME}" create
+        temporal-sql-tool \
+            --plugin "${DB}" \
+            --ep "${MYSQL_SEEDS}" \
+            -u "${MYSQL_USER}" \
+            -p "${DB_PORT}" \
+            "${MYSQL_CONNECT_ATTR[@]}" \
+            --db "${DBNAME}" \
+            --tls="${MYSQL_TLS_ENABLED}" \
+            --tls-disable-host-verification="${MYSQL_TLS_DISABLE_HOST_VERIFICATION}" \
+            --tls-cert-file "${MYSQL_TLS_CERT_FILE}" \
+            --tls-key-file "${MYSQL_TLS_KEY_FILE}" \
+            --tls-ca-file "${MYSQL_TLS_CA_FILE}" \
+            --tls-server-name "${MYSQL_TLS_SERVER_NAME}" \
+            create
     fi
-    temporal-sql-tool --plugin "${DB}" --ep "${MYSQL_SEEDS}" -u "${MYSQL_USER}" -p "${DB_PORT}" "${MYSQL_CONNECT_ATTR[@]}" --db "${DBNAME}" setup-schema -v 0.0
-    temporal-sql-tool --plugin "${DB}" --ep "${MYSQL_SEEDS}" -u "${MYSQL_USER}" -p "${DB_PORT}" "${MYSQL_CONNECT_ATTR[@]}" --db "${DBNAME}" update-schema -d "${SCHEMA_DIR}"
+
+    temporal-sql-tool \
+        --plugin "${DB}" \
+        --ep "${MYSQL_SEEDS}" \
+        -u "${MYSQL_USER}" \
+        -p "${DB_PORT}" \
+        "${MYSQL_CONNECT_ATTR[@]}" \
+        --db "${DBNAME}" \
+        --tls="${MYSQL_TLS_ENABLED}" \
+        --tls-disable-host-verification="${MYSQL_TLS_DISABLE_HOST_VERIFICATION}" \
+        --tls-cert-file "${MYSQL_TLS_CERT_FILE}" \
+        --tls-key-file "${MYSQL_TLS_KEY_FILE}" \
+        --tls-ca-file "${MYSQL_TLS_CA_FILE}" \
+        --tls-server-name "${MYSQL_TLS_SERVER_NAME}" \
+        setup-schema -v 0.0
+
+    temporal-sql-tool \
+        --plugin "${DB}" \
+        --ep "${MYSQL_SEEDS}" \
+        -u "${MYSQL_USER}" \
+        -p "${DB_PORT}" \
+        "${MYSQL_CONNECT_ATTR[@]}" \
+        --db "${DBNAME}" \
+        --tls="${MYSQL_TLS_ENABLED}" \
+        --tls-disable-host-verification="${MYSQL_TLS_DISABLE_HOST_VERIFICATION}" \
+        --tls-cert-file "${MYSQL_TLS_CERT_FILE}" \
+        --tls-key-file "${MYSQL_TLS_KEY_FILE}" \
+        --tls-ca-file "${MYSQL_TLS_CA_FILE}" \
+        --tls-server-name "${MYSQL_TLS_SERVER_NAME}" \
+        update-schema -d "${SCHEMA_DIR}"
 
     # Only setup visibility schema if ES is not enabled
     if [[ ${ENABLE_ES} == false ]]; then
       VISIBILITY_SCHEMA_DIR=${TEMPORAL_HOME}/schema/mysql/${MYSQL_VERSION_DIR}/visibility/versioned
       if [[ ${SKIP_DB_CREATE} != true ]]; then
-          temporal-sql-tool --plugin "${DB}" --ep "${MYSQL_SEEDS}" -u "${MYSQL_USER}" -p "${DB_PORT}" "${MYSQL_CONNECT_ATTR[@]}" --db "${VISIBILITY_DBNAME}" create
+          temporal-sql-tool \
+              --plugin "${DB}" \
+              --ep "${MYSQL_SEEDS}" \
+              -u "${MYSQL_USER}" \
+              -p "${DB_PORT}" \
+              "${MYSQL_CONNECT_ATTR[@]}" \
+              --db "${VISIBILITY_DBNAME}" \
+              --tls="${MYSQL_TLS_ENABLED}" \
+              --tls-disable-host-verification="${MYSQL_TLS_DISABLE_HOST_VERIFICATION}" \
+              --tls-cert-file "${MYSQL_TLS_CERT_FILE}" \
+              --tls-key-file "${MYSQL_TLS_KEY_FILE}" \
+              --tls-ca-file "${MYSQL_TLS_CA_FILE}" \
+              --tls-server-name "${MYSQL_TLS_SERVER_NAME}" \
+              create
       fi
-      temporal-sql-tool --plugin "${DB}" --ep "${MYSQL_SEEDS}" -u "${MYSQL_USER}" -p "${DB_PORT}" "${MYSQL_CONNECT_ATTR[@]}" --db "${VISIBILITY_DBNAME}" setup-schema -v 0.0
-      temporal-sql-tool --plugin "${DB}" --ep "${MYSQL_SEEDS}" -u "${MYSQL_USER}" -p "${DB_PORT}" "${MYSQL_CONNECT_ATTR[@]}" --db "${VISIBILITY_DBNAME}" update-schema -d "${VISIBILITY_SCHEMA_DIR}"
+
+      temporal-sql-tool \
+          --plugin "${DB}" \
+          --ep "${MYSQL_SEEDS}" \
+          -u "${MYSQL_USER}" \
+          -p "${DB_PORT}" \
+          "${MYSQL_CONNECT_ATTR[@]}" \
+          --db "${VISIBILITY_DBNAME}" \
+          --tls="${MYSQL_TLS_ENABLED}" \
+          --tls-disable-host-verification="${MYSQL_TLS_DISABLE_HOST_VERIFICATION}" \
+          --tls-cert-file "${MYSQL_TLS_CERT_FILE}" \
+          --tls-key-file "${MYSQL_TLS_KEY_FILE}" \
+          --tls-ca-file "${MYSQL_TLS_CA_FILE}" \
+          --tls-server-name "${MYSQL_TLS_SERVER_NAME}" \
+          setup-schema -v 0.0
+
+      temporal-sql-tool \
+          --plugin "${DB}" \
+          --ep "${MYSQL_SEEDS}" \
+          -u "${MYSQL_USER}" \
+          -p "${DB_PORT}" \
+          "${MYSQL_CONNECT_ATTR[@]}" \
+          --db "${VISIBILITY_DBNAME}" \
+          --tls="${MYSQL_TLS_ENABLED}" \
+          --tls-disable-host-verification="${MYSQL_TLS_DISABLE_HOST_VERIFICATION}" \
+          --tls-cert-file "${MYSQL_TLS_CERT_FILE}" \
+          --tls-key-file "${MYSQL_TLS_KEY_FILE}" \
+          --tls-ca-file "${MYSQL_TLS_CA_FILE}" \
+          --tls-server-name "${MYSQL_TLS_SERVER_NAME}" \
+          update-schema -d "${VISIBILITY_SCHEMA_DIR}"
     fi
 }
 
