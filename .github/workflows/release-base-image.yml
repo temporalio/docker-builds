@@ -1,6 +1,7 @@
 name: Release Base-* Docker image
 
-permissions: read-all
+permissions:
+  contents: read
 
 on:
   workflow_dispatch:
