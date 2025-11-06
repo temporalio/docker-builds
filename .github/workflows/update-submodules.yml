@@ -27,18 +27,23 @@ jobs:
 
     steps:
       - name: Generate a token
-        id: generate_token
+        id: app-token
         uses: actions/create-github-app-token@v2
         with:
           app-id: ${{ secrets.TEMPORAL_CICD_APP_ID }}
           private-key: ${{ secrets.TEMPORAL_CICD_PRIVATE_KEY }}
-          
+          owner: ${{ github.repository_owner }}
+          repositories: |
+            docker-builds
+            temporal
+            tctl
+            cli
       - name: Checkout
         uses: actions/checkout@v2
         with:
           submodules: true
-          persist-credentials: true
-          token: ${{ steps.generate_token.outputs.token }}
+          persist-credentials: false
+          token: ${{ steps.app-token.outputs.token }}
           fetch-depth: 0
 
       - name: Calc target branches
@@ -81,7 +86,7 @@ jobs:
       - name: Commit update
         env:
           CURRENT_REPO: ${{ github.repository }}
-          TOKEN: ${{ steps.generate_token.outputs.token }}
+          TOKEN: ${{ steps.app-token.outputs.token }}
           SUBMODULE: ${{ github.event.inputs.repo }}
           BRANCH: ${{ steps.target_branches.outputs.local_branch }}
         run: |
