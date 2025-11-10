@@ -23,6 +23,14 @@ variable "TAG_LATEST" {
   default = false
 }
 
+variable "DOCKER_BUILDX_CACHE_FROM" {
+  default = "type=gha"
+}
+
+variable "DOCKER_BUILDX_CACHE_TO" {
+  default = "type=gha,mode=max"
+}
+
 group "default" {
   targets = [
     "server",
@@ -44,6 +52,8 @@ target "server" {
     TEMPORAL_SHA = "${TEMPORAL_SHA}"
     TCTL_SHA = "${TCTL_SHA}"
   }
+  cache-from = [DOCKER_BUILDX_CACHE_FROM != "" ? "${DOCKER_BUILDX_CACHE_FROM},scope=server" : "type=gha,scope=server"]
+  cache-to = [DOCKER_BUILDX_CACHE_TO != "" ? "${DOCKER_BUILDX_CACHE_TO},scope=server" : "type=gha,mode=max,scope=server"]
   labels = {
     "org.opencontainers.image.title" = "server"
     "org.opencontainers.image.description" = "Workflow as Code (TM) to build and operate resilient applications"
@@ -64,6 +74,8 @@ target "admin-tools" {
   contexts = {
     server = "target:server"
   }
+  cache-from = [DOCKER_BUILDX_CACHE_FROM != "" ? "${DOCKER_BUILDX_CACHE_FROM},scope=admin-tools" : "type=gha,scope=admin-tools"]
+  cache-to = [DOCKER_BUILDX_CACHE_TO != "" ? "${DOCKER_BUILDX_CACHE_TO},scope=admin-tools" : "type=gha,mode=max,scope=admin-tools"]
   labels = {
     "org.opencontainers.image.title" = "admin-tools"
     "org.opencontainers.image.description" = "Workflow as Code (TM) to build and operate resilient applications"
@@ -86,6 +98,8 @@ target "auto-setup" {
     server = "target:server"
     admin-tools = "target:admin-tools"
   }
+  cache-from = [DOCKER_BUILDX_CACHE_FROM != "" ? "${DOCKER_BUILDX_CACHE_FROM},scope=auto-setup" : "type=gha,scope=auto-setup"]
+  cache-to = [DOCKER_BUILDX_CACHE_TO != "" ? "${DOCKER_BUILDX_CACHE_TO},scope=auto-setup" : "type=gha,mode=max,scope=auto-setup"]
   labels = {
     "org.opencontainers.image.title" = "auto-setup"
     "org.opencontainers.image.description" = "Workflow as Code (TM) to build and operate resilient applications"
