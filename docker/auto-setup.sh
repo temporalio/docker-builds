@@ -34,6 +34,8 @@ set -eu -o pipefail
 : "${POSTGRES_SEEDS:=}"
 : "${POSTGRES_USER:=}"
 : "${POSTGRES_PWD:=}"
+: "${VISIBILITY_POSTGRES_USER:=${POSTGRES_USER}}"
+: "${VISIBILITY_POSTGRES_PWD:=${POSTGRES_PWD}}"
 
 : "${POSTGRES_TLS_ENABLED:=false}"
 : "${POSTGRES_TLS_DISABLE_HOST_VERIFICATION:=false}"
@@ -198,9 +200,6 @@ setup_mysql_schema() {
 }
 
 setup_postgres_schema() {
-    # TODO (alex): Remove exports
-    export SQL_PASSWORD=${POSTGRES_PWD}
-
     POSTGRES_VERSION_DIR=v12
     SCHEMA_DIR=${TEMPORAL_HOME}/schema/postgresql/${POSTGRES_VERSION_DIR}/temporal/versioned
     # Create database only if its name is different from the user name. Otherwise PostgreSQL container itself will create database.
@@ -209,6 +208,7 @@ setup_postgres_schema() {
             --plugin ${DB} \
             --ep "${POSTGRES_SEEDS}" \
             -u "${POSTGRES_USER}" \
+            -pw "${POSTGRES_PWD}" \
             -p "${DB_PORT}" \
             --db "${DBNAME}" \
             --tls="${POSTGRES_TLS_ENABLED}" \
@@ -223,6 +223,7 @@ setup_postgres_schema() {
         --plugin ${DB} \
         --ep "${POSTGRES_SEEDS}" \
         -u "${POSTGRES_USER}" \
+        -pw "${POSTGRES_PWD}" \
         -p "${DB_PORT}" \
         --db "${DBNAME}" \
         --tls="${POSTGRES_TLS_ENABLED}" \
@@ -236,6 +237,7 @@ setup_postgres_schema() {
         --plugin ${DB} \
         --ep "${POSTGRES_SEEDS}" \
         -u "${POSTGRES_USER}" \
+        -pw "${POSTGRES_PWD}" \
         -p "${DB_PORT}" \
         --db "${DBNAME}" \
         --tls="${POSTGRES_TLS_ENABLED}" \
@@ -253,7 +255,8 @@ setup_postgres_schema() {
           temporal-sql-tool \
               --plugin ${DB} \
               --ep "${POSTGRES_SEEDS}" \
-              -u "${POSTGRES_USER}" \
+              -u "${VISIBILITY_POSTGRES_USER}" \
+              -pw "${VISIBILITY_POSTGRES_PWD}" \
               -p "${DB_PORT}" \
               --db "${VISIBILITY_DBNAME}" \
               --tls="${POSTGRES_TLS_ENABLED}" \
@@ -267,7 +270,8 @@ setup_postgres_schema() {
       temporal-sql-tool \
           --plugin ${DB} \
           --ep "${POSTGRES_SEEDS}" \
-          -u "${POSTGRES_USER}" \
+          -u "${VISIBILITY_POSTGRES_USER}" \
+          -pw "${VISIBILITY_POSTGRES_PWD}" \
           -p "${DB_PORT}" \
           --db "${VISIBILITY_DBNAME}" \
           --tls="${POSTGRES_TLS_ENABLED}" \
@@ -280,7 +284,8 @@ setup_postgres_schema() {
       temporal-sql-tool \
           --plugin ${DB} \
           --ep "${POSTGRES_SEEDS}" \
-          -u "${POSTGRES_USER}" \
+          -u "${VISIBILITY_POSTGRES_USER}" \
+          -pw "${VISIBILITY_POSTGRES_PWD}" \
           -p "${DB_PORT}" \
           --db "${VISIBILITY_DBNAME}" \
           --tls="${POSTGRES_TLS_ENABLED}" \
