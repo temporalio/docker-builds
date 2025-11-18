@@ -29,7 +29,7 @@ COPY ./build/${TARGETARCH}/temporal /usr/local/bin
 
 # configs
 COPY ./temporal/config/dynamicconfig/docker.yaml /etc/temporal/config/dynamicconfig/docker.yaml
-COPY ./temporal/docker/config_template.yaml /etc/temporal/config/config_template.yaml
+COPY ./temporal/config/docker.yaml /etc/temporal/config/docker.yaml
 
 # scripts
 COPY ./docker/entrypoint.sh /etc/temporal/entrypoint.sh
@@ -44,6 +44,7 @@ ENTRYPOINT ["/etc/temporal/entrypoint.sh"]
 # This is injected as a context via the bakefile so we don't take it as an ARG
 FROM temporaliotest/admin-tools as admin-tools
 FROM temporal-server as auto-setup
+ARG TARGETARCH
 
 WORKDIR /etc/temporal
 
