@@ -74,7 +74,7 @@ jobs:
             type=raw,value=latest,enable=${{ github.event.inputs.latest }}
 
       - name: Build and Push the image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           push: true
           pull: true
@@ -82,3 +82,5 @@ jobs:
           platforms: ${{ matrix.arch }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}

@@ -59,7 +59,7 @@ jobs:
           tags: ${{ github.event.inputs.tag }}
 
       - name: Build-Push Base-* image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           push: true
           pull: true
@@ -67,3 +67,5 @@ jobs:
           platforms: ${{ github.event.inputs.arch }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

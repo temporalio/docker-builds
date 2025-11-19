@@ -1,0 +1,39 @@
+# Version control
+.git
+.gitignore
+.gitmodules
+.gitattributes
+
+# Documentation
+*.md
+README*
+docs/
+docker-readme/
+
+# Development
+.env
+.env.*
+*.log
+
+# Build artifacts (if any)
+*.o
+*.a
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+
+# Docker
+docker-compose.yml
+*.Dockerfile
+docker-bake.hcl
+
+# Scripts not needed in build context
+scripts/
+Makefile
