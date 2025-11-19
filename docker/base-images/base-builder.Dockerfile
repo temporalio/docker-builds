@@ -1,7 +1,7 @@
-FROM golang:1.24-alpine3.22 AS base-builder
+FROM registry.access.redhat.com/ubi9/go-toolset:1.23 AS base-builder
 
-RUN apk upgrade --no-cache
-RUN apk add --no-cache \
-    make \
-    git \
-    curl
+USER root
+
+RUN dnf -y upgrade && \
+    dnf -y install make git && \
+    dnf clean all
