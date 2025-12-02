@@ -1,6 +1,7 @@
 name: Release All Base Docker images
 
-permissions: read-all
+permissions:
+  contents: read
 
 on:
   workflow_dispatch:
