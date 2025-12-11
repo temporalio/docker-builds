@@ -103,6 +103,12 @@ jobs:
           docker save \
             --output="/tmp/temporal-autosetup.tar" \
             temporaliotest/auto-setup:"${{env.IMAGE_SHA_TAG}}"
+          docker save \
+            --output="/tmp/temporal-server.tar" \
+            temporaliotest/server:"${{env.IMAGE_SHA_TAG}}"
+          docker save \
+            --output="/tmp/temporal-admin-tools.tar" \
+            temporaliotest/admin-tools:"${{env.IMAGE_SHA_TAG}}"
 
       - name: Prepare artifact
         run: |
@@ -117,5 +123,7 @@ jobs:
           name: temporal-server-docker
           path: |
             /tmp/temporal-autosetup.tar
+            /tmp/temporal-server.tar
+            /tmp/temporal-admin-tools.tar
             /tmp/docker-compose.yml
             /tmp/image_sha_tag
