@@ -50,6 +50,15 @@ jobs:
         ports:
           - 5000:5000
     steps:
+      - name: create some space
+        run: |
+          sudo rm -rf /opt/hostedtoolcache/CodeQL || :
+          sudo apt purge -y firefox
+          sudo apt purge -y firefox
+          sudo apt purge -y google-chrome-stable || :
+          sudo apt purge -y microsoft-edge-stable || :
+          sudo rm -rf /opt/microsoft/powershell || :
+          df -h
       - name: Checkout docker builds repository
         uses: actions/checkout@v4
         with:
