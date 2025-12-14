@@ -45,7 +45,7 @@ jobs:
     # TODO: use bigger runner when available. Seems like they're stuck or not enough?
     runs-on: ubuntu-latest
     steps:
-      - name: create some space
+      - name: free up space
         run: |
           sudo rm -rf /opt/hostedtoolcache/CodeQL || :
           sudo apt purge -y firefox
