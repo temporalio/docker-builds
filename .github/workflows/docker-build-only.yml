@@ -44,11 +44,6 @@ jobs:
   build-image:
     # TODO: use bigger runner when available. Seems like they're stuck or not enough?
     runs-on: ubuntu-latest
-    services:
-      registry:
-        image: registry:2
-        ports:
-          - 5000:5000
     steps:
       - name: create some space
         run: |
