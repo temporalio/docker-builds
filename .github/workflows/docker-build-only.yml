@@ -44,12 +44,16 @@ jobs:
   build-image:
     # TODO: use bigger runner when available. Seems like they're stuck or not enough?
     runs-on: ubuntu-latest
-    services:
-      registry:
-        image: registry:2
-        ports:
-          - 5000:5000
     steps:
+      - name: free up space
+        run: |
+          sudo rm -rf /opt/hostedtoolcache/CodeQL || :
+          sudo apt purge -y firefox
+          sudo apt purge -y firefox
+          sudo apt purge -y google-chrome-stable || :
+          sudo apt purge -y microsoft-edge-stable || :
+          sudo rm -rf /opt/microsoft/powershell || :
+          df -h
       - name: Checkout docker builds repository
         uses: actions/checkout@v4
         with:
