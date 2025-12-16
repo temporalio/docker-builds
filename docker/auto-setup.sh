@@ -366,9 +366,9 @@ setup_es_index() {
 
 register_default_namespace() {
     echo "Registering default namespace: ${DEFAULT_NAMESPACE}."
-    if ! temporal operator namespace describe "${DEFAULT_NAMESPACE}"; then
+    if ! temporal operator namespace describe --namespace "${DEFAULT_NAMESPACE}"; then
         echo "Default namespace ${DEFAULT_NAMESPACE} not found. Creating..."
-        temporal operator namespace create --retention "${DEFAULT_NAMESPACE_RETENTION}" --description "Default namespace for Temporal Server." "${DEFAULT_NAMESPACE}"
+        temporal operator namespace create --retention "${DEFAULT_NAMESPACE_RETENTION}" --description "Default namespace for Temporal Server." --namespace "${DEFAULT_NAMESPACE}"
         echo "Default namespace ${DEFAULT_NAMESPACE} registration complete."
     else
         echo "Default namespace ${DEFAULT_NAMESPACE} already registered."
