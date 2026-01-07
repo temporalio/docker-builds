@@ -1,4 +1,4 @@
-ARG BASE_SERVER_IMAGE=temporalio/base-server:1.15.12
+ARG BASE_SERVER_IMAGE=temporalio/base-server:1.15.15
 
 FROM ${BASE_SERVER_IMAGE} AS temporal-server
 ARG TARGETARCH
