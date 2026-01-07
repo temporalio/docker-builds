@@ -1,5 +1,7 @@
 > [!WARNING]
 > This repository is deprecated and no longer actively maintained.
+> - `temporalio/admin-tools` and `temporalio/server` image builds have been moved to [temporalio/server](https://github.com/temporalio/server)
+> - `temporalio/auto-setup`, `temporalio/base-server`, `temporalio/base-builder`, `temporalio/base-ci-builder`, and `temporalio/base-admin-tools` images are deprecated.
 
 # docker-builds
 [![Update Submodules](https://github.com/temporalio/docker-builds/actions/workflows/update-submodules.yml/badge.svg)](https://github.com/temporalio/docker-builds/actions/workflows/update-submodules.yml)
