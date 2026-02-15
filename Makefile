@@ -65,6 +65,12 @@ update-submodules:
 	@GOOS=linux GOARCH=$* CGO_ENABLED=$(CGO_ENABLED) make -C $(TCTL_ROOT) build
 	@cp ./$(TCTL_ROOT)/tctl build/$*/
 	@cp ./$(TCTL_ROOT)/tctl-authorization-plugin build/$*/
+	@tmp=$$(mktemp -d); \
+		cd $$tmp; \
+		go mod init dockerize-build >/dev/null 2>&1; \
+		go get github.com/jwilder/dockerize@v0.10.1 >/dev/null 2>&1; \
+		GOOS=linux GOARCH=$* CGO_ENABLED=$(CGO_ENABLED) go build -o "$(PWD)/build/$*/dockerize" github.com/jwilder/dockerize; \
+		rm -rf $$tmp
 
 .PHONY: bins
 .NOTPARALLEL: bins
@@ -141,4 +147,3 @@ update-alpine:
 update-base-images:
 	@printf $(COLOR) "Updating builds to use latest Temporal base images.."
 	./scripts/update-base-images.sh
-
