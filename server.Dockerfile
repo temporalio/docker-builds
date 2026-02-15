@@ -1,4 +1,4 @@
-ARG BASE_SERVER_IMAGE=temporalio/base-server:1.15.15
+ARG BASE_SERVER_IMAGE=temporalio/base-server:1.15.16
 
 FROM ${BASE_SERVER_IMAGE} AS temporal-server
 ARG TARGETARCH
@@ -26,6 +26,7 @@ COPY ./build/${TARGETARCH}/tctl \
      ./build/${TARGETARCH}/tctl-authorization-plugin \
      ./build/${TARGETARCH}/temporal-server \
      ./build/${TARGETARCH}/temporal \
+     ./build/${TARGETARCH}/dockerize \
      /usr/local/bin/
 
 # configs

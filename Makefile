@@ -27,9 +27,6 @@ BAKE := IMAGE_SHA_TAG=$(IMAGE_SHA_TAG) \
 		$(DOCKER) bake
 NATIVE_ARCH := $(shell go env GOARCH)
 
-# Default to loading into the local docker context. Provide the value 'registry' if you wish to push the images
-BAKE_OUTPUT ?= docker
-
 ##### Scripts ######
 .PHONY: install
 install: install-submodules
@@ -65,6 +62,12 @@ update-submodules:
 	@GOOS=linux GOARCH=$* CGO_ENABLED=$(CGO_ENABLED) make -C $(TCTL_ROOT) build
 	@cp ./$(TCTL_ROOT)/tctl build/$*/
 	@cp ./$(TCTL_ROOT)/tctl-authorization-plugin build/$*/
+	@tmp=$$(mktemp -d); \
+		cd $$tmp; \
+		go mod init dockerize-build >/dev/null 2>&1; \
+		go get github.com/jwilder/dockerize@v0.10.1 >/dev/null 2>&1; \
+		GOOS=linux GOARCH=$* CGO_ENABLED=$(CGO_ENABLED) go build -o "$(PWD)/build/$*/dockerize" github.com/jwilder/dockerize; \
+		rm -rf $$tmp
 
 .PHONY: bins
 .NOTPARALLEL: bins
@@ -80,14 +83,13 @@ simulate-dispatch:
 	@act workflow_dispatch -s GITHUB_TOKEN="$(shell gh auth token)" -j build-image -P ubuntu-latest-16-cores=catthehacker/ubuntu:act-latest --input commit=$(COMMIT)
 
 # We hard-code the native arch here as the docker machine for mac doesn't support cross-platform builds (unless running within act)
-# This target also ignores the BAKE_OUTPUT variable to prevent us from uploading a single-architecture image
+# This target always loads images into the local docker context.
 .PHONY: build-native
 build-native: $(NATIVE_ARCH)-bins
 	$(BAKE) --set "*.platform=linux/$(NATIVE_ARCH)" --load
 
 .PHONY: build
-build: bins
-	$(BAKE) --set="*.output=type=$(BAKE_OUTPUT)"
+build: build-native
 
 .PHONY: docker-server
 docker-server: $(NATIVE_ARCH)-bins
@@ -141,4 +143,3 @@ update-alpine:
 update-base-images:
 	@printf $(COLOR) "Updating builds to use latest Temporal base images.."
 	./scripts/update-base-images.sh
-

@@ -9,7 +9,7 @@ permissions:
 on:
   push:
     branches:
-      # NOTE: We only publish Docker images for the main branch and branches that are used for release validation.
+      # NOTE: We build Docker images for the main branch and branches that are used for release validation.
       - main
       - cloud/*
       - feature/*
@@ -43,13 +43,6 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Login to DockerHub
-        if: ${{ !env.ACT }}
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PAT }}
-
       - name: Set SHA when dispatched
         run: |
           SHA=$([ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ] && echo "${{ github.event.inputs.commit }}" || echo "${GITHUB_SHA}")
@@ -82,16 +75,9 @@ jobs:
           go-version-file: 'temporal/go.mod'
 
       # You can't use `load` when building a multiarch image, so we build and load the
-      # native image and build multiarch images later
+      # native image locally for security scanning
       - name: Bake native images for security scanning
-        run: BAKE_OUTPUT=docker make build-native
-
-      - name: 🐳 Bake and push multiarch images
-        if: ${{ github.event_name == 'push' && !env.ACT }}
-        run: |
-          BAKE_OUTPUT=registry make build
-          IMAGES=$(docker images --format "• {{.Repository}}:{{.Tag}}" | grep temporaliotest | tr '\n' ' ')
-          echo "::notice title=🐳 Docker images::${IMAGES}"
+        run: make build-native
 
       # TODO: can we loop this somehow?
       - name: Run Trivy vulnerability scanner on Server image
