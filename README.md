@@ -29,11 +29,14 @@ Use local deterministic scan targets after `make build-native`:
 ```bash
 make scan-grype
 make scan-trivy
+make scan-scout
 make scan-all
+make scan-all-with-scout
 ```
 
 Scan outputs are written to `scan-results/` as JSON and SARIF.
 CI also uploads scanner metadata (scanner versions and Trivy DB metadata) under `scan-results/meta/`.
+Docker Scout requires Docker authentication (`docker login`) before running `make scan-scout`.
 
 
 ## Workflows

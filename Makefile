@@ -138,8 +138,15 @@ scan-grype:
 scan-trivy:
 	IMAGE_REPO=$(IMAGE_REPO) IMAGE_TAG=$(IMAGE_SHA_TAG) OUTPUT_DIR=scan-results/trivy ./scripts/scan-images-trivy.sh
 
+.PHONY: scan-scout
+scan-scout:
+	IMAGE_REPO=$(IMAGE_REPO) IMAGE_TAG=$(IMAGE_SHA_TAG) OUTPUT_DIR=scan-results/scout ./scripts/scan-images-scout.sh
+
 .PHONY: scan-all
 scan-all: scan-grype scan-trivy
+
+.PHONY: scan-all-with-scout
+scan-all-with-scout: scan-grype scan-trivy scan-scout
 
 .PHONY: update-tool-submodules
 update-tool-submodules:
