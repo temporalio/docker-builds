@@ -14,6 +14,7 @@ TCTL_SHA := $(shell sh -c "git submodule status -- tctl | cut -c2-41")
 
 IMAGE_SHA_TAG ?= sha-$(shell git rev-parse --short HEAD)
 IMAGE_BRANCH_TAG ?= branch-$(shell git rev-parse --abbrev-ref HEAD)
+IMAGE_REPO ?= temporaliotest
 
 DOCKER ?= docker buildx
 DOCKER_BUILDX_CACHE_FROM ?=
@@ -128,6 +129,17 @@ docker-auto-setup-x: bins
 .PHONY: test
 test:
 	IMAGE_SHA_TAG=$(IMAGE_SHA_TAG) ./scripts/test.sh
+
+.PHONY: scan-grype
+scan-grype:
+	IMAGE_REPO=$(IMAGE_REPO) IMAGE_TAG=$(IMAGE_SHA_TAG) OUTPUT_DIR=scan-results/grype ./scripts/scan-images-grype.sh
+
+.PHONY: scan-trivy
+scan-trivy:
+	IMAGE_REPO=$(IMAGE_REPO) IMAGE_TAG=$(IMAGE_SHA_TAG) OUTPUT_DIR=scan-results/trivy ./scripts/scan-images-trivy.sh
+
+.PHONY: scan-all
+scan-all: scan-grype scan-trivy
 
 .PHONY: update-tool-submodules
 update-tool-submodules:

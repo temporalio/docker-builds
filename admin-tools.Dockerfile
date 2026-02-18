@@ -1,4 +1,4 @@
-ARG BASE_ADMIN_TOOLS_IMAGE=temporalio/base-admin-tools:1.12.16
+ARG BASE_ADMIN_TOOLS_IMAGE=base-admin-tools-hardened
 
 # This is injected as a context via the bakefile so we don't take it as an ARG
 FROM temporaliotest/server AS server
@@ -21,6 +21,7 @@ COPY ./temporal/schema /etc/temporal/schema
 # interactive shells, so we can add completion logic in /etc/bash/temporal-completion.sh
 # Completion for temporal depends on the bash-completion package.
 RUN apk add --no-cache bash-completion && \
+    mkdir -p /etc/bash && \
     temporal completion bash > /etc/bash/temporal-completion.sh && \
     addgroup -g 1000 temporal && \
     adduser -u 1000 -G temporal -D temporal

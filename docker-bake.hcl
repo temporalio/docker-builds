@@ -39,6 +39,24 @@ group "default" {
   ]
 }
 
+target "base-runtime-hardened" {
+  dockerfile = "docker/base-images/base-runtime-hardened.Dockerfile"
+  target = "base-runtime-hardened"
+  platforms = platforms
+}
+
+target "base-admin-tools-hardened" {
+  dockerfile = "docker/base-images/base-admin-tools-hardened.Dockerfile"
+  target = "base-admin-tools-hardened"
+  platforms = platforms
+  contexts = {
+    base-runtime-hardened = "target:base-runtime-hardened"
+  }
+  args = {
+    BASE_RUNTIME_IMAGE = "base-runtime-hardened"
+  }
+}
+
 target "server" {
   dockerfile = "server.Dockerfile"
   target = "server"
@@ -48,7 +66,11 @@ target "server" {
     TAG_LATEST ? "${IMAGE_REPO}/server:latest" : ""
   ]
   platforms = platforms
+  contexts = {
+    base-runtime-hardened = "target:base-runtime-hardened"
+  }
   args = {
+    BASE_SERVER_IMAGE = "base-runtime-hardened"
     TEMPORAL_SHA = "${TEMPORAL_SHA}"
     TCTL_SHA = "${TCTL_SHA}"
   }
@@ -73,6 +95,10 @@ target "admin-tools" {
   platforms = platforms
   contexts = {
     server = "target:server"
+    base-admin-tools-hardened = "target:base-admin-tools-hardened"
+  }
+  args = {
+    BASE_ADMIN_TOOLS_IMAGE = "base-admin-tools-hardened"
   }
   cache-from = [DOCKER_BUILDX_CACHE_FROM != "" ? "${DOCKER_BUILDX_CACHE_FROM},scope=admin-tools" : "type=gha,scope=admin-tools"]
   cache-to = [DOCKER_BUILDX_CACHE_TO != "" ? "${DOCKER_BUILDX_CACHE_TO},scope=admin-tools" : "type=gha,mode=max,scope=admin-tools"]
@@ -97,6 +123,10 @@ target "auto-setup" {
   contexts = {
     server = "target:server"
     admin-tools = "target:admin-tools"
+    base-runtime-hardened = "target:base-runtime-hardened"
+  }
+  args = {
+    BASE_SERVER_IMAGE = "base-runtime-hardened"
   }
   cache-from = [DOCKER_BUILDX_CACHE_FROM != "" ? "${DOCKER_BUILDX_CACHE_FROM},scope=auto-setup" : "type=gha,scope=auto-setup"]
   cache-to = [DOCKER_BUILDX_CACHE_TO != "" ? "${DOCKER_BUILDX_CACHE_TO},scope=auto-setup" : "type=gha,mode=max,scope=auto-setup"]

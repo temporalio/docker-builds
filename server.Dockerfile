@@ -1,4 +1,4 @@
-ARG BASE_SERVER_IMAGE=temporalio/base-server:1.15.16
+ARG BASE_SERVER_IMAGE=base-runtime-hardened
 
 FROM ${BASE_SERVER_IMAGE} AS temporal-server
 ARG TARGETARCH

@@ -2,3 +2,4 @@
 .vscode
 *.log
 /build/
+/scan-results/

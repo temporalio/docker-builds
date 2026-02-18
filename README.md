@@ -13,6 +13,28 @@ A set of workflows that publish:
 - https://hub.docker.com/repository/docker/temporaliotest/server
 - https://hub.docker.com/repository/docker/temporaliotest/admin-tools
 
+## Hardened lineage
+
+This repo now builds runtime images from hardened Wolfi-based internal base targets:
+
+- `docker/base-images/base-runtime-hardened.Dockerfile` for `server` and `auto-setup`.
+- `docker/base-images/base-admin-tools-hardened.Dockerfile` for `admin-tools` (including `cqlsh` support).
+
+Final image Dockerfiles consume those internal targets via `docker-bake.hcl` contexts.
+
+## Security scans
+
+Use local deterministic scan targets after `make build-native`:
+
+```bash
+make scan-grype
+make scan-trivy
+make scan-all
+```
+
+Scan outputs are written to `scan-results/` as JSON and SARIF.
+CI also uploads scanner metadata (scanner versions and Trivy DB metadata) under `scan-results/meta/`.
+
 
 ## Workflows
 

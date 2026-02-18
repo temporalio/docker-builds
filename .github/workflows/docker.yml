@@ -79,27 +79,66 @@ jobs:
       - name: Bake native images for security scanning
         run: make build-native
 
-      # TODO: can we loop this somehow?
-      - name: Run Trivy vulnerability scanner on Server image
-        uses: ./.github/actions/trivy
-        with:
-          image-tags: temporaliotest/server:${{ env.IMAGE_SHA_TAG }}
-          image-name: server
+      - name: Install ORAS
+        uses: oras-project/setup-oras@v1
 
-      - name: Run Trivy vulnerability scanner on Admin Tools image
-        uses: ./.github/actions/trivy
-        with:
-          image-tags: temporaliotest/admin-tools:${{ env.IMAGE_SHA_TAG }}
-          image-name: admin-tools
+      - name: Authenticate to GHCR
+        env:
+          PW: ${{ github.token }}
+        run: echo "$PW" | oras login ghcr.io -u github-actions --password-stdin
 
-      - name: Run Trivy vulnerability scanner on Auto Setup image
-        uses: ./.github/actions/trivy
+      - name: Pull Trivy DBs from GHCR
+        run: |
+          mkdir -p $GITHUB_WORKSPACE/.cache/trivy/db
+          oras pull ghcr.io/temporalio/trivy-db:2
+          tar -xzf db.tar.gz -C $GITHUB_WORKSPACE/.cache/trivy/db
+          rm db.tar.gz
+
+          mkdir -p $GITHUB_WORKSPACE/.cache/trivy/java-db
+          oras pull ghcr.io/temporalio/trivy-java-db:1
+          tar -xzf javadb.tar.gz -C $GITHUB_WORKSPACE/.cache/trivy/java-db
+          rm javadb.tar.gz
+
+      - name: Install Trivy
+        uses: aquasecurity/setup-trivy@v0.2.3
         with:
-          image-tags: temporaliotest/auto-setup:${{ env.IMAGE_SHA_TAG }}
-          image-name: auto-setup
+          version: v0.65.0
+
+      - name: Run Grype zero-finding gate
+        env:
+          GRYPE_IMAGE: anchore/grype@sha256:0844db82d96f22b8010f361474d711b9eaf0f6438f853e75bfdb074094d41a20
+          GRYPE_CHECK_FOR_APP_UPDATE: false
+        run: make scan-grype
+
+      - name: Run Trivy zero-finding gate
+        env:
+          TRIVY_SKIP_DB_UPDATE: true
+          TRIVY_SKIP_JAVA_DB_UPDATE: true
+          TRIVY_CACHE_DIR: ${{ github.workspace }}/.cache/trivy
+        run: make scan-trivy
+
+      - name: Collect scanner metadata
+        if: always()
+        run: |
+          mkdir -p scan-results/meta
+
+          trivy --version > scan-results/meta/trivy-version.txt
+          cp "$GITHUB_WORKSPACE/.cache/trivy/db/metadata.json" scan-results/meta/trivy-db-metadata.json || true
+          cp "$GITHUB_WORKSPACE/.cache/trivy/java-db/metadata.json" scan-results/meta/trivy-java-db-metadata.json || true
+
+          echo "anchore/grype@sha256:0844db82d96f22b8010f361474d711b9eaf0f6438f853e75bfdb074094d41a20" > scan-results/meta/grype-image.txt
+          docker run --rm anchore/grype@sha256:0844db82d96f22b8010f361474d711b9eaf0f6438f853e75bfdb074094d41a20 version > scan-results/meta/grype-version.txt
+          docker run --rm anchore/grype@sha256:0844db82d96f22b8010f361474d711b9eaf0f6438f853e75bfdb074094d41a20 db status -o json > scan-results/meta/grype-db-status.json || true
 
       - name: Ensure images work
         run: make IMAGE_SHA_TAG=${{env.IMAGE_SHA_TAG}} test
+
+      - name: Upload vulnerability scan artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vulnerability-scan-results
+          path: scan-results
 
       - name: Upload compose logs
         if: always()
