@@ -5,6 +5,7 @@ COLOR := "\e[1;36m%s\e[0m\n"
 
 # Disable cgo by default.
 CGO_ENABLED ?= 0
+TEMPORAL_BUILD_TAG ?= aws
 
 TEMPORAL_ROOT := temporal
 TCTL_ROOT := tctl
@@ -53,7 +54,7 @@ update-submodules:
 # $* expands to the stem that matches the %, so when the target is amd64-bins $* expands to amd64
 %-bins:
 	@mkdir -p build/$*
-	@GOOS=linux GOARCH=$* CGO_ENABLED=$(CGO_ENABLED) make -C $(TEMPORAL_ROOT) clean-bins bins
+	@GOOS=linux GOARCH=$* CGO_ENABLED=$(CGO_ENABLED) BUILD_TAG=$(TEMPORAL_BUILD_TAG) make -C $(TEMPORAL_ROOT) clean-bins bins
 	@cp $(TEMPORAL_ROOT)/temporal-server build/$*/
 	@cp $(TEMPORAL_ROOT)/temporal-cassandra-tool build/$*/
 	@cp $(TEMPORAL_ROOT)/temporal-sql-tool build/$*/
@@ -88,6 +89,10 @@ simulate-dispatch:
 .PHONY: build-native
 build-native: $(NATIVE_ARCH)-bins
 	$(BAKE) --set "*.platform=linux/$(NATIVE_ARCH)" --load
+
+.PHONY: build-native-aws
+build-native-aws:
+	$(MAKE) TEMPORAL_BUILD_TAG=aws build-native
 
 .PHONY: build
 build: build-native

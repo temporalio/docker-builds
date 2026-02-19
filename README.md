@@ -24,12 +24,18 @@ Final image Dockerfiles consume those internal targets via `docker-bake.hcl` con
 
 ## AWS feature flags
 
-AWS integrations are intentionally opt-in:
+AWS integrations are controlled via `TEMPORAL_BUILD_TAG`:
 
-- Default hardened builds use `!aws` stubs:
-  - S3 archival is disabled.
-  - Elasticsearch AWS request signing is disabled.
-- To enable AWS paths in server code, build with `-tags aws`.
+- This repo now defaults to `TEMPORAL_BUILD_TAG=aws`, so S3 archival support is compiled into server binaries.
+- To build hardened `!aws` binaries (S3 disabled and ES AWS signing disabled), run:
+  - `make TEMPORAL_BUILD_TAG= build-native`
+- `docker-compose.yml` is now Postgres-only (no Elasticsearch) and includes S3 history archival env vars:
+  - `ENABLE_S3_ARCHIVAL`
+  - `S3_ARCHIVAL_BUCKET`
+  - `S3_ARCHIVAL_REGION`
+  - `S3_ARCHIVAL_ENDPOINT` (optional, for MinIO/LocalStack/custom endpoint)
+  - `S3_ARCHIVAL_FORCE_PATH_STYLE`
+- GCS (`gs://`) archival is intentionally not supported by this hardened runtime path.
 
 The `aws` build now uses `github.com/aws/aws-sdk-go-v2` only.
 
