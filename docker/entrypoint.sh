@@ -2,11 +2,25 @@
 
 set -eu -o pipefail
 
-: "${BIND_ON_IP:=$(getent hosts "$(hostname)" | awk '{print $1;}')}"
+resolve_bind_ip() {
+    local resolved_ip=""
+    if command -v getent >/dev/null 2>&1; then
+        resolved_ip="$(getent hosts "$(hostname)" | awk 'NR==1 {print $1;}')"
+    fi
+    if [[ -z "${resolved_ip}" ]] && command -v hostname >/dev/null 2>&1; then
+        resolved_ip="$(hostname -i 2>/dev/null | awk '{print $1;}')"
+    fi
+    if [[ -z "${resolved_ip}" ]]; then
+        resolved_ip="127.0.0.1"
+    fi
+    printf '%s' "${resolved_ip}"
+}
+
+: "${BIND_ON_IP:=$(resolve_bind_ip)}"
 export BIND_ON_IP
 
-if [[ "${BIND_ON_IP}" == "0.0.0.0" || "${BIND_ON_IP}" == "::0" ]]; then
-    : "${TEMPORAL_BROADCAST_ADDRESS:=$(getent hosts "$(hostname)" | awk '{print $1;}')}"
+if [[ "${BIND_ON_IP}" == "0.0.0.0" || "${BIND_ON_IP}" == "::0" || "${BIND_ON_IP}" == "::" ]]; then
+    : "${TEMPORAL_BROADCAST_ADDRESS:=$(resolve_bind_ip)}"
     export TEMPORAL_BROADCAST_ADDRESS
 fi
 
