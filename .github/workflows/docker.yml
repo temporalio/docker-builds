@@ -104,6 +104,9 @@ jobs:
         with:
           version: v0.65.0
 
+      - name: Run Go module AWS SDK v1 audit gate
+        run: make audit-modules
+
       - name: Run Grype zero-finding gate
         env:
           GRYPE_IMAGE: anchore/grype@sha256:0844db82d96f22b8010f361474d711b9eaf0f6438f853e75bfdb074094d41a20
@@ -116,6 +119,9 @@ jobs:
           TRIVY_SKIP_JAVA_DB_UPDATE: true
           TRIVY_CACHE_DIR: ${{ github.workspace }}/.cache/trivy
         run: make scan-trivy
+
+      - name: Run Docker Scout zero-finding gate
+        run: make scan-scout
 
       - name: Collect scanner metadata
         if: always()

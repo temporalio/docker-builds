@@ -1,0 +1,73 @@
+name: "Code scanning - action"
+
+on:
+  push:
+    branches:
+      - '*.v7'
+  pull_request:
+    branches:
+      - '*.v7'
+  schedule:
+    - cron: '0 19 * * 3'
+
+jobs:
+  codeql:
+    strategy:
+      matrix:
+        go: [1.16.x, 1.17.x]
+        os: [ubuntu-latest]
+    name: Run ${{ matrix.go }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    steps:
+    - name: Prepare tests
+      run: |
+        sudo apt-get install -y netcat
+        sudo sysctl -w vm.max_map_count=262144
+
+    - name: Setup Go ${{ matrix.go }}
+      uses: actions/setup-go@v2
+      with:
+        go-version: ${{ matrix.go }}
+
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 2
+
+    - uses: actions/cache@v2
+      with:
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v1
+      with:
+        languages: go
+
+    - name: Run Docker containers
+      run: docker-compose up -d
+
+    - name: Check Docker containers
+      run: docker ps -a
+
+    - name: Get dependencies
+      run: |
+        go get -u github.com/google/go-cmp/cmp
+        go get -u github.com/fortytw2/leaktest
+        go get . ./aws/... ./config/... ./trace/... ./uritemplates/...
+
+    - name: Wait for Elasticsearch
+      run: |
+        while ! nc -z localhost 9200; do sleep 1; done
+        while ! nc -z localhost 9210; do sleep 1; done
+        sleep 5
+
+    - name: Run the tests
+      run: |
+        go test -race -deprecations -strict-decoder -v . ./aws/... ./config/... ./trace/... ./uritemplates/...
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v1

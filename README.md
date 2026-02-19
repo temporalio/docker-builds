@@ -22,6 +22,26 @@ This repo now builds runtime images from hardened Wolfi-based internal base targ
 
 Final image Dockerfiles consume those internal targets via `docker-bake.hcl` contexts.
 
+## AWS feature flags
+
+AWS integrations are intentionally opt-in:
+
+- Default hardened builds use `!aws` stubs:
+  - S3 archival is disabled.
+  - Elasticsearch AWS request signing is disabled.
+- To enable AWS paths in server code, build with `-tags aws`.
+
+The `aws` build now uses `github.com/aws/aws-sdk-go-v2` only.
+
+## Module overrides
+
+To keep the workspace on a no-v1 module graph:
+
+- `cli/go.mod` and `tctl/go.mod` currently use `replace go.temporal.io/server => ../temporal`.
+- `temporal/go.mod`, `cli/go.mod`, and `tctl/go.mod` use `replace github.com/olivere/elastic/v7 => ../third_party/elastic-v7` (local fork with no `github.com/aws/aws-sdk-go` v1 requirement).
+
+For remote CI/release builds, pin `go.temporal.io/server` to your published fork commit (`github.com/Apurer/temporal`) instead of the local path replace.
+
 ## Security scans
 
 Use local deterministic scan targets after `make build-native`:

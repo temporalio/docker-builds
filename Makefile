@@ -148,6 +148,13 @@ scan-all: scan-grype scan-trivy
 .PHONY: scan-all-with-scout
 scan-all-with-scout: scan-grype scan-trivy scan-scout
 
+.PHONY: audit-modules
+audit-modules:
+	./scripts/audit-no-aws-sdk-v1.sh
+
+.PHONY: security-gate
+security-gate: audit-modules scan-grype scan-trivy scan-scout
+
 .PHONY: update-tool-submodules
 update-tool-submodules:
 	./scripts/update-tool-submodules.sh cli
