@@ -24,7 +24,6 @@ RUN apk add --no-cache \
     curl \
     jq \
     yq \
-    mysql-client \
     postgresql-client \
     expat \
     tini

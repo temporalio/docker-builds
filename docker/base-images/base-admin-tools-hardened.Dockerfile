@@ -5,7 +5,6 @@ FROM ${BASE_RUNTIME_IMAGE} AS base-admin-tools-hardened
 RUN apk update && apk upgrade --no-cache && apk add --no-cache \
     jq \
     yq \
-    mysql-9.4-client \
     postgresql-18-client \
     cqlsh
 
