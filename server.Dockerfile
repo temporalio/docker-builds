@@ -66,3 +66,5 @@ COPY ./docker/entrypoint.sh \
 
 ENTRYPOINT ["/etc/temporal/entrypoint.sh"]
 CMD ["autosetup"]
+HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=5 \
+  CMD /bin/bash -ec 'out="$(temporal operator cluster health --address "${TEMPORAL_ADDRESS:-127.0.0.1:7233}" 2>/dev/null)"; [[ "${out}" == *"SERVING"* ]]'

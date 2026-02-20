@@ -29,5 +29,8 @@ RUN apk add --no-cache bash-completion && \
 USER temporal
 WORKDIR /etc/temporal
 
+HEALTHCHECK --interval=30s --timeout=10s --start-period=20s --retries=3 \
+  CMD /bin/bash -ec 'addr="${TEMPORAL_ADDRESS:-${TEMPORAL_CLI_ADDRESS:-}}"; if [[ -n "${addr}" ]]; then out="$(temporal operator cluster health --address "${addr}" 2>/dev/null)"; [[ "${out}" == *"SERVING"* ]]; else temporal --version >/dev/null && tctl --version >/dev/null; fi'
+
 # Keep the container running.
 ENTRYPOINT ["tini", "--", "sleep", "infinity"]
