@@ -1,5 +1,5 @@
 > [!WARNING]
-> This repository is deprecated and no longer actively maintained.
+> This repository is deprecated and no longer actively maintained. It will remain available for building patch releases of older versions.
 > - `temporalio/admin-tools` and `temporalio/server` image builds have been moved to [temporalio/server](https://github.com/temporalio/server)
 > - `temporalio/auto-setup`, `temporalio/base-server`, `temporalio/base-builder`, `temporalio/base-ci-builder`, and `temporalio/base-admin-tools` images are deprecated.
 
