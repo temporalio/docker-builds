@@ -47,6 +47,10 @@ ENTRYPOINT ["/etc/temporal/entrypoint.sh"]
 FROM temporaliotest/admin-tools AS admin-tools
 FROM temporal-server AS auto-setup
 
+USER root
+RUN apk add --no-cache postgresql-client
+USER temporal
+
 WORKDIR /etc/temporal
 
 # binaries

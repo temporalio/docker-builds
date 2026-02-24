@@ -124,8 +124,11 @@ wait_for_mysql() {
 }
 
 wait_for_postgres() {
-    until nc -z "${POSTGRES_SEEDS%%,*}" "${DB_PORT}"; do
-        echo 'Waiting for PostgreSQL to startup.'
+    local host="${POSTGRES_SEEDS%%,*}"
+    local user="${POSTGRES_USER:-temporal}"
+
+    until pg_isready -h "${host}" -p "${DB_PORT}" -U "${user}" -q; do
+        echo 'Waiting for PostgreSQL to be ready to accept connections...'
         sleep 1
     done
 
