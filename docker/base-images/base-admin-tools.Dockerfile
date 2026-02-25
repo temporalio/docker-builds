@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=alpine:3.23
+ARG BASE_IMAGE=alpine:3.23.3
 
 FROM ${BASE_IMAGE} AS builder
 
@@ -8,9 +8,16 @@ RUN apk add --update --no-cache \
     musl-dev \
     libev-dev \
     gcc \
+    g++ \
     pipx
 
-RUN pipx install --global cqlsh
+# cassandra-driver source builds still import pkg_resources via ez_setup.
+# Setuptools v82 removed pkg_resources: https://setuptools.pypa.io/en/latest/history.html#v82-0-0
+# On Alpine, cassandra-driver is built from source (no musllinux wheels), so pip's isolated
+# build env must be constrained to setuptools<81 or the build fails.
+RUN printf 'setuptools<81\n' > /tmp/pip-build-constraints.txt && \
+    PIP_CONSTRAINT=/tmp/pip-build-constraints.txt pipx install --global cqlsh && \
+    rm -f /tmp/pip-build-constraints.txt
 
 FROM ${BASE_IMAGE} AS base-admin-tools
 

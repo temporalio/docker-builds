@@ -1,0 +1,67 @@
+name: Docker PR Compatibility
+
+permissions:
+  contents: read
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-compat-images:
+    runs-on: ubuntu-latest-16-cores
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: "true"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver: docker
+
+      - uses: actions/setup-go@v5
+        with:
+          cache-dependency-path: "**/*.sum"
+          go-version-file: "temporal/go.mod"
+
+      - name: Prepare build args
+        run: |
+          github_sha_short=${GITHUB_SHA:0:7}
+          echo "IMAGE_SHA_TAG=sha-${github_sha_short}" >> $GITHUB_ENV
+
+          branch_name=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
+          echo "IMAGE_BRANCH_TAG=branch-${branch_name}" >> $GITHUB_ENV
+
+          TEMPORAL_SHA=$(git submodule status -- temporal | awk '{print $1}')
+          echo "TEMPORAL_SHA=${TEMPORAL_SHA}" >> $GITHUB_ENV
+          TCTL_SHA=$(git submodule status -- tctl | awk '{print $1}')
+          echo "TCTL_SHA=${TCTL_SHA}" >> $GITHUB_ENV
+
+      - name: Build Linux amd64 binaries
+        run: make amd64-bins
+
+      - name: Build base images from PR changes
+        run: |
+          docker build \
+            -f docker/base-images/base-server.Dockerfile \
+            -t temporaliotest/base-server:${IMAGE_SHA_TAG} \
+            docker/base-images
+
+          docker build \
+            -f docker/base-images/base-admin-tools.Dockerfile \
+            -t temporaliotest/base-admin-tools:${IMAGE_SHA_TAG} \
+            docker/base-images
+
+      - name: Build downstream images against PR base images
+        run: |
+          docker buildx bake \
+            -f docker-bake.hcl \
+            --set "*.platform=linux/amd64" \
+            --set "server.args.BASE_SERVER_IMAGE=temporaliotest/base-server:${IMAGE_SHA_TAG}" \
+            --set "admin-tools.args.BASE_ADMIN_TOOLS_IMAGE=temporaliotest/base-admin-tools:${IMAGE_SHA_TAG}" \
+            --load \
+            server admin-tools auto-setup

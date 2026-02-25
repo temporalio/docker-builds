@@ -141,4 +141,3 @@ update-alpine:
 update-base-images:
 	@printf $(COLOR) "Updating builds to use latest Temporal base images.."
 	./scripts/update-base-images.sh
-
