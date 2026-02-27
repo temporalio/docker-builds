@@ -42,7 +42,7 @@ services:
       - POSTGRES_SEEDS=postgresql
       - ENABLE_ES=true
       - ES_SEEDS=elasticsearch
-      - ES_VERSION=v7
+      - ES_VERSION=v8
     image: ${IMAGE_REPO}/auto-setup:${IMAGE_SHA_TAG}
     networks:
       - temporal-network
