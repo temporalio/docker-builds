@@ -50,7 +50,7 @@ runs:
         rm javadb.tar.gz
 
     - name: Install Trivy
-      uses: aquasecurity/setup-trivy@v0.2.5
+      uses: aquasecurity/setup-trivy@v0.2.6
       with:
         version: v0.69.3
 
