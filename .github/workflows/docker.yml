@@ -86,7 +86,7 @@ jobs:
         run: BAKE_OUTPUT=docker make build-native
 
       - name: 🐳 Bake and push multiarch images
-        if: ${{ github.event_name == 'push' && !env.ACT }}
+        if: ${{ (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && !env.ACT }}
         run: |
           BAKE_OUTPUT=registry make build
           IMAGES=$(docker images --format "• {{.Repository}}:{{.Tag}}" | grep temporaliotest | tr '\n' ' ')
