@@ -61,6 +61,7 @@ jobs:
           BRANCH: ${{ steps.target_branches.outputs.local_branch }}
         run: |
           git switch "$BRANCH" || git switch -c "$BRANCH"
+          git submodule update --init --recursive --checkout
 
       - name: Update Submodule branch
         env:
