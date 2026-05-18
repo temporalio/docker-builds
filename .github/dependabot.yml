@@ -2,12 +2,23 @@ version: 2
 updates:
   - package-ecosystem: "gomod"
     directory: "/src"
+    cooldown:
+      default-days: 14
     schedule:
-      interval: "daily"
+      interval: "weekly"
 
   - package-ecosystem: "docker"
     directories:
       "/"
       "/docker/base-images"
+    cooldown:
+      default-days: 14
     schedule:
-      interval: "daily"
+      interval: "weekly"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    cooldown:
+      default-days: 14
+    schedule:
+      interval: "weekly"
