@@ -26,7 +26,7 @@ runs:
 
     - name: Install ORAS
       id: oras
-      uses: oras-project/setup-oras@v1
+      uses: oras-project/setup-oras@22ce207df3b08e061f537244349aac6ae1d214f6 # v1.2.4
 
     - name: Authenticate to GHCR
       env:
@@ -50,7 +50,7 @@ runs:
         rm javadb.tar.gz
 
     - name: Install Trivy
-      uses: aquasecurity/setup-trivy@v0.2.3
+      uses: aquasecurity/setup-trivy@9ea583eb67910444b1f64abf338bd2e105a0a93d # v0.2.3
       with:
         version: v0.65.0
 
@@ -65,7 +65,7 @@ runs:
         trivy image --severity HIGH,CRITICAL --no-progress ${{ steps.vars.outputs.tag }} --format sarif --output trivy-${{ steps.vars.outputs.name }}-results.sarif
 
     - name: Upload Trivy scan results
-      uses: github/codeql-action/upload-sarif@v3
+      uses: github/codeql-action/upload-sarif@458d36d7d4f47d0dd16ca424c1d3cda0060f1360 # v3.35.5
       if: always()
       with:
         sarif_file: trivy-${{ steps.vars.outputs.name }}-results.sarif
