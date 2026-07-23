@@ -26,7 +26,7 @@ runs:
 
     - name: Install ORAS
       id: oras
-      uses: oras-project/setup-oras@v1
+      uses: oras-project/setup-oras@22ce207df3b08e061f537244349aac6ae1d214f6 # v1.2.4
 
     - name: Authenticate to GHCR
       env:
@@ -65,7 +65,7 @@ runs:
         trivy image --severity HIGH,CRITICAL --no-progress ${{ steps.vars.outputs.tag }} --format sarif --output trivy-${{ steps.vars.outputs.name }}-results.sarif
 
     - name: Upload Trivy scan results
-      uses: github/codeql-action/upload-sarif@v3
+      uses: github/codeql-action/upload-sarif@4187e74d05793876e9989daffde9c3e66b4acd07 # v3.37.3
       if: always()
       with:
         sarif_file: trivy-${{ steps.vars.outputs.name }}-results.sarif
