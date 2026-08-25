@@ -112,7 +112,7 @@ jobs:
         run: cp ./temporal/develop/docker-compose/docker-compose.yml /tmp/docker-compose.yml
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: temporal-server-docker
           path: |
