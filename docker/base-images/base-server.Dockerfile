@@ -7,6 +7,10 @@ RUN go install github.com/jwilder/dockerize@${DOCKERIZE_VERSION}
 RUN cp $(which dockerize) /usr/local/bin/dockerize
 
 ##### base-server target #####
+# Build-only base layer, never run as a container directly: consumers (server.Dockerfile,
+# admin-tools.Dockerfile) FROM this via ARG BASE_*_IMAGE and immediately RUN addgroup/adduser
+# (needs root) before their own USER temporal. Adding USER here would break that.
+# trivy:ignore:DS-0002
 FROM ${BASE_IMAGE} AS base-server
 
 RUN apk upgrade --no-cache

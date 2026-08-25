@@ -1,7 +1,11 @@
+# temporaliotest/auto-setup is an ephemeral CI-test registry (thousands of per-commit SHA tags,
+# no stable/semver channel), so ":latest" is the only sensible default for local dev builds here
+# -- pinning to a specific SHA would go stale immediately with no equivalent to bump it to.
 ARG AUTO_SETUP_IMAGE=temporaliotest/auto-setup:latest
 ARG GOPROXY
 
 ##### Development configuration for Temporal with additional set of tools #####
+# trivy:ignore:DS-0001
 FROM ${AUTO_SETUP_IMAGE} AS temporal-develop
 
 # apk and setup-develop.sh require root permissions, and setup-develop.sh's `tc` traffic-shaping

@@ -19,6 +19,10 @@ RUN printf 'setuptools<81\n' > /tmp/pip-build-constraints.txt && \
     PIP_CONSTRAINT=/tmp/pip-build-constraints.txt pipx install --global cqlsh && \
     rm -f /tmp/pip-build-constraints.txt
 
+# Build-only base layer, never run as a container directly: admin-tools.Dockerfile FROMs this
+# via ARG BASE_ADMIN_TOOLS_IMAGE and immediately RUN apk add/addgroup/adduser (needs root)
+# before its own USER temporal. Adding USER here would break that.
+# trivy:ignore:DS-0002
 FROM ${BASE_IMAGE} AS base-admin-tools
 
 RUN apk upgrade --no-cache

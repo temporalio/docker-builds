@@ -3,6 +3,9 @@ ARG BASE_ADMIN_TOOLS_IMAGE=temporalio/base-admin-tools:1.12.15
 # This is injected as a context via the bakefile so we don't take it as an ARG.
 # Not a registry pull (bake replaces it with the "server" build target), so it
 # can't be tag-pinned like a normal FROM.
+# Also a known false positive for trivy's DS-0001 check, which this comment can't
+# simultaneously suppress alongside the hadolint ignore below (each tool only honors
+# its own directive when it's the comment immediately adjacent to the instruction).
 # hadolint ignore=DL3006
 FROM temporaliotest/server AS server
 
