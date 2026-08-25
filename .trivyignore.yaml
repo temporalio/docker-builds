@@ -1,0 +1,5 @@
+misconfigurations:
+  - id: DS-0002
+    paths:
+      - "docker/base-images/base-server.Dockerfile"
+      - "docker/base-images/base-admin-tools.Dockerfile"
